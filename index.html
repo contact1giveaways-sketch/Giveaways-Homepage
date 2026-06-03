@@ -284,6 +284,20 @@ nav{
   display:flex;justify-content:stretch;
 }
 .raffle-btn{flex:1;text-align:center}
+.countdown-wrap{
+  background:var(--black);
+  border-radius:10px;
+  padding:12px 16px;
+  margin-bottom:14px;
+  text-align:center;
+}
+.countdown-label{font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.countdown-timer{display:flex;gap:8px;justify-content:center;align-items:center}
+.cd-block{text-align:center}
+.cd-num{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold-light);line-height:1;background:rgba(245,200,66,0.1);border-radius:6px;padding:4px 10px;min-width:40px;display:block}
+.cd-lbl{font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.cd-sep{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);opacity:0.5;margin-bottom:8px}
+.draw-done{font-size:12px;color:var(--green);font-weight:600;text-align:center;padding:8px;background:rgba(34,197,94,0.1);border-radius:8px;margin-bottom:14px}
 .raffle-btn{
   padding:9px 20px;
   background:var(--gold);color:var(--white);
@@ -914,6 +928,7 @@ function renderAll() {
   renderRaffles(homeData);
   renderWinners(homeData);
   updateHeroStats(homeData);
+  startCountdowns(homeData.raffles || []);
 }
 
 // ════════════════════════════════════════════════════════
@@ -982,6 +997,19 @@ function renderRaffles(data) {
         <div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div>
       </div>
 
+      ${r.drawDate ? `
+      <div class="countdown-wrap" id="cd-${r.id}">
+        <div class="countdown-label">🎰 Draw in</div>
+        <div class="countdown-timer">
+          <div class="cd-block"><span class="cd-num" id="cd-d-${r.id}">--</span><div class="cd-lbl">Days</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block"><span class="cd-num" id="cd-h-${r.id}">--</span><div class="cd-lbl">Hours</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block"><span class="cd-num" id="cd-m-${r.id}">--</span><div class="cd-lbl">Mins</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block"><span class="cd-num" id="cd-s-${r.id}">--</span><div class="cd-lbl">Secs</div></div>
+        </div>
+      </div>` : ""}
       <div class="raffle-cta">
         ${r.link ? `<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>` : ""}
       </div>
@@ -1108,6 +1136,54 @@ function fmtDate(s) {
   if (!s) return "";
   const d = new Date(s);
   return isNaN(d) ? s : d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+}
+
+
+// ════════════════════════════════════════════════════════
+//  COUNTDOWN TIMERS
+// ════════════════════════════════════════════════════════
+const countdownIntervals = {};
+
+function startCountdowns(raffles) {
+  // Clear existing
+  Object.values(countdownIntervals).forEach(clearInterval);
+  Object.keys(countdownIntervals).forEach(k => delete countdownIntervals[k]);
+
+  raffles.forEach(r => {
+    if (!r.drawDate) return;
+    const drawTime = new Date(r.drawDate).getTime();
+    if (isNaN(drawTime)) return;
+
+    function tick() {
+      const now = Date.now();
+      const diff = drawTime - now;
+      const dEl = document.getElementById(`cd-d-${r.id}`);
+      const hEl = document.getElementById(`cd-h-${r.id}`);
+      const mEl = document.getElementById(`cd-m-${r.id}`);
+      const sEl = document.getElementById(`cd-s-${r.id}`);
+      const wrap = document.getElementById(`cd-${r.id}`);
+      if (!dEl) return;
+
+      if (diff <= 0) {
+        if (wrap) wrap.innerHTML = '<div class="draw-done">🎉 Draw is happening now!</div>';
+        clearInterval(countdownIntervals[r.id]);
+        return;
+      }
+
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      dEl.textContent = String(d).padStart(2,"0");
+      hEl.textContent = String(h).padStart(2,"0");
+      mEl.textContent = String(m).padStart(2,"0");
+      sEl.textContent = String(s).padStart(2,"0");
+    }
+
+    tick();
+    countdownIntervals[r.id] = setInterval(tick, 1000);
+  });
 }
 
 </script>
