@@ -462,7 +462,7 @@ footer{
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── ADMIN PANEL ─────────────────────────────────────── */
+
 #admin-panel{
   display:none;
   position:fixed;inset:0;background:rgba(0,0,0,0.5);
@@ -835,136 +835,19 @@ footer{
         <a href="https://t.me/GiveawaysEn" target="_blank">Telegram</a>
         <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank">WhatsApp</a>
         <a href="https://instant-win-xi.vercel.app" target="_blank">Instant Win</a>
-        <a href="#" onclick="openAdmin()">Admin</a>
+        
       </div>
     </div>
   </div>
 </footer>
 
 <!-- ── ADMIN PANEL ────────────────────────────────────── -->
-<div id="admin-panel">
-  <div class="admin-box">
-    <button class="admin-close" onclick="closeAdmin()">✕</button>
 
-    <div id="admin-login-view">
-      <h2>Admin Access</h2>
-      <div class="admin-login-wrap">
-        <p>Enter your password to manage raffles and winners.</p>
-        <div id="login-alert" class="alert"></div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="admin-password" placeholder="Admin password" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
-        </div>
-        <button class="admin-btn" onclick="doAdminLogin()">🔐 Login</button>
-      </div>
-    </div>
-
-    <div id="admin-main-view" style="display:none">
-      <h2>Manage Raffles & Winners</h2>
-
-      <div id="create-alert" class="alert"></div>
-
-      <!-- Add Raffle -->
-      <div class="form-group">
-        <label>Raffle Name</label>
-        <input type="text" id="r-name" placeholder="e.g. WIN 50% of the CASH POOL"/>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Price per Ticket</label>
-          <input type="text" id="r-price" placeholder="£2"/>
-        </div>
-        <div class="form-group">
-          <label>Raffall Link</label>
-          <input type="text" id="r-link" placeholder="https://raffall.com/..."/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Type</label>
-        <select id="r-type" onchange="togglePoolField()">
-          <option value="pool">50% Cash Pool</option>
-          <option value="fixed">Fixed Prize</option>
-        </select>
-      </div>
-      <div class="form-group" id="pool-field">
-        <label>Current Pool (£)</label>
-        <input type="number" id="r-pool" placeholder="0.00" step="0.01"/>
-      </div>
-      <div class="form-group" id="fixed-field" style="display:none">
-        <label>Prize Description</label>
-        <input type="text" id="r-fixed-prize" placeholder="e.g. £500 Cash"/>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Tickets Sold</label>
-          <input type="number" id="r-sold" placeholder="0"/>
-        </div>
-        <div class="form-group">
-          <label>Total Tickets (0 = unlimited)</label>
-          <input type="number" id="r-total" placeholder="0"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Instant Prizes (comma separated)</label>
-        <input type="text" id="r-instants" placeholder="£50, £75, £100, £200"/>
-      </div>
-      <button class="admin-btn" onclick="addRaffle()">✅ Add Raffle</button>
-
-      <!-- Existing Raffles -->
-      <div class="admin-section">
-        <strong style="font-size:14px;color:var(--black)">Active Raffles</strong>
-        <div id="admin-raffles-list" style="margin-top:12px"></div>
-      </div>
-
-      <!-- Add Winner -->
-      <div class="admin-section">
-        <strong style="font-size:14px;color:var(--black)">Add Winner</strong>
-        <div style="margin-top:12px">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Username</label>
-              <input type="text" id="w-username" placeholder="Raffall username"/>
-            </div>
-            <div class="form-group">
-              <label>Prize</label>
-              <input type="text" id="w-prize" placeholder="e.g. £200 Cash"/>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Raffle</label>
-            <input type="text" id="w-raffle" placeholder="Raffle name"/>
-          </div>
-          <button class="admin-btn" onclick="addWinner()">🏆 Add Winner</button>
-        </div>
-      </div>
-
-      <!-- Update Pool -->
-      <div class="admin-section">
-        <strong style="font-size:14px;color:var(--black)">Update Pool Amount</strong>
-        <div style="margin-top:12px">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Raffle</label>
-              <select id="pool-raffle-select"></select>
-            </div>
-            <div class="form-group">
-              <label>New Pool Amount (£)</label>
-              <input type="number" id="pool-amount" placeholder="0.00" step="0.01"/>
-            </div>
-          </div>
-          <button class="admin-btn" onclick="updatePool()">💰 Update Pool</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
 
 <script>
 // ════════════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════════════
-const ADMIN_PASS = "giveaways2026home"; // Change this!
 const STORAGE_KEY = "giveaways_home_data";
 const TELEGRAM_LINK = "https://t.me/GiveawaysEn";
 const WHATSAPP_LINK = "https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f";
@@ -1106,8 +989,8 @@ function updateHeroStats(data) {
 //  FAQ
 // ════════════════════════════════════════════════════════
 const FAQS = [
-  { q: "How do I enter?", a: "Go to raffall.com/giveaways_community and buy tickets for any competition you like. To enter the instant prizes as well — for free — register your Raffall username at instant-win-xi.vercel.app. Then join us on Telegram (t.me/GiveawaysEn) or WhatsApp (whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f) and keep an eye out for draw announcements." },
-  { q: "How do instant prizes work?", a: "Every competition we run includes instant prizes on top of the main Raffall draw — free to enter for any ticket holder. When we announce a draw on our channels (Telegram and WhatsApp), go to instant-win-xi.vercel.app, register your Raffall username, and wait for the live draw. One entry per person per competition." },
+  { q: "How do I enter?", a: `Buy tickets for any active competition at <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>.<br><br>To also enter the instant prizes for free, register your Raffall username at <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>.<br><br>Then follow us on <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> or <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> and turn on notifications so you never miss a draw.` },
+  { q: "How do instant prizes work?", a: `Every competition includes instant prizes on top of the main Raffall draw — free to enter for any ticket holder.<br><br>When we announce a draw on our channels, head to <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>, register your Raffall username, and watch the live draw. One entry per person per competition.` },
   { q: "How quickly are prizes paid?", a: "All prizes are paid within 24 hours of the draw via bank transfer. We'll contact you directly — no need to chase us." },
   { q: "Can I win more than one instant prize?", a: "No. Each participant can win one instant prize per competition. If you win, you're automatically removed from subsequent draws in that competition — giving everyone else a fair shot." },
   { q: "What if the minimum ticket threshold isn't reached?", a: "The draw still happens. The winner receives 50% of the total ticket sales — no cancellations, no refunds games. If you buy a ticket, a draw will always take place." },
@@ -1139,122 +1022,16 @@ function toggleFAQ(i) {
 // ════════════════════════════════════════════════════════
 let adminLoggedIn = false;
 
-function openAdmin() {
-  document.getElementById("admin-panel").classList.add("open");
-  if (adminLoggedIn) showAdminMain();
-}
 
-function closeAdmin() {
-  document.getElementById("admin-panel").classList.remove("open");
-}
 
-function doAdminLogin() {
-  const pass = document.getElementById("admin-password").value;
-  if (pass !== ADMIN_PASS) return showAlert("login-alert", "error", "Incorrect password.");
-  adminLoggedIn = true;
-  showAdminMain();
-}
 
-function showAdminMain() {
-  document.getElementById("admin-login-view").style.display = "none";
-  document.getElementById("admin-main-view").style.display = "block";
-  renderAdminRaffles();
-  populatePoolSelect();
-}
 
-function togglePoolField() {
-  const type = document.getElementById("r-type").value;
-  document.getElementById("pool-field").style.display = type === "pool" ? "block" : "none";
-  document.getElementById("fixed-field").style.display = type === "fixed" ? "block" : "none";
-}
 
-function addRaffle() {
-  const name = document.getElementById("r-name").value.trim();
-  if (!name) return showAlert("create-alert", "error", "Enter a raffle name.");
-  const type = document.getElementById("r-type").value;
-  const raffle = {
-    id: Date.now(),
-    name,
-    type,
-    price: document.getElementById("r-price").value.trim(),
-    link: document.getElementById("r-link").value.trim(),
-    pool: parseFloat(document.getElementById("r-pool").value) || 0,
-    fixedPrize: document.getElementById("r-fixed-prize").value.trim(),
-    sold: parseInt(document.getElementById("r-sold").value) || 0,
-    total: parseInt(document.getElementById("r-total").value) || 0,
-    instants: document.getElementById("r-instants").value.trim(),
-    createdAt: new Date().toISOString(),
-  };
-  const data = loadData();
-  data.raffles.push(raffle);
-  saveData(data);
-  showAlert("create-alert", "success", "✅ Raffle added!");
-  renderAdminRaffles();
-  renderAll();
-  populatePoolSelect();
-  // Clear fields
-  ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = "";
-  });
-}
 
-function renderAdminRaffles() {
-  const data = loadData();
-  const list = document.getElementById("admin-raffles-list");
-  if (!data.raffles.length) { list.innerHTML = '<p style="font-size:13px;color:var(--gray)">No raffles yet.</p>'; return; }
-  list.innerHTML = data.raffles.map(r => `
-    <div class="admin-raffle-item">
-      <div>
-        <div style="font-weight:600">${esc(r.name)}</div>
-        <div style="font-size:11px;color:var(--gray)">${r.type === "pool" ? "Pool: £" + (r.pool||0).toFixed(2) : r.fixedPrize} · ${r.sold} tickets</div>
-      </div>
-      <button class="del-btn" onclick="deleteRaffle(${r.id})">Delete</button>
-    </div>`).join("");
-}
 
-function deleteRaffle(id) {
-  if (!confirm("Delete this raffle?")) return;
-  const data = loadData();
-  data.raffles = data.raffles.filter(r => r.id !== id);
-  saveData(data);
-  renderAdminRaffles();
-  renderAll();
-  populatePoolSelect();
-}
 
-function addWinner() {
-  const username = document.getElementById("w-username").value.trim();
-  const prize = document.getElementById("w-prize").value.trim();
-  const raffle = document.getElementById("w-raffle").value.trim();
-  if (!username || !prize) return showAlert("create-alert", "error", "Fill in username and prize.");
-  const data = loadData();
-  data.winners.push({ id: Date.now(), username, prize, raffle, date: new Date().toISOString() });
-  saveData(data);
-  showAlert("create-alert", "success", "🏆 Winner added!");
-  renderAll();
-  document.getElementById("w-username").value = "";
-  document.getElementById("w-prize").value = "";
-  document.getElementById("w-raffle").value = "";
-}
 
-function populatePoolSelect() {
-  const sel = document.getElementById("pool-raffle-select");
-  const data = loadData();
-  const pools = data.raffles.filter(r => r.type === "pool");
-  sel.innerHTML = pools.length
-    ? pools.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join("")
-    : '<option value="">No pool raffles</option>';
-}
 
-function updatePool() {
-  const id = parseInt(document.getElementById("pool-raffle-select").value);
-  const amount = parseFloat(document.getElementById("pool-amount").value);
-  if (!id || isNaN(amount)) return showAlert("create-alert", "error", "Select a raffle and enter an amount.");
-  const data = loadData();
-  const raffle = data.raffles.find(r => r.id === id);
-  if (raffle) { raffle.pool = amount; saveData(data); renderAll(); renderAdminRaffles(); showAlert("create-alert", "success", "✅ Pool updated to £" + amount.toFixed(2)); }
-}
 
 // ════════════════════════════════════════════════════════
 //  UTILS
