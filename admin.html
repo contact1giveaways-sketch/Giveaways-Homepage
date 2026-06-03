@@ -284,6 +284,20 @@ nav{
   display:flex;justify-content:stretch;
 }
 .raffle-btn{flex:1;text-align:center}
+.countdown-wrap{
+  background:var(--black);
+  border-radius:10px;
+  padding:12px 16px;
+  margin-bottom:14px;
+  text-align:center;
+}
+.countdown-label{font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.countdown-timer{display:flex;gap:8px;justify-content:center;align-items:center}
+.cd-block{text-align:center}
+.cd-num{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold-light);line-height:1;background:rgba(245,200,66,0.1);border-radius:6px;padding:4px 10px;min-width:40px;display:block}
+.cd-lbl{font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.cd-sep{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);opacity:0.5;margin-bottom:8px}
+.draw-done{font-size:12px;color:var(--green);font-weight:600;text-align:center;padding:8px;background:rgba(34,197,94,0.1);border-radius:8px;margin-bottom:14px}
 .raffle-btn{
   padding:9px 20px;
   background:var(--gold);color:var(--white);
@@ -921,6 +935,10 @@ footer{
         <label>Instant Prizes (comma separated)</label>
         <input type="text" id="r-instants" placeholder="£50, £75, £100, £200"/>
       </div>
+      <div class="form-group">
+        <label>Draw Date &amp; Time</label>
+        <input type="datetime-local" id="r-drawdate"/>
+      </div>
       <button class="admin-btn" onclick="addRaffle()">✅ Add Raffle</button>
 
       <!-- Existing Raffles -->
@@ -984,6 +1002,10 @@ footer{
           <div class="form-group">
             <label>Promo Codes (one per line: CODE | uses left)</label>
             <textarea id="update-promos" placeholder="GIVE | 50&#10;START | 10&#10;VIP | 5" rows="4"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Draw Date & Time</label>
+            <input type="datetime-local" id="update-drawdate"/>
           </div>
           <button class="admin-btn" onclick="updateRaffle()">💰 Update Raffle</button>
         </div>
@@ -1050,6 +1072,7 @@ function renderAll() {
   renderRaffles(homeData);
   renderWinners(homeData);
   updateHeroStats(homeData);
+  startCountdowns(homeData.raffles || []);
 }
 
 // ════════════════════════════════════════════════════════
@@ -1118,6 +1141,19 @@ function renderRaffles(data) {
         <div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div>
       </div>
 
+      ${r.drawDate ? `
+      <div class="countdown-wrap" id="cd-${r.id}">
+        <div class="countdown-label">🎰 Draw in</div>
+        <div class="countdown-timer">
+          <div class="cd-block"><span class="cd-num" id="cd-d-${r.id}">--</span><div class="cd-lbl">Days</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block"><span class="cd-num" id="cd-h-${r.id}">--</span><div class="cd-lbl">Hours</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block"><span class="cd-num" id="cd-m-${r.id}">--</span><div class="cd-lbl">Mins</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block"><span class="cd-num" id="cd-s-${r.id}">--</span><div class="cd-lbl">Secs</div></div>
+        </div>
+      </div>` : ""}
       <div class="raffle-cta">
         ${r.link ? `<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>` : ""}
       </div>
@@ -1243,6 +1279,7 @@ async function addRaffle() {
     sold:       parseInt(document.getElementById("r-sold").value) || 0,
     total:      parseInt(document.getElementById("r-total").value) || 0,
     instants:   document.getElementById("r-instants").value.trim(),
+    drawDate:   document.getElementById("r-drawdate").value,
     promos:     []
   });
   if (d.error) return showAlert("create-alert", "error", d.error);
@@ -1250,7 +1287,7 @@ async function addRaffle() {
   await loadHomeData();
   renderAdminRaffles();
   populatePoolSelect();
-  ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants"].forEach(id => {
+  ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants","r-drawdate"].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = "";
   });
 }
@@ -1344,6 +1381,12 @@ function loadRaffleForEdit() {
   document.getElementById("update-sold").value = r.sold || "";
   const promos = r.promos || [];
   document.getElementById("update-promos").value = promos.map(p => `${p.code} | ${p.uses}`).join("\n");
+  if (r.drawDate) {
+    // Convert ISO to datetime-local format
+    const dt = new Date(r.drawDate);
+    const local = new Date(dt.getTime() - dt.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    document.getElementById("update-drawdate").value = local;
+  }
 }
 
 async function updateRaffle() {
@@ -1359,11 +1402,13 @@ async function updateRaffle() {
       })
     : [];
   showAlert("create-alert", "info", "Saving...");
+  const drawDateVal = document.getElementById("update-drawdate").value;
   const d = await apiPost({
     action: "updateHomeRaffle", password: ADMIN_PASS, id,
     pool: parseFloat(amount)||0,
     sold: parseInt(sold)||0,
-    promos
+    promos,
+    drawDate: drawDateVal ? new Date(drawDateVal).toISOString() : ""
   });
   if (d.error) return showAlert("create-alert", "error", d.error);
   showAlert("create-alert", "success", "✅ Updated!");
@@ -1405,6 +1450,54 @@ function fmtDate(s) {
   if (!s) return "";
   const d = new Date(s);
   return isNaN(d) ? s : d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+}
+
+
+// ════════════════════════════════════════════════════════
+//  COUNTDOWN TIMERS
+// ════════════════════════════════════════════════════════
+const countdownIntervals = {};
+
+function startCountdowns(raffles) {
+  // Clear existing
+  Object.values(countdownIntervals).forEach(clearInterval);
+  Object.keys(countdownIntervals).forEach(k => delete countdownIntervals[k]);
+
+  raffles.forEach(r => {
+    if (!r.drawDate) return;
+    const drawTime = new Date(r.drawDate).getTime();
+    if (isNaN(drawTime)) return;
+
+    function tick() {
+      const now = Date.now();
+      const diff = drawTime - now;
+      const dEl = document.getElementById(`cd-d-${r.id}`);
+      const hEl = document.getElementById(`cd-h-${r.id}`);
+      const mEl = document.getElementById(`cd-m-${r.id}`);
+      const sEl = document.getElementById(`cd-s-${r.id}`);
+      const wrap = document.getElementById(`cd-${r.id}`);
+      if (!dEl) return;
+
+      if (diff <= 0) {
+        if (wrap) wrap.innerHTML = '<div class="draw-done">🎉 Draw is happening now!</div>';
+        clearInterval(countdownIntervals[r.id]);
+        return;
+      }
+
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      dEl.textContent = String(d).padStart(2,"0");
+      hEl.textContent = String(h).padStart(2,"0");
+      mEl.textContent = String(m).padStart(2,"0");
+      sEl.textContent = String(s).padStart(2,"0");
+    }
+
+    tick();
+    countdownIntervals[r.id] = setInterval(tick, 1000);
+  });
 }
 
 </script>
