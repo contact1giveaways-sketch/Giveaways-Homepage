@@ -984,45 +984,59 @@ footer{
 // ════════════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════════════
-const ADMIN_PASS = "giveaways2026home"; // Change this!
-const STORAGE_KEY = "giveaways_home_data";
-const TELEGRAM_LINK = "https://t.me/GiveawaysEn";
-const WHATSAPP_LINK = "https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f";
-const INSTANT_WIN_LINK = "https://instant-win-xi.vercel.app";
+const API_URL   = "https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec";
+const ADMIN_PASS = "giveaways2024";
 
 // ════════════════════════════════════════════════════════
-//  DATA (stored in localStorage)
+//  API HELPERS
 // ════════════════════════════════════════════════════════
-function loadData() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { raffles: [], winners: [] };
-  } catch(e) { return { raffles: [], winners: [] }; }
+async function apiFetch(params) {
+  const url = API_URL + "?" + new URLSearchParams(params);
+  const r = await fetch(url);
+  return r.json();
 }
 
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+async function apiPost(body) {
+  const action = body.action;
+  const params = new URLSearchParams({ action, body: JSON.stringify(body) });
+  const r = await fetch(API_URL + "?" + params);
+  return r.json();
 }
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let homeData = { raffles: [], winners: [] };
+let adminLoggedIn = false;
 
 // ════════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════════
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => document.getElementById("loading-overlay").classList.add("hidden"), 600);
-  renderAll();
+document.addEventListener("DOMContentLoaded", async () => {
+  setTimeout(() => document.getElementById("loading-overlay").classList.add("hidden"), 8000);
+  await loadHomeData();
+  document.getElementById("loading-overlay").classList.add("hidden");
   initFAQ();
-  updateLinks();
 });
 
-function updateLinks() {
-  document.querySelectorAll('a[href*="YOUR_TELEGRAM"]').forEach(a => a.href = TELEGRAM_LINK);
-  document.querySelectorAll('a[href*="YOUR_WHATSAPP"]').forEach(a => a.href = WHATSAPP_LINK);
+async function loadHomeData() {
+  try {
+    const [r1, r2] = await Promise.all([
+      apiFetch({ action: "getHomeRaffles" }),
+      apiFetch({ action: "getHomeWinners" })
+    ]);
+    homeData.raffles = r1.raffles || [];
+    homeData.winners = r2.winners || [];
+    renderAll();
+  } catch(e) {
+    console.error("Load error:", e);
+  }
 }
 
 function renderAll() {
-  const data = loadData();
-  renderRaffles(data);
-  renderWinners(data);
-  updateHeroStats(data);
+  renderRaffles(homeData);
+  renderWinners(homeData);
+  updateHeroStats(homeData);
 }
 
 // ════════════════════════════════════════════════════════
@@ -1041,9 +1055,10 @@ function renderRaffles(data) {
     return;
   }
 
-  grid.innerHTML = raffles.map((r, i) => {
+  grid.innerHTML = raffles.map((r) => {
     const soldPct = r.total > 0 ? Math.min(100, Math.round((r.sold / r.total) * 100)) : null;
     const instants = r.instants ? r.instants.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const promos = (r.promos || []).filter(p => p.uses > 0);
 
     return `
     <div class="raffle-card">
@@ -1055,7 +1070,7 @@ function renderRaffles(data) {
       <div class="pool-display">
         <div class="pool-label">💰 Current Pool</div>
         <div class="pool-val">£${parseFloat(r.pool || 0).toFixed(2)}</div>
-      </div>` : ''}
+      </div>` : ""}
 
       ${soldPct !== null ? `
       <div class="progress-wrap">
@@ -1067,21 +1082,31 @@ function renderRaffles(data) {
       </div>` : r.sold > 0 ? `
       <div class="raffle-meta">
         <div class="raffle-pill">🎟️ <span>${r.sold} tickets sold</span></div>
-      </div>` : ''}
+      </div>` : ""}
 
       ${instants.length ? `
       <div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">⚡ Instant Prizes</div>
       <div class="instant-prizes">
         ${instants.map(p => `<div class="prize-chip">${esc(p)}</div>`).join("")}
-      </div>` : ''}
+      </div>` : ""}
+
+      ${promos.length ? `
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">🎟️ Promo Codes</div>
+        ${promos.map(p => `
+          <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,149,42,0.08);border:1px solid rgba(201,149,42,0.2);border-radius:8px;padding:5px 12px;margin:3px;font-size:12px;">
+            <span style="font-family:'DM Mono',monospace;font-weight:600;color:var(--black)">${esc(p.code)}</span>
+            <span style="color:var(--gray)">${p.uses} use${p.uses !== 1 ? "s" : ""} left</span>
+          </div>`).join("")}
+      </div>` : ""}
 
       <div class="raffle-meta">
-        ${r.price ? `<div class="raffle-pill">💷 <span>${esc(r.price)} per ticket</span></div>` : ''}
+        ${r.price ? `<div class="raffle-pill">💷 <span>${esc(r.price)} per ticket</span></div>` : ""}
         <div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div>
       </div>
 
       <div class="raffle-cta">
-        ${r.link ? `<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>` : ''}
+        ${r.link ? `<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>` : ""}
       </div>
     </div>`;
   }).join("");
@@ -1157,8 +1182,6 @@ function toggleFAQ(i) {
 // ════════════════════════════════════════════════════════
 //  ADMIN
 // ════════════════════════════════════════════════════════
-let adminLoggedIn = false;
-
 function openAdmin() {
   document.getElementById("admin-panel").classList.add("open");
   if (adminLoggedIn) showAdminMain();
@@ -1168,9 +1191,10 @@ function closeAdmin() {
   document.getElementById("admin-panel").classList.remove("open");
 }
 
-function doAdminLogin() {
+async function doAdminLogin() {
   const pass = document.getElementById("admin-password").value;
-  if (pass !== ADMIN_PASS) return showAlert("login-alert", "error", "Incorrect password.");
+  const d = await apiPost({ action: "checkAdmin", password: pass });
+  if (!d.ok) return showAlert("login-alert", "error", "Incorrect password.");
   adminLoggedIn = true;
   showAdminMain();
 }
@@ -1189,42 +1213,39 @@ function togglePoolField() {
   document.getElementById("fixed-field").style.display = type === "fixed" ? "block" : "none";
 }
 
-function addRaffle() {
+async function addRaffle() {
   const name = document.getElementById("r-name").value.trim();
   if (!name) return showAlert("create-alert", "error", "Enter a raffle name.");
   const type = document.getElementById("r-type").value;
-  const raffle = {
-    id: Date.now(),
+  showAlert("create-alert", "info", "Saving...");
+  const d = await apiPost({
+    action: "addHomeRaffle",
+    password: ADMIN_PASS,
     name,
     type,
-    price: document.getElementById("r-price").value.trim(),
-    link: document.getElementById("r-link").value.trim(),
-    pool: parseFloat(document.getElementById("r-pool").value) || 0,
+    price:      document.getElementById("r-price").value.trim(),
+    link:       document.getElementById("r-link").value.trim(),
+    pool:       parseFloat(document.getElementById("r-pool").value) || 0,
     fixedPrize: document.getElementById("r-fixed-prize").value.trim(),
-    sold: parseInt(document.getElementById("r-sold").value) || 0,
-    total: parseInt(document.getElementById("r-total").value) || 0,
-    instants: document.getElementById("r-instants").value.trim(),
-    createdAt: new Date().toISOString(),
-  };
-  const data = loadData();
-  data.raffles.push(raffle);
-  saveData(data);
+    sold:       parseInt(document.getElementById("r-sold").value) || 0,
+    total:      parseInt(document.getElementById("r-total").value) || 0,
+    instants:   document.getElementById("r-instants").value.trim(),
+    promos:     []
+  });
+  if (d.error) return showAlert("create-alert", "error", d.error);
   showAlert("create-alert", "success", "✅ Raffle added!");
+  await loadHomeData();
   renderAdminRaffles();
-  renderAll();
   populatePoolSelect();
-  // Clear fields
   ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = "";
+    const el = document.getElementById(id); if (el) el.value = "";
   });
 }
 
 function renderAdminRaffles() {
-  const data = loadData();
   const list = document.getElementById("admin-raffles-list");
-  if (!data.raffles.length) { list.innerHTML = '<p style="font-size:13px;color:var(--gray)">No raffles yet.</p>'; return; }
-  list.innerHTML = data.raffles.map(r => `
+  if (!homeData.raffles.length) { list.innerHTML = '<p style="font-size:13px;color:var(--gray)">No raffles yet.</p>'; return; }
+  list.innerHTML = homeData.raffles.map(r => `
     <div class="admin-raffle-item">
       <div>
         <div style="font-weight:600">${esc(r.name)}</div>
@@ -1234,28 +1255,26 @@ function renderAdminRaffles() {
     </div>`).join("");
 }
 
-function deleteRaffle(id) {
+async function deleteRaffle(id) {
   if (!confirm("Delete this raffle?")) return;
-  const data = loadData();
-  data.raffles = data.raffles.filter(r => r.id !== id);
-  saveData(data);
+  await apiPost({ action: "deleteHomeRaffle", password: ADMIN_PASS, id });
+  await loadHomeData();
   renderAdminRaffles();
-  renderAll();
   populatePoolSelect();
 }
 
-function addWinner() {
+async function addWinner() {
   const username = document.getElementById("w-username").value.trim();
-  const prize = document.getElementById("w-prize").value.trim();
-  const raffle = document.getElementById("w-raffle").value.trim();
-  const dateVal = document.getElementById("w-date").value;
+  const prize    = document.getElementById("w-prize").value.trim();
+  const raffle   = document.getElementById("w-raffle").value.trim();
+  const dateVal  = document.getElementById("w-date").value;
   if (!username || !prize) return showAlert("create-alert", "error", "Fill in username and prize.");
   const date = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
-  const data = loadData();
-  data.winners.push({ id: Date.now(), username, prize, raffle, date });
-  saveData(data);
+  showAlert("create-alert", "info", "Saving...");
+  const d = await apiPost({ action: "addHomeWinner", password: ADMIN_PASS, username, prize, raffle, date });
+  if (d.error) return showAlert("create-alert", "error", d.error);
   showAlert("create-alert", "success", "🏆 Winner added!");
-  renderAll();
+  await loadHomeData();
   renderAdminWinners();
   document.getElementById("w-username").value = "";
   document.getElementById("w-prize").value = "";
@@ -1264,20 +1283,16 @@ function addWinner() {
 }
 
 function renderAdminWinners() {
-  const data = loadData();
   const el = document.getElementById("admin-winners-list");
   if (!el) return;
-  if (!data.winners.length) {
-    el.innerHTML = '<p style="font-size:13px;color:var(--gray)">No winners yet.</p>';
-    return;
-  }
-  el.innerHTML = data.winners.slice().reverse().map(w => `
-    <div class="admin-raffle-item" style="flex-wrap:wrap;gap:8px;" id="winner-row-${w.id}">
+  if (!homeData.winners.length) { el.innerHTML = '<p style="font-size:13px;color:var(--gray)">No winners yet.</p>'; return; }
+  el.innerHTML = homeData.winners.slice().reverse().map(w => `
+    <div class="admin-raffle-item" style="flex-wrap:wrap;gap:8px;">
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:13px">${esc(w.username)} — <span style="color:var(--gold)">${esc(w.prize)}</span></div>
         <div style="font-size:11px;color:var(--gray);margin-top:2px">${esc(w.raffle)}</div>
-        <div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-          <input type="date" value="${w.date ? w.date.slice(0,10) : ''}" 
+        <div style="margin-top:6px">
+          <input type="date" value="${w.date ? w.date.slice(0,10) : ""}"
             onchange="updateWinnerDate(${w.id}, this.value)"
             style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--bg);color:var(--black);outline:none"/>
         </div>
@@ -1286,76 +1301,76 @@ function renderAdminWinners() {
     </div>`).join("");
 }
 
-function updateWinnerDate(id, dateVal) {
-  const data = loadData();
-  const w = data.winners.find(w => w.id === id);
-  if (w) {
-    w.date = new Date(dateVal).toISOString();
-    saveData(data);
-    renderAll();
-    showAlert("create-alert", "success", "✅ Date updated!");
-  }
+async function updateWinnerDate(id, dateVal) {
+  const date = new Date(dateVal).toISOString();
+  await apiPost({ action: "updateHomeWinner", password: ADMIN_PASS, id, date });
+  await loadHomeData();
+  renderAdminWinners();
+  showAlert("create-alert", "success", "✅ Date updated!");
 }
 
-function deleteWinner(id) {
-  if (!confirm("Delete this winner? They will be removed from the public list.")) return;
-  const data = loadData();
-  data.winners = data.winners.filter(w => w.id !== id);
-  saveData(data);
-  renderAll();
+async function deleteWinner(id) {
+  if (!confirm("Delete this winner?")) return;
+  await apiPost({ action: "deleteHomeWinner", password: ADMIN_PASS, id });
+  await loadHomeData();
   renderAdminWinners();
-  showAlert("create-alert", "success", "Deleted.");
 }
 
 function populatePoolSelect() {
   const sel = document.getElementById("pool-raffle-select");
-  const data = loadData();
-  sel.innerHTML = data.raffles.length
-    ? data.raffles.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join("")
+  sel.innerHTML = homeData.raffles.length
+    ? homeData.raffles.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join("")
     : '<option value="">No raffles</option>';
 }
 
 function loadRaffleForEdit() {
   const id = parseInt(document.getElementById("pool-raffle-select").value);
-  const data = loadData();
-  const raffle = data.raffles.find(r => r.id === id);
-  if (!raffle) return;
-  document.getElementById("pool-amount").value = raffle.pool || "";
-  document.getElementById("update-sold").value = raffle.sold || "";
-  // Load promo codes
-  const promos = raffle.promos || [];
+  const r = homeData.raffles.find(r => String(r.id) === String(id));
+  if (!r) return;
+  document.getElementById("pool-amount").value = r.pool || "";
+  document.getElementById("update-sold").value = r.sold || "";
+  const promos = r.promos || [];
   document.getElementById("update-promos").value = promos.map(p => `${p.code} | ${p.uses}`).join("\n");
 }
 
-function updateRaffle() {
-  const id = parseInt(document.getElementById("pool-raffle-select").value);
+async function updateRaffle() {
+  const id = document.getElementById("pool-raffle-select").value;
   if (!id) return showAlert("create-alert", "error", "Select a raffle.");
-  const data = loadData();
-  const raffle = data.raffles.find(r => r.id === id);
-  if (!raffle) return;
-
-  const amount = document.getElementById("pool-amount").value;
-  const sold = document.getElementById("update-sold").value;
+  const amount    = document.getElementById("pool-amount").value;
+  const sold      = document.getElementById("update-sold").value;
   const promosRaw = document.getElementById("update-promos").value.trim();
-
-  if (amount !== "") raffle.pool = parseFloat(amount) || 0;
-  if (sold !== "") raffle.sold = parseInt(sold) || 0;
-
-  // Parse promo codes
-  if (promosRaw) {
-    raffle.promos = promosRaw.split("\n").filter(l => l.trim()).map(line => {
-      const parts = line.split("|").map(s => s.trim());
-      return { code: parts[0] || "", uses: parseInt(parts[1]) || 0 };
-    });
-  } else {
-    raffle.promos = [];
-  }
-
-  saveData(data);
-  renderAll();
+  const promos = promosRaw
+    ? promosRaw.split("\n").filter(l => l.trim()).map(line => {
+        const parts = line.split("|").map(s => s.trim());
+        return { code: parts[0]||"", uses: parseInt(parts[1])||0 };
+      })
+    : [];
+  showAlert("create-alert", "info", "Saving...");
+  const d = await apiPost({
+    action: "updateHomeRaffle", password: ADMIN_PASS, id,
+    pool: parseFloat(amount)||0,
+    sold: parseInt(sold)||0,
+    promos
+  });
+  if (d.error) return showAlert("create-alert", "error", d.error);
+  showAlert("create-alert", "success", "✅ Updated!");
+  await loadHomeData();
   renderAdminRaffles();
-  showAlert("create-alert", "success", "✅ Raffle updated!");
 }
+
+// ════════════════════════════════════════════════════════
+//  JOIN MODAL
+// ════════════════════════════════════════════════════════
+function openJoinModal() {
+  const m = document.getElementById("join-modal");
+  m.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+function closeJoinModal() {
+  document.getElementById("join-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if(e.key === "Escape") { closeJoinModal(); closeAdmin(); } });
 
 // ════════════════════════════════════════════════════════
 //  UTILS
@@ -1379,16 +1394,6 @@ function fmtDate(s) {
   return isNaN(d) ? s : d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
 }
 
-function openJoinModal() {
-  const m = document.getElementById("join-modal");
-  m.style.display = "flex";
-  document.body.style.overflow = "hidden";
-}
-function closeJoinModal() {
-  document.getElementById("join-modal").style.display = "none";
-  document.body.style.overflow = "";
-}
-document.addEventListener("keydown", e => { if(e.key === "Escape") closeJoinModal(); });
 </script>
 </body>
 </html>
