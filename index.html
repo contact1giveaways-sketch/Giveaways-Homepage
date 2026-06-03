@@ -462,7 +462,7 @@ footer{
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-
+/* ── ADMIN PANEL ─────────────────────────────────────── */
 #admin-panel{
   display:none;
   position:fixed;inset:0;background:rgba(0,0,0,0.5);
@@ -848,44 +848,59 @@ footer{
 // ════════════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════════════
-const STORAGE_KEY = "giveaways_home_data";
-const TELEGRAM_LINK = "https://t.me/GiveawaysEn";
-const WHATSAPP_LINK = "https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f";
-const INSTANT_WIN_LINK = "https://instant-win-xi.vercel.app";
+const API_URL   = "https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec";
+const ADMIN_PASS = "giveaways2024";
 
 // ════════════════════════════════════════════════════════
-//  DATA (stored in localStorage)
+//  API HELPERS
 // ════════════════════════════════════════════════════════
-function loadData() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { raffles: [], winners: [] };
-  } catch(e) { return { raffles: [], winners: [] }; }
+async function apiFetch(params) {
+  const url = API_URL + "?" + new URLSearchParams(params);
+  const r = await fetch(url);
+  return r.json();
 }
 
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+async function apiPost(body) {
+  const action = body.action;
+  const params = new URLSearchParams({ action, body: JSON.stringify(body) });
+  const r = await fetch(API_URL + "?" + params);
+  return r.json();
 }
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let homeData = { raffles: [], winners: [] };
+let adminLoggedIn = false;
 
 // ════════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════════
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => document.getElementById("loading-overlay").classList.add("hidden"), 600);
-  renderAll();
+document.addEventListener("DOMContentLoaded", async () => {
+  setTimeout(() => document.getElementById("loading-overlay").classList.add("hidden"), 8000);
+  await loadHomeData();
+  document.getElementById("loading-overlay").classList.add("hidden");
   initFAQ();
-  updateLinks();
 });
 
-function updateLinks() {
-  document.querySelectorAll('a[href*="YOUR_TELEGRAM"]').forEach(a => a.href = TELEGRAM_LINK);
-  document.querySelectorAll('a[href*="YOUR_WHATSAPP"]').forEach(a => a.href = WHATSAPP_LINK);
+async function loadHomeData() {
+  try {
+    const [r1, r2] = await Promise.all([
+      apiFetch({ action: "getHomeRaffles" }),
+      apiFetch({ action: "getHomeWinners" })
+    ]);
+    homeData.raffles = r1.raffles || [];
+    homeData.winners = r2.winners || [];
+    renderAll();
+  } catch(e) {
+    console.error("Load error:", e);
+  }
 }
 
 function renderAll() {
-  const data = loadData();
-  renderRaffles(data);
-  renderWinners(data);
-  updateHeroStats(data);
+  renderRaffles(homeData);
+  renderWinners(homeData);
+  updateHeroStats(homeData);
 }
 
 // ════════════════════════════════════════════════════════
@@ -904,9 +919,10 @@ function renderRaffles(data) {
     return;
   }
 
-  grid.innerHTML = raffles.map((r, i) => {
+  grid.innerHTML = raffles.map((r) => {
     const soldPct = r.total > 0 ? Math.min(100, Math.round((r.sold / r.total) * 100)) : null;
     const instants = r.instants ? r.instants.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const promos = (r.promos || []).filter(p => p.uses > 0);
 
     return `
     <div class="raffle-card">
@@ -918,7 +934,7 @@ function renderRaffles(data) {
       <div class="pool-display">
         <div class="pool-label">💰 Current Pool</div>
         <div class="pool-val">£${parseFloat(r.pool || 0).toFixed(2)}</div>
-      </div>` : ''}
+      </div>` : ""}
 
       ${soldPct !== null ? `
       <div class="progress-wrap">
@@ -930,30 +946,31 @@ function renderRaffles(data) {
       </div>` : r.sold > 0 ? `
       <div class="raffle-meta">
         <div class="raffle-pill">🎟️ <span>${r.sold} tickets sold</span></div>
-      </div>` : ''}
+      </div>` : ""}
 
       ${instants.length ? `
       <div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">⚡ Instant Prizes</div>
       <div class="instant-prizes">
         ${instants.map(p => `<div class="prize-chip">${esc(p)}</div>`).join("")}
-      </div>` : ''}
+      </div>` : ""}
 
-      ${r.promos && r.promos.length ? `
+      ${promos.length ? `
       <div style="margin-bottom:14px">
         <div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">🎟️ Promo Codes</div>
-        ${r.promos.filter(p => p.uses > 0).map(p => `
+        ${promos.map(p => `
           <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,149,42,0.08);border:1px solid rgba(201,149,42,0.2);border-radius:8px;padding:5px 12px;margin:3px;font-size:12px;">
             <span style="font-family:'DM Mono',monospace;font-weight:600;color:var(--black)">${esc(p.code)}</span>
-            <span style="color:var(--gray)">${p.uses} use${p.uses !== 1 ? 's' : ''} left</span>
-          </div>`).join('') || '<span style="font-size:12px;color:var(--gray)">No active codes</span>'}
-      </div>` : ''}
+            <span style="color:var(--gray)">${p.uses} use${p.uses !== 1 ? "s" : ""} left</span>
+          </div>`).join("")}
+      </div>` : ""}
+
       <div class="raffle-meta">
-        ${r.price ? `<div class="raffle-pill">💷 <span>${esc(r.price)} per ticket</span></div>` : ''}
+        ${r.price ? `<div class="raffle-pill">💷 <span>${esc(r.price)} per ticket</span></div>` : ""}
         <div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div>
       </div>
 
       <div class="raffle-cta">
-        ${r.link ? `<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>` : ''}
+        ${r.link ? `<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>` : ""}
       </div>
     </div>`;
   }).join("");
@@ -1029,7 +1046,6 @@ function toggleFAQ(i) {
 // ════════════════════════════════════════════════════════
 //  ADMIN
 // ════════════════════════════════════════════════════════
-let adminLoggedIn = false;
 
 
 
@@ -1041,6 +1057,23 @@ let adminLoggedIn = false;
 
 
 
+
+
+
+
+// ════════════════════════════════════════════════════════
+//  JOIN MODAL
+// ════════════════════════════════════════════════════════
+function openJoinModal() {
+  const m = document.getElementById("join-modal");
+  m.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+function closeJoinModal() {
+  document.getElementById("join-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if(e.key === "Escape") { closeJoinModal(); closeAdmin(); } });
 
 // ════════════════════════════════════════════════════════
 //  UTILS
@@ -1064,16 +1097,6 @@ function fmtDate(s) {
   return isNaN(d) ? s : d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
 }
 
-function openJoinModal() {
-  const m = document.getElementById("join-modal");
-  m.style.display = "flex";
-  document.body.style.overflow = "hidden";
-}
-function closeJoinModal() {
-  document.getElementById("join-modal").style.display = "none";
-  document.body.style.overflow = "";
-}
-document.addEventListener("keydown", e => { if(e.key === "Escape") closeJoinModal(); });
 </script>
 </body>
 </html>
