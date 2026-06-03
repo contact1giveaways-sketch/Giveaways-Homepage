@@ -930,12 +930,24 @@ footer{
               <input type="text" id="w-prize" placeholder="e.g. £200 Cash"/>
             </div>
           </div>
-          <div class="form-group">
-            <label>Raffle</label>
-            <input type="text" id="w-raffle" placeholder="Raffle name"/>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Raffle</label>
+              <input type="text" id="w-raffle" placeholder="Raffle name"/>
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="w-date"/>
+            </div>
           </div>
           <button class="admin-btn" onclick="addWinner()">🏆 Add Winner</button>
         </div>
+      </div>
+
+      <!-- Winners List (editable) -->
+      <div class="admin-section">
+        <strong style="font-size:14px;color:var(--black)">Manage Winners</strong>
+        <div id="admin-winners-list" style="margin-top:12px"></div>
       </div>
 
       <!-- Update Pool -->
@@ -1159,6 +1171,7 @@ function showAdminMain() {
   document.getElementById("admin-login-view").style.display = "none";
   document.getElementById("admin-main-view").style.display = "block";
   renderAdminRaffles();
+  renderAdminWinners();
   populatePoolSelect();
 }
 
@@ -1227,15 +1240,63 @@ function addWinner() {
   const username = document.getElementById("w-username").value.trim();
   const prize = document.getElementById("w-prize").value.trim();
   const raffle = document.getElementById("w-raffle").value.trim();
+  const dateVal = document.getElementById("w-date").value;
   if (!username || !prize) return showAlert("create-alert", "error", "Fill in username and prize.");
+  const date = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
   const data = loadData();
-  data.winners.push({ id: Date.now(), username, prize, raffle, date: new Date().toISOString() });
+  data.winners.push({ id: Date.now(), username, prize, raffle, date });
   saveData(data);
   showAlert("create-alert", "success", "🏆 Winner added!");
   renderAll();
+  renderAdminWinners();
   document.getElementById("w-username").value = "";
   document.getElementById("w-prize").value = "";
   document.getElementById("w-raffle").value = "";
+  document.getElementById("w-date").value = "";
+}
+
+function renderAdminWinners() {
+  const data = loadData();
+  const el = document.getElementById("admin-winners-list");
+  if (!el) return;
+  if (!data.winners.length) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--gray)">No winners yet.</p>';
+    return;
+  }
+  el.innerHTML = data.winners.slice().reverse().map(w => `
+    <div class="admin-raffle-item" style="flex-wrap:wrap;gap:8px;" id="winner-row-${w.id}">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px">${esc(w.username)} — <span style="color:var(--gold)">${esc(w.prize)}</span></div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px">${esc(w.raffle)}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <input type="date" value="${w.date ? w.date.slice(0,10) : ''}" 
+            onchange="updateWinnerDate(${w.id}, this.value)"
+            style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--bg);color:var(--black);outline:none"/>
+        </div>
+      </div>
+      <button class="del-btn" onclick="deleteWinner(${w.id})">Delete</button>
+    </div>`).join("");
+}
+
+function updateWinnerDate(id, dateVal) {
+  const data = loadData();
+  const w = data.winners.find(w => w.id === id);
+  if (w) {
+    w.date = new Date(dateVal).toISOString();
+    saveData(data);
+    renderAll();
+    showAlert("create-alert", "success", "✅ Date updated!");
+  }
+}
+
+function deleteWinner(id) {
+  if (!confirm("Delete this winner? They will be removed from the public list.")) return;
+  const data = loadData();
+  data.winners = data.winners.filter(w => w.id !== id);
+  saveData(data);
+  renderAll();
+  renderAdminWinners();
+  showAlert("create-alert", "success", "Deleted.");
 }
 
 function populatePoolSelect() {
