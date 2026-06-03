@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giveaways Community</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── VARIABLES ───────────────────────────────────────── */
+:root {
+  --gold:       #C9952A;
+  --gold-light: #F5C842;
+  --gold-pale:  #FDF6E3;
+  --gold-line:  rgba(201,149,42,0.2);
+  --black:      #0F0F0F;
+  --gray-dark:  #2A2A2A;
+  --gray:       #666;
+  --gray-light: #999;
+  --border:     #E8E0D0;
+  --bg:         #FAFAF8;
+  --white:      #FFFFFF;
+  --green:      #2D7D46;
+  --radius:     16px;
+}
+
+/* ── RESET ───────────────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:16px;scroll-padding-top:70px}
+body{
+  background:var(--bg);
+  color:var(--gray-dark);
+  font-family:'DM Sans',sans-serif;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+img{display:block;max-width:100%}
+a{text-decoration:none;color:inherit}
+
+/* ── TYPOGRAPHY ──────────────────────────────────────── */
+.display{font-family:'Bebas Neue',sans-serif;letter-spacing:3px;line-height:1}
+.serif{font-family:'Playfair Display',serif}
+.mono{font-family:'DM Mono',monospace}
+
+/* ── LAYOUT ──────────────────────────────────────────── */
+.container{max-width:1080px;margin:0 auto;padding:0 24px}
+.section{padding:80px 0}
+
+/* ── NAV ─────────────────────────────────────────────── */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(250,250,248,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:16px 0;
+}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{display:flex;align-items:center;gap:12px}
+.nav-icon{
+  width:40px;height:40px;
+  background:var(--gold);
+  border-radius:10px;
+  display:grid;place-items:center;
+  font-size:20px;
+  box-shadow:0 2px 12px rgba(201,149,42,0.3);
+}
+.nav-name{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px;letter-spacing:3px;color:var(--black);
+}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{
+  font-size:13px;font-weight:500;color:var(--gray);
+  letter-spacing:0.5px;transition:color .2s;
+}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{
+  padding:9px 20px;
+  background:var(--gold);color:var(--white);
+  border-radius:8px;font-size:13px;font-weight:600;
+  letter-spacing:0.5px;
+  box-shadow:0 2px 10px rgba(201,149,42,0.3);
+  transition:all .2s;
+}
+.nav-cta:hover{background:#b8841f;transform:translateY(-1px);box-shadow:0 4px 16px rgba(201,149,42,0.4)}
+
+/* ── HERO ─────────────────────────────────────────────── */
+.hero{
+  padding:100px 0 80px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';
+  position:absolute;top:-200px;right:-200px;
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(245,200,66,0.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';
+  position:absolute;bottom:-100px;left:-100px;
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(201,149,42,0.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-inner{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:60px;align-items:center;
+  position:relative;z-index:1;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold-pale);
+  border:1px solid var(--gold-line);
+  border-radius:20px;padding:5px 14px;
+  font-size:12px;font-weight:600;color:var(--gold);
+  letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:20px;
+}
+.hero-tag::before{content:'●';font-size:8px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(52px,6vw,80px);
+  letter-spacing:3px;line-height:1;
+  color:var(--black);margin-bottom:12px;
+}
+.hero-title span{color:var(--gold)}
+.hero-subtitle{
+  font-family:'Playfair Display',serif;
+  font-size:18px;color:var(--gray);
+  font-style:italic;margin-bottom:28px;line-height:1.5;
+}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;max-width:400px}
+.btn-primary{
+  padding:14px 28px;
+  background:var(--gold);color:var(--white);
+  border-radius:10px;font-size:14px;font-weight:600;
+  box-shadow:0 4px 20px rgba(201,149,42,0.35);
+  transition:all .2s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary:hover{background:#b8841f;transform:translateY(-2px);box-shadow:0 6px 24px rgba(201,149,42,0.4)}
+.btn-secondary{
+  padding:14px 28px;
+  background:var(--white);color:var(--gray-dark);
+  border:1px solid var(--border);
+  border-radius:10px;font-size:14px;font-weight:500;
+  transition:all .2s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Hero visual */
+.hero-visual{
+  display:flex;flex-direction:column;gap:12px;
+}
+.stat-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px 24px;
+  box-shadow:0 2px 16px rgba(0,0,0,0.05);
+  display:flex;align-items:center;gap:16px;
+  animation:slideIn .6s ease both;
+}
+.stat-card:nth-child(2){animation-delay:.1s}
+.stat-card:nth-child(3){animation-delay:.2s}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.stat-icon{
+  width:48px;height:48px;border-radius:12px;
+  display:grid;place-items:center;font-size:22px;flex-shrink:0;
+}
+.stat-icon.gold{background:rgba(201,149,42,0.12)}
+.stat-icon.green{background:rgba(45,125,70,0.1)}
+.stat-icon.blue{background:rgba(59,130,246,0.1)}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--black);letter-spacing:1px;line-height:1}
+.stat-lbl{font-size:12px;color:var(--gray-light);margin-top:2px}
+
+/* ── DIVIDER ─────────────────────────────────────────── */
+.divider{
+  height:1px;background:var(--border);
+  margin:0;
+}
+.gold-divider{
+  width:60px;height:3px;
+  background:var(--gold);
+  border-radius:2px;margin-bottom:16px;
+}
+
+/* ── SECTION HEADER ──────────────────────────────────── */
+.sec-header{margin-bottom:48px}
+.sec-tag{
+  font-size:11px;font-weight:600;color:var(--gold);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;
+}
+.sec-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(32px,4vw,48px);letter-spacing:2px;
+  color:var(--black);line-height:1;margin-bottom:10px;
+}
+.sec-sub{font-size:15px;color:var(--gray);max-width:480px}
+
+/* ── RAFFLES ─────────────────────────────────────────── */
+.raffles-bg{background:var(--white)}
+.raffles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.raffle-card{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:24px;
+  transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.raffle-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-light));
+}
+.raffle-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,0.08)}
+.raffle-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(45,125,70,0.08);
+  border:1px solid rgba(45,125,70,0.2);
+  border-radius:12px;padding:3px 10px;
+  font-size:11px;font-weight:600;color:var(--green);
+  letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px;
+}
+.raffle-badge::before{content:'●';font-size:7px;animation:pulse 2s infinite}
+.raffle-name{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:2px;color:var(--black);
+  margin-bottom:6px;line-height:1.1;
+}
+.raffle-desc{font-size:13px;color:var(--gray);margin-bottom:18px;line-height:1.5}
+
+/* Progress bar */
+.progress-wrap{margin-bottom:16px}
+.progress-label{
+  display:flex;justify-content:space-between;
+  font-size:12px;color:var(--gray);margin-bottom:6px;
+}
+.progress-label strong{color:var(--black);font-weight:600}
+.progress-bar{
+  height:6px;background:var(--border);border-radius:3px;overflow:hidden;
+}
+.progress-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-light));
+  transition:width .8s ease;
+}
+
+/* Pool display */
+.pool-display{
+  background:var(--gold-pale);
+  border:1px solid var(--gold-line);
+  border-radius:10px;padding:12px 16px;
+  margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.pool-label{font-size:11px;color:var(--gold);font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.pool-val{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold);letter-spacing:1px}
+
+.raffle-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.raffle-pill{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;color:var(--gray);
+}
+.raffle-pill span{font-weight:500;color:var(--gray-dark)}
+.raffle-cta{
+  display:flex;justify-content:stretch;
+}
+.raffle-btn{flex:1;text-align:center}
+.raffle-btn{
+  padding:9px 20px;
+  background:var(--gold);color:var(--white);
+  border-radius:8px;font-size:13px;font-weight:600;
+  transition:all .2s;
+}
+.raffle-btn:hover{background:#b8841f;transform:translateY(-1px)}
+
+/* Instant prizes chips */
+.instant-prizes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.prize-chip{
+  padding:4px 10px;border-radius:8px;
+  font-size:11px;font-weight:600;
+  background:rgba(201,149,42,0.08);
+  border:1px solid var(--gold-line);
+  color:var(--gold);
+}
+
+/* Empty state */
+.empty-raffles{
+  text-align:center;padding:60px 20px;
+  color:var(--gray);
+}
+.empty-raffles .empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
+
+/* ── CHANNELS ────────────────────────────────────────── */
+.channels-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.channel-card{
+  border-radius:var(--radius);padding:28px;
+  display:flex;flex-direction:column;gap:16px;
+  transition:transform .2s;
+}
+.channel-card:hover{transform:translateY(-2px)}
+.channel-card.telegram{
+  background:linear-gradient(135deg,#0088CC,#006DAA);
+  color:var(--white);
+}
+.channel-card.whatsapp{
+  background:linear-gradient(135deg,#25D366,#1aab52);
+  color:var(--white);
+}
+.ch-icon{font-size:36px}
+.ch-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px}
+.ch-desc{font-size:13px;opacity:.85;line-height:1.5}
+.ch-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;
+  background:rgba(255,255,255,0.2);
+  border:1px solid rgba(255,255,255,0.3);
+  border-radius:8px;font-size:13px;font-weight:600;color:var(--white);
+  width:fit-content;transition:background .2s;
+}
+.ch-btn:hover{background:rgba(255,255,255,0.3)}
+.ch-members{font-size:11px;opacity:.7;letter-spacing:1px;text-transform:uppercase}
+
+/* ── WINNERS ─────────────────────────────────────────── */
+.winners-bg{background:var(--white)}
+.winners-list{display:flex;flex-direction:column;gap:10px}
+.winner-row{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:12px;transition:border-color .2s;
+}
+.winner-row:hover{border-color:var(--gold-line)}
+.w-avatar{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),#f5c842);
+  display:grid;place-items:center;
+  font-size:15px;font-weight:700;color:var(--white);flex-shrink:0;
+}
+.w-main{flex:1;min-width:0}
+.w-name{font-weight:600;font-size:14px}
+.w-raffle{font-size:12px;color:var(--gray);margin-top:2px}
+.w-prize{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--gold)}
+.w-date{font-size:11px;color:var(--gray-light);margin-top:2px;text-align:right}
+.trophy-badge{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(201,149,42,0.1);
+  display:grid;place-items:center;font-size:14px;
+}
+
+/* ── HOW IT WORKS ────────────────────────────────────── */
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
+.how-card{
+  padding:28px 24px;text-align:center;
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);
+  transition:all .25s;
+}
+.how-card:hover{border-color:var(--gold-line);box-shadow:0 4px 20px rgba(201,149,42,0.08)}
+.how-num{
+  width:48px;height:48px;border-radius:50%;
+  background:var(--gold-pale);border:2px solid var(--gold-line);
+  display:grid;place-items:center;margin:0 auto 16px;
+  font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);
+}
+.how-title{font-weight:600;font-size:15px;margin-bottom:8px;color:var(--black)}
+.how-text{font-size:13px;color:var(--gray);line-height:1.6}
+
+/* ── FAQ ─────────────────────────────────────────────── */
+.faq-list{display:flex;flex-direction:column;gap:2px}
+.faq-item{
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  background:var(--white);
+}
+.faq-q{
+  padding:18px 20px;
+  min-height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;font-weight:500;font-size:15px;color:var(--black);
+  transition:color .2s;user-select:none;gap:12px;
+}
+.faq-q:hover{color:var(--gold)}
+.faq-arrow{
+  width:20px;height:20px;flex-shrink:0;
+  border-radius:50%;background:var(--gold-pale);
+  display:grid;place-items:center;
+  font-size:10px;color:var(--gold);
+  transition:transform .25s;
+}
+.faq-item.open .faq-arrow{transform:rotate(180deg)}
+.faq-a{
+  max-height:0;overflow:hidden;
+  transition:max-height .3s ease,padding .3s;
+  font-size:14px;color:var(--gray);line-height:1.7;
+  padding:0 20px;
+}
+.faq-item.open .faq-a{max-height:300px;padding:0 20px 18px}
+
+/* ── ABOUT ───────────────────────────────────────────── */
+.about-inner{
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;
+}
+.about-text .sec-sub{max-width:100%}
+.about-values{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+.value-row{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:14px 16px;background:var(--white);border:1px solid var(--border);border-radius:10px;
+}
+.value-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.value-text strong{display:block;font-size:14px;font-weight:600;color:var(--black);margin-bottom:2px}
+.value-text span{font-size:13px;color:var(--gray)}
+
+/* About visual */
+.about-visual{
+  background:linear-gradient(135deg,var(--gold-pale),var(--white));
+  border:1px solid var(--gold-line);
+  border-radius:20px;padding:36px;text-align:center;
+}
+.about-lion{font-size:80px;margin-bottom:16px;display:block}
+.about-slogan{
+  font-family:'Playfair Display',serif;
+  font-style:italic;font-size:16px;color:var(--gray-dark);
+  line-height:1.6;
+}
+.about-slogan strong{color:var(--gold);font-style:normal}
+
+/* ── FOOTER ──────────────────────────────────────────── */
+footer{
+  background:var(--black);color:rgba(255,255,255,0.5);
+  padding:40px 0;font-size:13px;
+}
+.footer-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+}
+.footer-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:16px;letter-spacing:3px;color:var(--gold);
+}
+.footer-links{display:flex;gap:20px}
+.footer-links a{transition:color .2s}
+.footer-links a:hover{color:var(--gold)}
+
+/* ── LOADING ─────────────────────────────────────────── */
+#loading-overlay{
+  position:fixed;inset:0;background:var(--bg);
+  display:grid;place-items:center;z-index:200;
+  transition:opacity .4s;
+}
+#loading-overlay.hidden{opacity:0;pointer-events:none}
+.ld-spinner{
+  width:36px;height:36px;
+  border:3px solid var(--border);
+  border-top-color:var(--gold);
+  border-radius:50%;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── ADMIN PANEL ─────────────────────────────────────── */
+#admin-panel{
+  display:none;
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);
+  z-index:300;padding:20px;overflow-y:auto;
+}
+#admin-panel.open{display:flex;align-items:flex-start;justify-content:center}
+.admin-box{
+  background:var(--white);border-radius:20px;
+  padding:32px;width:100%;max-width:600px;
+  margin-top:40px;
+}
+.admin-box h2{
+  font-family:'Bebas Neue',sans-serif;font-size:24px;
+  letter-spacing:2px;color:var(--black);margin-bottom:24px;
+}
+.admin-close{
+  float:right;background:none;border:none;
+  font-size:20px;cursor:pointer;color:var(--gray);
+  line-height:1;
+}
+.form-group{margin-bottom:16px}
+.form-group label{
+  display:block;font-size:12px;font-weight:600;
+  color:var(--gray);letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:10px 14px;
+  border:1px solid var(--border);border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--black);
+  background:var(--bg);outline:none;transition:border-color .2s;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.admin-btn{
+  width:100%;padding:13px;
+  background:var(--gold);color:var(--white);border:none;
+  border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;margin-top:8px;transition:background .2s;
+}
+.admin-btn:hover{background:#b8841f}
+.admin-section{margin-top:28px;padding-top:24px;border-top:1px solid var(--border)}
+.admin-raffle-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;margin-bottom:8px;font-size:13px;
+}
+.admin-raffle-item .del-btn{
+  background:rgba(239,68,68,0.1);border:none;color:#ef4444;
+  padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;
+}
+.admin-login-wrap{max-width:320px;margin:0 auto;text-align:center;padding:40px 0}
+.admin-login-wrap p{color:var(--gray);font-size:14px;margin-bottom:20px}
+
+/* ── ALERT ───────────────────────────────────────────── */
+.alert{
+  padding:12px 16px;border-radius:8px;
+  font-size:13px;margin-bottom:14px;display:none;
+}
+.alert.show{display:block}
+.alert-success{background:rgba(45,125,70,0.08);border:1px solid rgba(45,125,70,0.2);color:var(--green)}
+.alert-error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#ef4444}
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media(max-width:768px){
+  /* Nav */
+  .nav-links{display:none}
+  .nav-cta{padding:8px 14px;font-size:12px}
+  .nav-name{font-size:15px}
+
+  /* Hero */
+  .hero{padding:56px 0 48px}
+  .hero-inner{grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .hero-title{font-size:52px}
+  .hero-subtitle{font-size:15px}
+  .hero-btns{flex-direction:column}
+  .btn-primary,.btn-secondary{width:100%;justify-content:center;padding:15px 20px}
+
+  /* Sections */
+  .section{padding:48px 0}
+  .sec-header{margin-bottom:32px}
+  .sec-title{font-size:36px}
+  .container{padding:0 16px}
+
+  /* Raffles */
+  .raffles-grid{grid-template-columns:1fr}
+  .raffle-card{padding:20px}
+
+  /* How it works */
+  .how-grid{grid-template-columns:1fr 1fr;gap:12px}
+  .how-card{padding:20px 16px}
+
+  /* Channels */
+  .channels-grid{grid-template-columns:1fr}
+  .channel-card{padding:24px 20px}
+
+  /* About */
+  .about-inner{grid-template-columns:1fr}
+  .about-visual{display:none}
+
+  /* Winners */
+  .winner-row{padding:12px 14px;gap:10px}
+  .w-avatar{width:34px;height:34px;font-size:13px}
+
+  /* FAQ */
+  .faq-q{font-size:14px;padding:16px}
+
+  /* Admin */
+  .admin-box{padding:20px;margin-top:16px}
+  .form-row{grid-template-columns:1fr}
+
+  /* Footer */
+  .footer-inner{flex-direction:column;gap:20px;text-align:center}
+  .footer-links{justify-content:center;flex-wrap:wrap;gap:16px}
+}
+
+@media(max-width:400px){
+  .how-grid{grid-template-columns:1fr}
+  .hero-title{font-size:44px}
+  .hero-tag{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="ld-spinner"></div>
+</div>
+
+<!-- ── NAV ───────────────────────────────────────────── -->
+<nav>
+  <div class="container">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <div class="nav-icon">🎁</div>
+        <div class="nav-name">Giveaways</div>
+      </div>
+      <div class="nav-links">
+        <a href="#raffles">Raffles</a>
+        <a href="#how">How it works</a>
+        <a href="#winners">Winners</a>
+        <a href="#community">Community</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <button onclick="openJoinModal()" class="nav-cta" style="cursor:pointer;border:none">Join</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <p class="hero-slogan serif" style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--gray);margin-bottom:16px;line-height:1.5;">At other raffles you either win or lose.<br><strong style="color:var(--gold);font-style:normal">With us, you win either way.</strong></p>
+        <h1 class="hero-title">Win <span>Real</span><br>Prizes.</h1>
+        <p class="hero-subtitle">Transparent raffles, live draws, instant prizes — every ticket counts.</p>
+        <div class="hero-btns">
+          <a href="#raffles" class="btn-primary" style="width:100%;justify-content:center">🎟️ View Active Raffles</a>
+          <button onclick="openJoinModal()" class="btn-secondary" style="width:100%;justify-content:center;cursor:pointer">Join Community</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="stat-card">
+          <div class="stat-icon gold">🏆</div>
+          <div>
+            <div class="stat-val" id="hero-winners-count">—</div>
+            <div class="stat-lbl">Total Winners</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">🎟️</div>
+          <div>
+            <div class="stat-val" id="hero-raffles-count">—</div>
+            <div class="stat-lbl">Active Raffles</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">⚡</div>
+          <div>
+            <div class="stat-val">LIVE</div>
+            <div class="stat-lbl">Instant Win Draws</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── RAFFLES ────────────────────────────────────────── -->
+<section class="section raffles-bg" id="raffles">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-tag">Active Now</div>
+      <h2 class="sec-title">Live Raffles</h2>
+      <p class="sec-sub">Every raffle is drawn transparently. Watch it happen live on our Instant Win platform.</p>
+    </div>
+    <div class="raffles-grid" id="raffles-grid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────── -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-tag">Simple Process</div>
+      <h2 class="sec-title">How It Works</h2>
+      <p class="sec-sub">From ticket to winner in four easy steps.</p>
+    </div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">1</div>
+        <div class="how-title">Buy Tickets</div>
+        <div class="how-text">Buy tickets in any active raffle on Raffall.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">2</div>
+        <div class="how-title">Join the Community</div>
+        <div class="how-text">Join us on <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> or <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a>.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">3</div>
+        <div class="how-title">Enter Instant Draws</div>
+        <div class="how-text">If you have tickets, enter the instant prizes for free on our <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platform</a>.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">4</div>
+        <div class="how-title">Watch Live & Win</div>
+        <div class="how-text"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── WINNERS ────────────────────────────────────────── -->
+<section class="section winners-bg" id="winners">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-tag">Hall of Fame</div>
+      <h2 class="sec-title">Recent Winners</h2>
+      <p class="sec-sub">Every winner, every prize. Full transparency — always.</p>
+    </div>
+    <div class="winners-list" id="winners-list">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── COMMUNITY ──────────────────────────────────────── -->
+<section class="section" id="community">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-tag">Stay Connected</div>
+      <h2 class="sec-title">Join the Community</h2>
+      <p class="sec-sub">Get notified the moment a new draw opens. Don't miss your window.</p>
+    </div>
+    <div class="channels-grid">
+      <div class="channel-card telegram">
+        <div>
+          <div class="ch-name">Telegram Channel</div>
+          <div class="ch-members">Main channel · Draw announcements · Winners</div>
+        </div>
+        <p class="ch-desc">All draw announcements happen here first. Turn on notifications and never miss an instant prize window.</p>
+        <a href="https://t.me/GiveawaysEn" target="_blank" class="ch-btn">Join Channel →</a>
+      </div>
+      <div class="channel-card whatsapp">
+        <div>
+          <div class="ch-name">WhatsApp Channel</div>
+          <div class="ch-members">Announcements · Updates · Winners</div>
+        </div>
+        <p class="ch-desc">Follow our WhatsApp channel for all the latest updates, draw announcements, and winner reveals.</p>
+        <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" class="ch-btn">Follow Channel →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── ABOUT ──────────────────────────────────────────── -->
+<section class="section winners-bg" id="about">
+  <div class="container">
+    <div class="about-inner">
+      <div>
+        <div class="sec-tag">About Us</div>
+        <h2 class="sec-title">Who We Are</h2>
+        <p class="sec-sub" style="margin-bottom:0">We're a UK-based raffle community built around one simple idea: everyone who plays should have a real chance to win something.</p>
+        <div class="about-values">
+          <div class="value-row">
+            <div class="value-icon">💰</div>
+            <div class="value-text">
+              <strong>Cashback Pool — Win Even When You Lose</strong>
+              <span>20% of the gross profit from every raffle goes into a shared pool. At Christmas, that money comes back to players — proportionally to how many tickets each person bought throughout the year. The more you play, the more you get back. <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vShJYg-6ogBou61TLOiC3MV78ZEgydS0d4XLbH23LNGpShEZj0VF3vzWBwu8_OrDCaM0Av8oXHmU2hI/pubhtml?gid=1728509083&single=true" target="_blank" style="color:var(--gold);font-weight:600">View live leaderboard →</a></span>
+            </div>
+          </div>
+          <div class="value-row">
+            <div class="value-icon">⚡</div>
+            <div class="value-text">
+              <strong>Instant Prizes on Every Competition</strong>
+              <span>Every competition we run comes with instant prizes on top of the main draw — at zero extra cost. Buy a ticket, register your username on our platform, and you're automatically in. Winners are drawn live and verified manually. <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">Go to Instant Win platform →</a></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="about-visual">
+        <span class="about-lion">🦁</span>
+        <p class="about-slogan">"At other raffles you either win or lose.<br><strong>With us, you win either way.</strong>"</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── FAQ ────────────────────────────────────────────── -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-tag">Got Questions?</div>
+      <h2 class="sec-title">FAQ</h2>
+    </div>
+    <div class="faq-list" id="faq-list">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────── -->
+
+<!-- JOIN MODAL -->
+<div id="join-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;padding:20px;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:20px;padding:36px 32px;width:100%;max-width:400px;text-align:center;position:relative;">
+    <button onclick="closeJoinModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--gray);">✕</button>
+    <div style="font-size:36px;margin-bottom:12px;">🦁</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--black);margin-bottom:8px;">Join the Community</h3>
+    <p style="font-size:14px;color:var(--gray);margin-bottom:28px;">Choose your preferred platform. Turn on notifications to never miss a draw.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <a href="https://t.me/GiveawaysEn" target="_blank" onclick="closeJoinModal()"
+        style="display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;background:linear-gradient(135deg,#0088CC,#006DAA);color:#fff;border-radius:12px;font-weight:600;font-size:15px;">
+        Telegram Channel
+      </a>
+      <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" onclick="closeJoinModal()"
+        style="display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;background:linear-gradient(135deg,#25D366,#1aab52);color:#fff;border-radius:12px;font-weight:600;font-size:15px;">
+        WhatsApp Channel
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">Giveaways Community</div>
+        <div style="margin-top:4px">© 2026 · UK Registered · All rights reserved</div>
+      </div>
+      <div class="footer-links">
+        <a href="https://t.me/GiveawaysEn" target="_blank">Telegram</a>
+        <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank">WhatsApp</a>
+        <a href="https://instant-win-xi.vercel.app" target="_blank">Instant Win</a>
+        <a href="#" onclick="openAdmin()">Admin</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ── ADMIN PANEL ────────────────────────────────────── -->
+<div id="admin-panel">
+  <div class="admin-box">
+    <button class="admin-close" onclick="closeAdmin()">✕</button>
+
+    <div id="admin-login-view">
+      <h2>Admin Access</h2>
+      <div class="admin-login-wrap">
+        <p>Enter your password to manage raffles and winners.</p>
+        <div id="login-alert" class="alert"></div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="admin-password" placeholder="Admin password" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
+        </div>
+        <button class="admin-btn" onclick="doAdminLogin()">🔐 Login</button>
+      </div>
+    </div>
+
+    <div id="admin-main-view" style="display:none">
+      <h2>Manage Raffles & Winners</h2>
+
+      <div id="create-alert" class="alert"></div>
+
+      <!-- Add Raffle -->
+      <div class="form-group">
+        <label>Raffle Name</label>
+        <input type="text" id="r-name" placeholder="e.g. WIN 50% of the CASH POOL"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price per Ticket</label>
+          <input type="text" id="r-price" placeholder="£2"/>
+        </div>
+        <div class="form-group">
+          <label>Raffall Link</label>
+          <input type="text" id="r-link" placeholder="https://raffall.com/..."/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="r-type" onchange="togglePoolField()">
+          <option value="pool">50% Cash Pool</option>
+          <option value="fixed">Fixed Prize</option>
+        </select>
+      </div>
+      <div class="form-group" id="pool-field">
+        <label>Current Pool (£)</label>
+        <input type="number" id="r-pool" placeholder="0.00" step="0.01"/>
+      </div>
+      <div class="form-group" id="fixed-field" style="display:none">
+        <label>Prize Description</label>
+        <input type="text" id="r-fixed-prize" placeholder="e.g. £500 Cash"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tickets Sold</label>
+          <input type="number" id="r-sold" placeholder="0"/>
+        </div>
+        <div class="form-group">
+          <label>Total Tickets (0 = unlimited)</label>
+          <input type="number" id="r-total" placeholder="0"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Instant Prizes (comma separated)</label>
+        <input type="text" id="r-instants" placeholder="£50, £75, £100, £200"/>
+      </div>
+      <button class="admin-btn" onclick="addRaffle()">✅ Add Raffle</button>
+
+      <!-- Existing Raffles -->
+      <div class="admin-section">
+        <strong style="font-size:14px;color:var(--black)">Active Raffles</strong>
+        <div id="admin-raffles-list" style="margin-top:12px"></div>
+      </div>
+
+      <!-- Add Winner -->
+      <div class="admin-section">
+        <strong style="font-size:14px;color:var(--black)">Add Winner</strong>
+        <div style="margin-top:12px">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" id="w-username" placeholder="Raffall username"/>
+            </div>
+            <div class="form-group">
+              <label>Prize</label>
+              <input type="text" id="w-prize" placeholder="e.g. £200 Cash"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Raffle</label>
+            <input type="text" id="w-raffle" placeholder="Raffle name"/>
+          </div>
+          <button class="admin-btn" onclick="addWinner()">🏆 Add Winner</button>
+        </div>
+      </div>
+
+      <!-- Update Pool -->
+      <div class="admin-section">
+        <strong style="font-size:14px;color:var(--black)">Update Pool Amount</strong>
+        <div style="margin-top:12px">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Raffle</label>
+              <select id="pool-raffle-select"></select>
+            </div>
+            <div class="form-group">
+              <label>New Pool Amount (£)</label>
+              <input type="number" id="pool-amount" placeholder="0.00" step="0.01"/>
+            </div>
+          </div>
+          <button class="admin-btn" onclick="updatePool()">💰 Update Pool</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════════════
+const ADMIN_PASS = "giveaways2026home"; // Change this!
+const STORAGE_KEY = "giveaways_home_data";
+const TELEGRAM_LINK = "https://t.me/GiveawaysEn";
+const WHATSAPP_LINK = "https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f";
+const INSTANT_WIN_LINK = "https://instant-win-xi.vercel.app";
+
+// ════════════════════════════════════════════════════════
+//  DATA (stored in localStorage)
+// ════════════════════════════════════════════════════════
+function loadData() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { raffles: [], winners: [] };
+  } catch(e) { return { raffles: [], winners: [] }; }
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => document.getElementById("loading-overlay").classList.add("hidden"), 600);
+  renderAll();
+  initFAQ();
+  updateLinks();
+});
+
+function updateLinks() {
+  document.querySelectorAll('a[href*="YOUR_TELEGRAM"]').forEach(a => a.href = TELEGRAM_LINK);
+  document.querySelectorAll('a[href*="YOUR_WHATSAPP"]').forEach(a => a.href = WHATSAPP_LINK);
+}
+
+function renderAll() {
+  const data = loadData();
+  renderRaffles(data);
+  renderWinners(data);
+  updateHeroStats(data);
+}
+
+// ════════════════════════════════════════════════════════
+//  RAFFLES
+// ════════════════════════════════════════════════════════
+function renderRaffles(data) {
+  const grid = document.getElementById("raffles-grid");
+  const raffles = data.raffles || [];
+
+  if (!raffles.length) {
+    grid.innerHTML = `<div class="empty-raffles" style="grid-column:1/-1">
+      <div class="empty-icon">🎟️</div>
+      <p style="font-size:15px;font-weight:500;margin-bottom:6px">No active raffles right now</p>
+      <p style="font-size:13px">Join our Telegram to be first to know when the next one launches.</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = raffles.map((r, i) => {
+    const soldPct = r.total > 0 ? Math.min(100, Math.round((r.sold / r.total) * 100)) : null;
+    const instants = r.instants ? r.instants.split(",").map(s => s.trim()).filter(Boolean) : [];
+
+    return `
+    <div class="raffle-card">
+      <div class="raffle-badge">🟢 Active</div>
+      <div class="raffle-name">${esc(r.name)}</div>
+      <div class="raffle-desc">${r.type === "pool" ? "50% of the total cash pool goes to the winner" : esc(r.fixedPrize || "")}</div>
+
+      ${r.type === "pool" ? `
+      <div class="pool-display">
+        <div class="pool-label">💰 Current Pool</div>
+        <div class="pool-val">£${parseFloat(r.pool || 0).toFixed(2)}</div>
+      </div>` : ''}
+
+      ${soldPct !== null ? `
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Tickets sold</span>
+          <strong>${r.sold} / ${r.total} (${soldPct}%)</strong>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${soldPct}%"></div></div>
+      </div>` : r.sold > 0 ? `
+      <div class="raffle-meta">
+        <div class="raffle-pill">🎟️ <span>${r.sold} tickets sold</span></div>
+      </div>` : ''}
+
+      ${instants.length ? `
+      <div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">⚡ Instant Prizes</div>
+      <div class="instant-prizes">
+        ${instants.map(p => `<div class="prize-chip">${esc(p)}</div>`).join("")}
+      </div>` : ''}
+
+      <div class="raffle-meta">
+        ${r.price ? `<div class="raffle-pill">💷 <span>${esc(r.price)} per ticket</span></div>` : ''}
+        <div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div>
+      </div>
+
+      <div class="raffle-cta">
+        ${r.link ? `<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>` : ''}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ════════════════════════════════════════════════════════
+//  WINNERS
+// ════════════════════════════════════════════════════════
+function renderWinners(data) {
+  const list = document.getElementById("winners-list");
+  const winners = (data.winners || []).slice().reverse().slice(0, 10);
+
+  if (!winners.length) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gray)">
+      <div style="font-size:36px;margin-bottom:12px;opacity:.4">🏆</div>
+      <p>First winners coming soon!</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = winners.map(w => `
+    <div class="winner-row">
+      <div class="w-avatar">${(w.username || "?")[0].toUpperCase()}</div>
+      <div class="w-main">
+        <div class="w-name">${esc(w.username)}</div>
+        <div class="w-raffle">${esc(w.raffle)}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="w-prize">${esc(w.prize)}</div>
+        <div class="w-date">${fmtDate(w.date)}</div>
+      </div>
+      <div class="trophy-badge">🏆</div>
+    </div>`).join("");
+}
+
+function updateHeroStats(data) {
+  document.getElementById("hero-winners-count").textContent = (data.winners || []).length;
+  document.getElementById("hero-raffles-count").textContent = (data.raffles || []).length;
+}
+
+// ════════════════════════════════════════════════════════
+//  FAQ
+// ════════════════════════════════════════════════════════
+const FAQS = [
+  { q: "How do I enter?", a: `Buy tickets for any active competition at <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>.<br><br>To also enter the instant prizes for free, register your Raffall username at <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>.<br><br>Then follow us on <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> or <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> and turn on notifications so you never miss a draw.` },
+  { q: "How do instant prizes work?", a: `Every competition includes instant prizes on top of the main Raffall draw — free to enter for any ticket holder.<br><br>When we announce a draw on our channels, head to <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>, register your Raffall username, and watch the live draw. One entry per person per competition.` },
+  { q: "How quickly are prizes paid?", a: "All prizes are paid within 24 hours of the draw via bank transfer. We'll contact you directly — no need to chase us." },
+  { q: "Can I win more than one instant prize?", a: "No. Each participant can win one instant prize per competition. If you win, you're automatically removed from subsequent draws in that competition — giving everyone else a fair shot." },
+  { q: "What if the minimum ticket threshold isn't reached?", a: "The draw still happens. The winner receives 50% of the total ticket sales — no cancellations, no refunds games. If you buy a ticket, a draw will always take place." },
+  { q: "How do I know the draws are fair?", a: "Both draws are fully transparent. The main prize is drawn automatically by Raffall — a large, established platform with its own verified draw system. The instant prizes are drawn live on our platform where anyone can watch in real time, see the full participants list, and verify the result." },
+  { q: "How do I contact you?", a: `Private support: Telegram <a href="https://t.me/SuportGiveaways" target="_blank" style="color:var(--gold);font-weight:600">@SuportGiveaways</a>, WhatsApp <a href="https://wa.me/40756455748" target="_blank" style="color:var(--gold);font-weight:600">+40756455748</a>, or email <a href="mailto:contact1.giveaways@gmail.com" style="color:var(--gold);font-weight:600">contact1.giveaways@gmail.com</a>.<br><br>Open community chats: <a href="https://t.me/+2vxJ82x8hh1iZWNk" target="_blank" style="color:var(--gold);font-weight:600">Telegram Group</a> · <a href="https://chat.whatsapp.com/DeddO55mXfvKhpCx1WkB2R" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp Group</a>` },
+];
+
+function initFAQ() {
+  const list = document.getElementById("faq-list");
+  list.innerHTML = FAQS.map((f, i) => `
+    <div class="faq-item" id="faq-${i}">
+      <div class="faq-q" onclick="toggleFAQ(${i})">
+        <span>${esc(f.q)}</span>
+        <div class="faq-arrow">▼</div>
+      </div>
+      <div class="faq-a">${f.a}</div>
+    </div>`).join("");
+}
+
+function toggleFAQ(i) {
+  const item = document.getElementById("faq-" + i);
+  const isOpen = item.classList.contains("open");
+  document.querySelectorAll(".faq-item").forEach(el => el.classList.remove("open"));
+  if (!isOpen) item.classList.add("open");
+}
+
+// ════════════════════════════════════════════════════════
+//  ADMIN
+// ════════════════════════════════════════════════════════
+let adminLoggedIn = false;
+
+function openAdmin() {
+  document.getElementById("admin-panel").classList.add("open");
+  if (adminLoggedIn) showAdminMain();
+}
+
+function closeAdmin() {
+  document.getElementById("admin-panel").classList.remove("open");
+}
+
+function doAdminLogin() {
+  const pass = document.getElementById("admin-password").value;
+  if (pass !== ADMIN_PASS) return showAlert("login-alert", "error", "Incorrect password.");
+  adminLoggedIn = true;
+  showAdminMain();
+}
+
+function showAdminMain() {
+  document.getElementById("admin-login-view").style.display = "none";
+  document.getElementById("admin-main-view").style.display = "block";
+  renderAdminRaffles();
+  populatePoolSelect();
+}
+
+function togglePoolField() {
+  const type = document.getElementById("r-type").value;
+  document.getElementById("pool-field").style.display = type === "pool" ? "block" : "none";
+  document.getElementById("fixed-field").style.display = type === "fixed" ? "block" : "none";
+}
+
+function addRaffle() {
+  const name = document.getElementById("r-name").value.trim();
+  if (!name) return showAlert("create-alert", "error", "Enter a raffle name.");
+  const type = document.getElementById("r-type").value;
+  const raffle = {
+    id: Date.now(),
+    name,
+    type,
+    price: document.getElementById("r-price").value.trim(),
+    link: document.getElementById("r-link").value.trim(),
+    pool: parseFloat(document.getElementById("r-pool").value) || 0,
+    fixedPrize: document.getElementById("r-fixed-prize").value.trim(),
+    sold: parseInt(document.getElementById("r-sold").value) || 0,
+    total: parseInt(document.getElementById("r-total").value) || 0,
+    instants: document.getElementById("r-instants").value.trim(),
+    createdAt: new Date().toISOString(),
+  };
+  const data = loadData();
+  data.raffles.push(raffle);
+  saveData(data);
+  showAlert("create-alert", "success", "✅ Raffle added!");
+  renderAdminRaffles();
+  renderAll();
+  populatePoolSelect();
+  // Clear fields
+  ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+}
+
+function renderAdminRaffles() {
+  const data = loadData();
+  const list = document.getElementById("admin-raffles-list");
+  if (!data.raffles.length) { list.innerHTML = '<p style="font-size:13px;color:var(--gray)">No raffles yet.</p>'; return; }
+  list.innerHTML = data.raffles.map(r => `
+    <div class="admin-raffle-item">
+      <div>
+        <div style="font-weight:600">${esc(r.name)}</div>
+        <div style="font-size:11px;color:var(--gray)">${r.type === "pool" ? "Pool: £" + (r.pool||0).toFixed(2) : r.fixedPrize} · ${r.sold} tickets</div>
+      </div>
+      <button class="del-btn" onclick="deleteRaffle(${r.id})">Delete</button>
+    </div>`).join("");
+}
+
+function deleteRaffle(id) {
+  if (!confirm("Delete this raffle?")) return;
+  const data = loadData();
+  data.raffles = data.raffles.filter(r => r.id !== id);
+  saveData(data);
+  renderAdminRaffles();
+  renderAll();
+  populatePoolSelect();
+}
+
+function addWinner() {
+  const username = document.getElementById("w-username").value.trim();
+  const prize = document.getElementById("w-prize").value.trim();
+  const raffle = document.getElementById("w-raffle").value.trim();
+  if (!username || !prize) return showAlert("create-alert", "error", "Fill in username and prize.");
+  const data = loadData();
+  data.winners.push({ id: Date.now(), username, prize, raffle, date: new Date().toISOString() });
+  saveData(data);
+  showAlert("create-alert", "success", "🏆 Winner added!");
+  renderAll();
+  document.getElementById("w-username").value = "";
+  document.getElementById("w-prize").value = "";
+  document.getElementById("w-raffle").value = "";
+}
+
+function populatePoolSelect() {
+  const sel = document.getElementById("pool-raffle-select");
+  const data = loadData();
+  const pools = data.raffles.filter(r => r.type === "pool");
+  sel.innerHTML = pools.length
+    ? pools.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join("")
+    : '<option value="">No pool raffles</option>';
+}
+
+function updatePool() {
+  const id = parseInt(document.getElementById("pool-raffle-select").value);
+  const amount = parseFloat(document.getElementById("pool-amount").value);
+  if (!id || isNaN(amount)) return showAlert("create-alert", "error", "Select a raffle and enter an amount.");
+  const data = loadData();
+  const raffle = data.raffles.find(r => r.id === id);
+  if (raffle) { raffle.pool = amount; saveData(data); renderAll(); renderAdminRaffles(); showAlert("create-alert", "success", "✅ Pool updated to £" + amount.toFixed(2)); }
+}
+
+// ════════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════════
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `alert alert-${type} show`;
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("show"), 4000);
+}
+
+function esc(s) {
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function fmtDate(s) {
+  if (!s) return "";
+  const d = new Date(s);
+  return isNaN(d) ? s : d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+}
+
+function openJoinModal() {
+  const m = document.getElementById("join-modal");
+  m.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+function closeJoinModal() {
+  document.getElementById("join-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeJoinModal(); });
+</script>
+</body>
+</html>
