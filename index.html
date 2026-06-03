@@ -938,6 +938,15 @@ function renderRaffles(data) {
         ${instants.map(p => `<div class="prize-chip">${esc(p)}</div>`).join("")}
       </div>` : ''}
 
+      ${r.promos && r.promos.length ? `
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">🎟️ Promo Codes</div>
+        ${r.promos.filter(p => p.uses > 0).map(p => `
+          <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,149,42,0.08);border:1px solid rgba(201,149,42,0.2);border-radius:8px;padding:5px 12px;margin:3px;font-size:12px;">
+            <span style="font-family:'DM Mono',monospace;font-weight:600;color:var(--black)">${esc(p.code)}</span>
+            <span style="color:var(--gray)">${p.uses} use${p.uses !== 1 ? 's' : ''} left</span>
+          </div>`).join('') || '<span style="font-size:12px;color:var(--gray)">No active codes</span>'}
+      </div>` : ''}
       <div class="raffle-meta">
         ${r.price ? `<div class="raffle-pill">💷 <span>${esc(r.price)} per ticket</span></div>` : ''}
         <div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div>
