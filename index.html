@@ -58,6 +58,18 @@ a{text-decoration:none;color:inherit}
 .container{max-width:1080px;margin:0 auto;padding:0 24px}
 .section{padding:80px 0}
 
+
+/* ── LANGUAGE SWITCHER ───────────────────────────────── */
+.lang-switcher{display:flex;gap:4px;align-items:center;margin-right:12px}
+.lang-btn{
+  padding:5px 10px;border:1px solid var(--border);
+  border-radius:6px;background:transparent;
+  font-size:11px;font-weight:700;color:var(--gray);
+  cursor:pointer;transition:all .2s;letter-spacing:.5px;
+}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold)}
+.lang-btn.lang-active{background:var(--gold);color:#fff;border-color:var(--gold)}
+
 /* ── NAV ─────────────────────────────────────────────── */
 nav{
   position:sticky;top:0;z-index:100;
@@ -630,13 +642,18 @@ footer{
         <div class="nav-name">Giveaways</div>
       </div>
       <div class="nav-links">
-        <a href="#raffles">Raffles</a>
-        <a href="#how">How it works</a>
-        <a href="#winners">Winners</a>
-        <a href="#community">Community</a>
-        <a href="#faq">FAQ</a>
+        <a href="#raffles" id="nav-raffles">Raffles</a>
+        <a href="#how" id="nav-how">How it works</a>
+        <a href="#winners" id="nav-winners">Winners</a>
+        <a href="#community" id="nav-community">Community</a>
+        <a href="#faq" id="nav-faq">FAQ</a>
       </div>
-      <button onclick="openJoinModal()" class="nav-cta" style="cursor:pointer;border:none">Join</button>
+      <div class="lang-switcher">
+        <button class="lang-btn lang-active" data-lang="en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" data-lang="ro" onclick="setLang('ro')">RO</button>
+        <button class="lang-btn" data-lang="it" onclick="setLang('it')">IT</button>
+      </div>
+      <button id="nav-join-btn" onclick="openJoinModal()" class="nav-cta" style="cursor:pointer;border:none">Join</button>
     </div>
   </div>
 </nav>
@@ -646,12 +663,12 @@ footer{
   <div class="container">
     <div class="hero-inner">
       <div>
-        <p class="hero-slogan serif" style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--gray);margin-bottom:16px;line-height:1.5;">At other raffles you either win or lose.<br><strong style="color:var(--gold);font-style:normal">With us, you win either way.</strong></p>
-        <h1 class="hero-title">Win <span>Real</span><br>Prizes.</h1>
-        <p class="hero-subtitle">Transparent raffles, live draws, instant prizes — every ticket counts.</p>
+        <p class="hero-slogan serif" style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--gray);margin-bottom:16px;line-height:1.5;"><span id="hero-slogan-text">At other raffles you either win or lose.</span><br><strong id="hero-slogan-bold" style="color:var(--gold);font-style:normal">With us, you win either way.</strong></p>
+        <h1 class="hero-title"><span id="hero-title1">Win</span> <span id="hero-title2" style="color:var(--gold)">Real</span><br><span id="hero-title3">Prizes.</span></h1>
+        <p class="hero-subtitle" id="hero-subtitle">Transparent raffles, live draws, instant prizes — every ticket counts.</p>
         <div class="hero-btns">
-          <a href="#raffles" class="btn-primary" style="width:100%;justify-content:center">🎟️ View Active Raffles</a>
-          <button onclick="openJoinModal()" class="btn-secondary" style="width:100%;justify-content:center;cursor:pointer">Join Community</button>
+          <a href="#raffles" id="hero-btn-raffles" class="btn-primary" style="width:100%;justify-content:center">🎟️ View Active Raffles</a>
+          <button id="hero-btn-community" onclick="openJoinModal()" class="btn-secondary" style="width:100%;justify-content:center;cursor:pointer">Join Community</button>
         </div>
       </div>
       <div class="hero-visual">
@@ -659,21 +676,21 @@ footer{
           <div class="stat-icon gold">🏆</div>
           <div>
             <div class="stat-val" id="hero-winners-count">—</div>
-            <div class="stat-lbl">Total Winners</div>
+            <div class="stat-lbl" id="hero-stat-winners">Total Winners</div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon green">🎟️</div>
           <div>
             <div class="stat-val" id="hero-raffles-count">—</div>
-            <div class="stat-lbl">Active Raffles</div>
+            <div class="stat-lbl" id="hero-stat-raffles">Active Raffles</div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon blue">⚡</div>
           <div>
             <div class="stat-val">LIVE</div>
-            <div class="stat-lbl">Instant Win Draws</div>
+            <div class="stat-lbl" id="hero-stat-live">Instant Win Draws</div>
           </div>
         </div>
       </div>
@@ -687,9 +704,9 @@ footer{
 <section class="section raffles-bg" id="raffles">
   <div class="container">
     <div class="sec-header">
-      <div class="sec-tag">Active Now</div>
-      <h2 class="sec-title">Live Raffles</h2>
-      <p class="sec-sub">Every raffle is drawn transparently. Watch it happen live on our Instant Win platform.</p>
+      <div class="sec-tag" id="raffles-tag">Active Now</div>
+      <h2 class="sec-title" id="raffles-title">Live Raffles</h2>
+      <p class="sec-sub" id="raffles-sub">Every raffle is drawn transparently. Watch it happen live on our Instant Win platform.</p>
     </div>
     <div class="raffles-grid" id="raffles-grid">
       <!-- populated by JS -->
@@ -703,29 +720,29 @@ footer{
 <section class="section" id="how">
   <div class="container">
     <div class="sec-header">
-      <div class="sec-tag">Simple Process</div>
-      <h2 class="sec-title">How It Works</h2>
-      <p class="sec-sub">From ticket to winner in four easy steps.</p>
+      <div class="sec-tag" id="how-tag">Simple Process</div>
+      <h2 class="sec-title" id="how-title">How It Works</h2>
+      <p class="sec-sub" id="how-sub">From ticket to winner in four easy steps.</p>
     </div>
     <div class="how-grid">
       <div class="how-card">
         <div class="how-num">1</div>
-        <div class="how-title">Buy Tickets</div>
-        <div class="how-text">Buy tickets in any active raffle on Raffall.</div>
+        <div class="how-title" id="how1-title">Buy Tickets</div>
+        <div class="how-text" id="how1-text">Buy tickets in any active raffle on Raffall.</div>
       </div>
       <div class="how-card">
         <div class="how-num">2</div>
-        <div class="how-title">Join the Community</div>
+        <div class="how-title" id="how2-title">Join the Community</div>
         <div class="how-text">Join us on <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> or <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a>.</div>
       </div>
       <div class="how-card">
         <div class="how-num">3</div>
-        <div class="how-title">Enter Instant Draws</div>
-        <div class="how-text">If you have tickets, enter the instant prizes for free on our <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platform</a>.</div>
+        <div class="how-title" id="how3-title">Enter Instant Draws</div>
+        <div class="how-text" id="how3-text">If you have tickets, enter the instant prizes for free on our <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platform</a>.</div>
       </div>
       <div class="how-card">
         <div class="how-num">4</div>
-        <div class="how-title">Watch Live & Win</div>
+        <div class="how-title" id="how4-title">Watch Live & Win</div>
         <div class="how-text"></div>
       </div>
     </div>
@@ -738,9 +755,9 @@ footer{
 <section class="section winners-bg" id="winners">
   <div class="container">
     <div class="sec-header">
-      <div class="sec-tag">Hall of Fame</div>
-      <h2 class="sec-title">Recent Winners</h2>
-      <p class="sec-sub">Every winner, every prize. Full transparency — always.</p>
+      <div class="sec-tag" id="winners-tag">Hall of Fame</div>
+      <h2 class="sec-title" id="winners-title">Recent Winners</h2>
+      <p class="sec-sub" id="winners-sub">Every winner, every prize. Full transparency — always.</p>
     </div>
     <div class="winners-list" id="winners-list">
       <!-- populated by JS -->
@@ -754,26 +771,26 @@ footer{
 <section class="section" id="community">
   <div class="container">
     <div class="sec-header">
-      <div class="sec-tag">Stay Connected</div>
-      <h2 class="sec-title">Join the Community</h2>
-      <p class="sec-sub">Get notified the moment a new draw opens. Don't miss your window.</p>
+      <div class="sec-tag" id="community-tag">Stay Connected</div>
+      <h2 class="sec-title" id="community-title">Join the Community</h2>
+      <p class="sec-sub" id="community-sub">Get notified the moment a new draw opens. Don't miss your window.</p>
     </div>
     <div class="channels-grid">
       <div class="channel-card telegram">
         <div>
-          <div class="ch-name">Telegram Channel</div>
-          <div class="ch-members">Main channel · Draw announcements · Winners</div>
+          <div class="ch-name" id="tg-name">Telegram Channel</div>
+          <div class="ch-members" id="tg-members">Main channel · Draw announcements · Winners</div>
         </div>
-        <p class="ch-desc">All draw announcements happen here first. Turn on notifications and never miss an instant prize window.</p>
-        <a href="https://t.me/GiveawaysEn" target="_blank" class="ch-btn">Join Channel →</a>
+        <p class="ch-desc" id="tg-desc">All draw announcements happen here first. Turn on notifications and never miss an instant prize window.</p>
+        <a href="https://t.me/GiveawaysEn" target="_blank" class="ch-btn" id="tg-btn">Join Channel →</a>
       </div>
       <div class="channel-card whatsapp">
         <div>
-          <div class="ch-name">WhatsApp Channel</div>
-          <div class="ch-members">Announcements · Updates · Winners</div>
+          <div class="ch-name" id="wa-name">WhatsApp Channel</div>
+          <div class="ch-members" id="wa-members">Announcements · Updates · Winners</div>
         </div>
-        <p class="ch-desc">Follow our WhatsApp channel for all the latest updates, draw announcements, and winner reveals.</p>
-        <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" class="ch-btn">Follow Channel →</a>
+        <p class="ch-desc" id="wa-desc">Follow our WhatsApp channel for all the latest updates, draw announcements, and winner reveals.</p>
+        <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" class="ch-btn" id="wa-btn">Follow Channel →</a>
       </div>
     </div>
   </div>
@@ -786,29 +803,29 @@ footer{
   <div class="container">
     <div class="about-inner">
       <div>
-        <div class="sec-tag">About Us</div>
-        <h2 class="sec-title">Who We Are</h2>
-        <p class="sec-sub" style="margin-bottom:0">We're a UK-based raffle community built around one simple idea: everyone who plays should have a real chance to win something.</p>
+        <div class="sec-tag" id="about-tag">About Us</div>
+        <h2 class="sec-title" id="about-title">Who We Are</h2>
+        <p class="sec-sub" id="about-text" style="margin-bottom:0">We're a UK-based raffle community built around one simple idea: everyone who plays should have a real chance to win something.</p>
         <div class="about-values">
           <div class="value-row">
             <div class="value-icon">💰</div>
             <div class="value-text">
-              <strong>Cashback Pool — Win Even When You Lose</strong>
-              <span>20% of the gross profit from every raffle goes into a shared pool. At Christmas, that money comes back to players — proportionally to how many tickets each person bought throughout the year. The more you play, the more you get back. <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vShJYg-6ogBou61TLOiC3MV78ZEgydS0d4XLbH23LNGpShEZj0VF3vzWBwu8_OrDCaM0Av8oXHmU2hI/pubhtml?gid=1728509083&single=true" target="_blank" style="color:var(--gold);font-weight:600">View live leaderboard →</a></span>
+              <strong id="about-cashback-title">Cashback Pool — Win Even When You Lose</strong>
+              <span id="about-cashback-text">20% of the gross profit from every raffle goes into a shared pool. At Christmas, that money comes back to players — proportionally to how many tickets each person bought throughout the year. The more you play, the more you get back.</span> <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vShJYg-6ogBou61TLOiC3MV78ZEgydS0d4XLbH23LNGpShEZj0VF3vzWBwu8_OrDCaM0Av8oXHmU2hI/pubhtml?gid=1728509083&single=true" target="_blank" style="color:var(--gold);font-weight:600" id="about-cashback-link">View live leaderboard →</a></span>
             </div>
           </div>
           <div class="value-row">
             <div class="value-icon">⚡</div>
             <div class="value-text">
-              <strong>Instant Prizes on Every Competition</strong>
-              <span>Every competition we run comes with instant prizes on top of the main draw — at zero extra cost. Buy a ticket, register your username on our platform, and you're automatically in. Winners are drawn live and verified manually. <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">Go to Instant Win platform →</a></span>
+              <strong id="about-instant-title">Instant Prizes on Every Competition</strong>
+              <span id="about-instant-text">Every competition we run comes with instant prizes on top of the main draw — at zero extra cost. Buy a ticket, register your username on our platform, and you're automatically in. Winners are drawn live and verified manually.</span> <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600" id="about-instant-link">Go to Instant Win platform →</a></span>
             </div>
           </div>
         </div>
       </div>
       <div class="about-visual">
         <span class="about-lion">🦁</span>
-        <p class="about-slogan">"At other raffles you either win or lose.<br><strong>With us, you win either way.</strong>"</p>
+        <p class="about-slogan">"<span id="about-slogan-text">At other raffles you either win or lose.</span><br><strong id="about-slogan-bold">With us, you win either way.</strong>"</p>
       </div>
     </div>
   </div>
@@ -820,8 +837,8 @@ footer{
 <section class="section" id="faq">
   <div class="container">
     <div class="sec-header">
-      <div class="sec-tag">Got Questions?</div>
-      <h2 class="sec-title">FAQ</h2>
+      <div class="sec-tag" id="faq-tag">Got Questions?</div>
+      <h2 class="sec-title" id="faq-title">FAQ</h2>
     </div>
     <div class="faq-list" id="faq-list">
       <!-- populated by JS -->
@@ -836,8 +853,8 @@ footer{
   <div style="background:var(--white);border-radius:20px;padding:36px 32px;width:100%;max-width:400px;text-align:center;position:relative;">
     <button onclick="closeJoinModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--gray);">✕</button>
     <div style="font-size:36px;margin-bottom:12px;">🦁</div>
-    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--black);margin-bottom:8px;">Join the Community</h3>
-    <p style="font-size:14px;color:var(--gray);margin-bottom:28px;">Choose your preferred platform. Turn on notifications to never miss a draw.</p>
+    <h3 id="join-modal-title" style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--black);margin-bottom:8px;">Join the Community</h3>
+    <p id="join-modal-sub" style="font-size:14px;color:var(--gray);margin-bottom:28px;">Choose your preferred platform. Turn on notifications to never miss a draw.</p>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <a href="https://t.me/GiveawaysEn" target="_blank" onclick="closeJoinModal()"
         style="display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;background:linear-gradient(135deg,#0088CC,#006DAA);color:#fff;border-radius:12px;font-weight:600;font-size:15px;">
@@ -856,7 +873,7 @@ footer{
     <div class="footer-inner">
       <div>
         <div class="footer-logo">Giveaways Community</div>
-        <div style="margin-top:4px">© 2026 · UK Registered · All rights reserved</div>
+        <div id="footer-copy" style="margin-top:4px">© 2026 · UK Registered · All rights reserved</div>
       </div>
       <div class="footer-links">
         <a href="https://t.me/GiveawaysEn" target="_blank">Telegram</a>
@@ -872,6 +889,205 @@ footer{
 
 
 <script>
+
+// ════════════════════════════════════════════════════════
+//  TRANSLATIONS
+// ════════════════════════════════════════════════════════
+const TRANSLATIONS = {
+  en: {
+    nav_raffles: "Raffles", nav_how: "How it works", nav_winners: "Winners", nav_community: "Community", nav_faq: "FAQ", nav_join: "Join",
+    hero_slogan: "At other raffles you either win or lose.", hero_slogan_bold: "With us, you win either way.",
+    hero_title1: "Win", hero_title2: "Real", hero_title3: "Prizes.",
+    hero_subtitle: "Transparent raffles, live draws, instant prizes — every ticket counts.",
+    hero_btn_raffles: "🎟️ View Active Raffles", hero_btn_community: "Join Community",
+    hero_stat_winners: "Total Winners", hero_stat_raffles: "Active Raffles", hero_stat_live: "Instant Win Draws",
+    raffles_tag: "Active Now", raffles_title: "Live Raffles", raffles_sub: "Every raffle is drawn transparently. Watch it happen live on our Instant Win platform.",
+    raffles_empty_title: "No active raffles right now", raffles_empty_sub: "Join our Telegram to be first to know when the next one launches.",
+    raffle_active: "🟢 Active", raffle_pool_label: "💰 Current Pool", raffle_tickets_sold: "tickets sold",
+    raffle_instants_label: "⚡ Instant Prizes", raffle_promos_label: "🎟️ Promo Codes", raffle_uses: "uses left", raffle_use: "use left",
+    raffle_per_ticket: "per ticket", raffle_live_draw: "Live draw on Instant Win", raffle_buy_btn: "Buy Tickets →",
+    raffle_pool_desc: "50% of the total cash pool goes to the winner",
+    raffle_countdown_label: "🎰 Draw in", raffle_draw_now: "🎉 Draw is happening now!",
+    raffle_days: "Days", raffle_hours: "Hours", raffle_mins: "Mins", raffle_secs: "Secs",
+    how_tag: "Simple Process", how_title: "How It Works", how_sub: "From ticket to winner in four easy steps.",
+    how1_title: "Buy Tickets", how1_text: "Buy tickets in any active raffle on Raffall.",
+    how2_title: "Join the Community", how2_text: "",
+    how3_title: "Enter Instant Draws", how3_text: "If you have tickets, enter the instant prizes for free on our platform.",
+    how4_title: "Watch Live & Win", how4_text: "",
+    winners_tag: "Hall of Fame", winners_title: "Recent Winners", winners_sub: "Every winner, every prize. Full transparency — always.", winners_empty: "First winners coming soon!",
+    community_tag: "Stay Connected", community_title: "Join the Community", community_sub: "Get notified the moment a new draw opens. Don't miss your window.",
+    tg_name: "Telegram Channel", tg_members: "Main channel · Draw announcements · Winners",
+    tg_desc: "All draw announcements happen here first. Turn on notifications and never miss an instant prize window.", tg_btn: "Join Channel →",
+    wa_name: "WhatsApp Channel", wa_members: "Announcements · Updates · Winners",
+    wa_desc: "Follow our WhatsApp channel for all the latest updates, draw announcements, and winner reveals.", wa_btn: "Follow Channel →",
+    about_tag: "About Us", about_title: "Who We Are",
+    about_text: "We're a UK-based raffle community built around one simple idea: everyone who plays should have a real chance to win something.",
+    about_cashback_title: "Cashback Pool — Win Even When You Lose",
+    about_cashback_text: "20% of the gross profit from every raffle goes into a shared pool. At Christmas, that money comes back to players — proportionally to how many tickets each person bought throughout the year. The more you play, the more you get back.",
+    about_cashback_link: "View live leaderboard →",
+    about_instant_title: "Instant Prizes on Every Competition",
+    about_instant_text: "Every competition we run comes with instant prizes on top of the main draw — at zero extra cost. Buy a ticket, register your username on our platform, and you're automatically in. Winners are drawn live and verified manually.",
+    about_instant_link: "Go to Instant Win platform →",
+    about_slogan: "At other raffles you either win or lose.", about_slogan_bold: "With us, you win either way.",
+    faq_tag: "Got Questions?", faq_title: "FAQ",
+    footer_copy: "© 2026 · UK Registered · All rights reserved",
+    join_modal_title: "Join the Community", join_modal_sub: "Choose your preferred platform. Turn on notifications to never miss a draw.",
+    join_tg_btn: "Telegram Channel", join_wa_btn: "WhatsApp Channel",
+    faqs: [
+      { q: "How do I enter?", a: `Buy tickets for any active competition at <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>.<br><br>To also enter the instant prizes for free, register your Raffall username at <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>.<br><br>Then follow us on <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> or <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> and turn on notifications so you never miss a draw.` },
+      { q: "How do instant prizes work?", a: `Every competition includes instant prizes on top of the main Raffall draw — free to enter for any ticket holder.<br><br>When we announce a draw on our channels, head to <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>, register your Raffall username, and watch the live draw. One entry per person per competition.` },
+      { q: "How quickly are prizes paid?", a: "All prizes are paid within 24 hours of the draw via bank transfer. We'll contact you directly — no need to chase us." },
+      { q: "Can I win more than one instant prize?", a: "No. Each participant can win one instant prize per competition. If you win, you're automatically removed from subsequent draws in that competition — giving everyone else a fair shot." },
+      { q: "What if the minimum ticket threshold isn't reached?", a: "The draw still happens. The winner receives 50% of the total ticket sales — no cancellations. If you buy a ticket, a draw will always take place." },
+      { q: "How do I know the draws are fair?", a: "Both draws are fully transparent. The main prize is drawn automatically by Raffall — a large, established platform. The instant prizes are drawn live on our platform where anyone can watch in real time and verify the result." },
+      { q: "How do I contact you?", a: `Private support: Telegram <a href="https://t.me/SuportGiveaways" target="_blank" style="color:var(--gold);font-weight:600">@SuportGiveaways</a>, WhatsApp <a href="https://wa.me/40756455748" target="_blank" style="color:var(--gold);font-weight:600">+40756455748</a>, or email <a href="mailto:contact1.giveaways@gmail.com" style="color:var(--gold);font-weight:600">contact1.giveaways@gmail.com</a>.<br><br>Open community chats: <a href="https://t.me/+2vxJ82x8hh1iZWNk" target="_blank" style="color:var(--gold);font-weight:600">Telegram Group</a> · <a href="https://chat.whatsapp.com/DeddO55mXfvKhpCx1WkB2R" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp Group</a>` },
+    ]
+  },
+  ro: {
+    nav_raffles: "Tombole", nav_how: "Cum funcționează", nav_winners: "Câștigători", nav_community: "Comunitate", nav_faq: "Întrebări", nav_join: "Alătură-te",
+    hero_slogan: "La alte tombole ori câștigești, ori pierzi.", hero_slogan_bold: "La noi câștigi oricum.",
+    hero_title1: "Câștigă", hero_title2: "Premii", hero_title3: "Reale.",
+    hero_subtitle: "Tombole transparente, extrageri live, premii instant — fiecare bilet contează.",
+    hero_btn_raffles: "🎟️ Vezi Tombolele Active", hero_btn_community: "Intră în Comunitate",
+    hero_stat_winners: "Câștigători Totali", hero_stat_raffles: "Tombole Active", hero_stat_live: "Extrageri Instant Win",
+    raffles_tag: "Active Acum", raffles_title: "Tombole Live", raffles_sub: "Fiecare tombolă este extrasă transparent. Urmărește live pe platforma noastră Instant Win.",
+    raffles_empty_title: "Nicio tombolă activă momentan", raffles_empty_sub: "Intră pe Telegram să fii primul care află când lansăm următoarea.",
+    raffle_active: "🟢 Activă", raffle_pool_label: "💰 Pool Curent", raffle_tickets_sold: "bilete vândute",
+    raffle_instants_label: "⚡ Premii Instant", raffle_promos_label: "🎟️ Coduri Promo", raffle_uses: "utilizări rămase", raffle_use: "utilizare rămasă",
+    raffle_per_ticket: "pe bilet", raffle_live_draw: "Extragere live pe Instant Win", raffle_buy_btn: "Cumpără Bilete →",
+    raffle_pool_desc: "50% din totalul pool-ului de cash merge câștigătorului",
+    raffle_countdown_label: "🎰 Extragere în", raffle_draw_now: "🎉 Extragerea are loc acum!",
+    raffle_days: "Zile", raffle_hours: "Ore", raffle_mins: "Min", raffle_secs: "Sec",
+    how_tag: "Proces Simplu", how_title: "Cum Funcționează", how_sub: "De la bilet la câștigător în patru pași simpli.",
+    how1_title: "Cumpără Bilete", how1_text: "Cumpără bilete la orice tombolă activă pe Raffall.",
+    how2_title: "Intră în Comunitate", how2_text: "",
+    how3_title: "Înscrie-te la Instant", how3_text: "Dacă ai bilete, înscrie-te gratuit la premiile instant pe platforma noastră.",
+    how4_title: "Urmărește Live & Câștigă", how4_text: "",
+    winners_tag: "Hall of Fame", winners_title: "Câștigători Recenți", winners_sub: "Fiecare câștigător, fiecare premiu. Transparență totală — mereu.", winners_empty: "Primii câștigători vin în curând!",
+    community_tag: "Rămâi Conectat", community_title: "Intră în Comunitate", community_sub: "Fii notificat imediat ce se deschide o nouă extragere. Nu rata nicio șansă.",
+    tg_name: "Canal Telegram", tg_members: "Canal principal · Anunțuri · Câștigători",
+    tg_desc: "Toate anunțurile de extragere apar aici primele. Activează notificările și nu rata nicio fereastră de premii instant.", tg_btn: "Intră pe Canal →",
+    wa_name: "Canal WhatsApp", wa_members: "Anunțuri · Actualizări · Câștigători",
+    wa_desc: "Urmărește canalul nostru de WhatsApp pentru toate actualizările, anunțurile de extragere și dezvăluirile câștigătorilor.", wa_btn: "Urmărește Canalul →",
+    about_tag: "Despre Noi", about_title: "Cine Suntem",
+    about_text: "Suntem o comunitate de tombole cu sediul în UK construită în jurul unei idei simple: toți cei care joacă ar trebui să aibă o șansă reală de a câștiga ceva.",
+    about_cashback_title: "Cashback Pool — Câștigi Chiar și Când Pierzi",
+    about_cashback_text: "20% din profitul brut al fiecărei tombole merge într-un pool comun. De Crăciun, acești bani se întorc la jucători — proporțional cu câte bilete a cumpărat fiecare pe parcursul anului. Cu cât joci mai mult, cu atât primești mai mult înapoi.",
+    about_cashback_link: "Vezi clasamentul live →",
+    about_instant_title: "Premii Instant la Fiecare Competiție",
+    about_instant_text: "Fiecare competiție organizată de noi vine cu premii instant pe lângă premiul principal — fără costuri suplimentare. Cumperi bilet, îți înregistrezi username-ul pe platforma noastră și ești automat înscris. Câștigătorii sunt extrași live și verificați manual.",
+    about_instant_link: "Mergi la platforma Instant Win →",
+    about_slogan: "La alte tombole ori câștigești, ori pierzi.", about_slogan_bold: "La noi câștigi oricum.",
+    faq_tag: "Ai Întrebări?", faq_title: "Întrebări Frecvente",
+    footer_copy: "© 2026 · Înregistrat în UK · Toate drepturile rezervate",
+    join_modal_title: "Intră în Comunitate", join_modal_sub: "Alege platforma preferată. Activează notificările să nu ratezi nicio extragere.",
+    join_tg_btn: "Canal Telegram", join_wa_btn: "Canal WhatsApp",
+    faqs: [
+      { q: "Cum mă înscriu?", a: `Cumpără bilete la orice competiție activă pe <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>.<br><br>Pentru a intra gratuit și la premiile instant, înregistrează-ți username-ul de Raffall pe <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platforma noastră</a>.<br><br>Urmărește-ne pe <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> sau <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> și activează notificările să nu ratezi nicio extragere.` },
+      { q: "Cum funcționează premiile instant?", a: `Fiecare competiție include premii instant pe lângă extragerea principală Raffall — gratuit pentru orice deținător de bilet.<br><br>Când anunțăm o extragere pe canalele noastre, mergi pe <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platforma noastră</a>, înregistrează-ți username-ul și urmărește extragerea live. O înscriere per persoană per competiție.` },
+      { q: "Cât de repede sunt plătite premiile?", a: "Toate premiile sunt plătite în 24 de ore de la extragere prin transfer bancar. Te contactăm noi direct — nu trebuie să ne cauți." },
+      { q: "Pot câștiga mai mult de un premiu instant?", a: "Nu. Fiecare participant poate câștiga un singur premiu instant per competiție. Dacă câștigi, ești eliminat automat din extragerile următoare din acea competiție." },
+      { q: "Ce se întâmplă dacă nu se vând minimul de bilete?", a: "Extragerea are loc oricum. Câștigătorul primește 50% din totalul vânzărilor de bilete. Dacă ai cumpărat bilet, extragerea va avea loc întotdeauna." },
+      { q: "Cum știu că extragerile sunt corecte?", a: "Ambele extrageri sunt complet transparente. Premiul principal este extras automat de Raffall. Premiile instant sunt extrase live pe platforma noastră unde oricine poate urmări în timp real." },
+      { q: "Cum vă pot contacta?", a: `Suport privat: Telegram <a href="https://t.me/SuportGiveaways" target="_blank" style="color:var(--gold);font-weight:600">@SuportGiveaways</a>, WhatsApp <a href="https://wa.me/40756455748" target="_blank" style="color:var(--gold);font-weight:600">+40756455748</a>, email <a href="mailto:contact1.giveaways@gmail.com" style="color:var(--gold);font-weight:600">contact1.giveaways@gmail.com</a>.<br><br>Chat-uri deschise: <a href="https://t.me/+2vxJ82x8hh1iZWNk" target="_blank" style="color:var(--gold);font-weight:600">Grup Telegram</a> · <a href="https://chat.whatsapp.com/DeddO55mXfvKhpCx1WkB2R" target="_blank" style="color:var(--gold);font-weight:600">Grup WhatsApp</a>` },
+    ]
+  },
+  it: {
+    nav_raffles: "Lotterie", nav_how: "Come funziona", nav_winners: "Vincitori", nav_community: "Comunità", nav_faq: "FAQ", nav_join: "Unisciti",
+    hero_slogan: "In altre lotterie o vinci o perdi.", hero_slogan_bold: "Con noi vinci sempre.",
+    hero_title1: "Vinci", hero_title2: "Premi", hero_title3: "Veri.",
+    hero_subtitle: "Lotterie trasparenti, estrazioni live, premi istantanei — ogni biglietto conta.",
+    hero_btn_raffles: "🎟️ Vedi Lotterie Attive", hero_btn_community: "Unisciti alla Comunità",
+    hero_stat_winners: "Vincitori Totali", hero_stat_raffles: "Lotterie Attive", hero_stat_live: "Estrazioni Instant Win",
+    raffles_tag: "Attive Ora", raffles_title: "Lotterie Live", raffles_sub: "Ogni lotteria viene estratta in modo trasparente. Guardalo live sulla nostra piattaforma Instant Win.",
+    raffles_empty_title: "Nessuna lotteria attiva al momento", raffles_empty_sub: "Unisciti al nostro Telegram per essere il primo a sapere quando lanciamo la prossima.",
+    raffle_active: "🟢 Attiva", raffle_pool_label: "💰 Pool Attuale", raffle_tickets_sold: "biglietti venduti",
+    raffle_instants_label: "⚡ Premi Istantanei", raffle_promos_label: "🎟️ Codici Promo", raffle_uses: "usi rimanenti", raffle_use: "uso rimanente",
+    raffle_per_ticket: "per biglietto", raffle_live_draw: "Estrazione live su Instant Win", raffle_buy_btn: "Acquista Biglietti →",
+    raffle_pool_desc: "Il 50% del pool totale va al vincitore",
+    raffle_countdown_label: "🎰 Estrazione tra", raffle_draw_now: "🎉 L'estrazione sta avvenendo ora!",
+    raffle_days: "Giorni", raffle_hours: "Ore", raffle_mins: "Min", raffle_secs: "Sec",
+    how_tag: "Processo Semplice", how_title: "Come Funziona", how_sub: "Dal biglietto al vincitore in quattro semplici passaggi.",
+    how1_title: "Acquista Biglietti", how1_text: "Acquista biglietti per qualsiasi lotteria attiva su Raffall.",
+    how2_title: "Unisciti alla Comunità", how2_text: "",
+    how3_title: "Partecipa alle Estrazioni", how3_text: "Se hai biglietti, iscriviti gratuitamente ai premi istantanei sulla nostra piattaforma.",
+    how4_title: "Guarda Live & Vinci", how4_text: "",
+    winners_tag: "Hall of Fame", winners_title: "Vincitori Recenti", winners_sub: "Ogni vincitore, ogni premio. Trasparenza totale — sempre.", winners_empty: "I primi vincitori arriveranno presto!",
+    community_tag: "Resta Connesso", community_title: "Unisciti alla Comunità", community_sub: "Ricevi notifiche nel momento in cui si apre una nuova estrazione. Non perdere la tua finestra.",
+    tg_name: "Canale Telegram", tg_members: "Canale principale · Annunci · Vincitori",
+    tg_desc: "Tutti gli annunci di estrazione appaiono qui per primi. Attiva le notifiche e non perdere mai una finestra di premi istantanei.", tg_btn: "Unisciti al Canale →",
+    wa_name: "Canale WhatsApp", wa_members: "Annunci · Aggiornamenti · Vincitori",
+    wa_desc: "Segui il nostro canale WhatsApp per tutti gli aggiornamenti, gli annunci di estrazione e le rivelazioni dei vincitori.", wa_btn: "Segui il Canale →",
+    about_tag: "Chi Siamo", about_title: "Chi Siamo",
+    about_text: "Siamo una comunità di lotterie con sede nel Regno Unito costruita attorno a un'idea semplice: tutti coloro che giocano dovrebbero avere una vera possibilità di vincere qualcosa.",
+    about_cashback_title: "Cashback Pool — Vinci Anche Quando Perdi",
+    about_cashback_text: "Il 20% del profitto lordo di ogni lotteria va in un pool condiviso. A Natale, quei soldi tornano ai giocatori — proporzionalmente a quanti biglietti ha acquistato ciascuno durante l'anno. Più giochi, più ricevi indietro.",
+    about_cashback_link: "Vedi la classifica live →",
+    about_instant_title: "Premi Istantanei in Ogni Competizione",
+    about_instant_text: "Ogni competizione include premi istantanei oltre al premio principale — senza costi aggiuntivi. Acquista un biglietto, registra il tuo username sulla nostra piattaforma e sei automaticamente iscritto. I vincitori vengono estratti live e verificati manualmente.",
+    about_instant_link: "Vai alla piattaforma Instant Win →",
+    about_slogan: "In altre lotterie o vinci o perdi.", about_slogan_bold: "Con noi vinci sempre.",
+    faq_tag: "Hai Domande?", faq_title: "FAQ",
+    footer_copy: "© 2026 · Registrato nel Regno Unito · Tutti i diritti riservati",
+    join_modal_title: "Unisciti alla Comunità", join_modal_sub: "Scegli la tua piattaforma preferita. Attiva le notifiche per non perdere mai un'estrazione.",
+    join_tg_btn: "Canale Telegram", join_wa_btn: "Canale WhatsApp",
+    faqs: [
+      { q: "Come mi iscrivo?", a: `Acquista biglietti per qualsiasi competizione attiva su <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>.<br><br>Per partecipare gratuitamente anche ai premi istantanei, registra il tuo username Raffall sulla <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">nostra piattaforma</a>.<br><br>Seguici su <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> o <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> e attiva le notifiche per non perdere nessuna estrazione.` },
+      { q: "Come funzionano i premi istantanei?", a: `Ogni competizione include premi istantanei oltre all'estrazione principale Raffall — gratuiti per qualsiasi detentore di biglietto.<br><br>Quando annunciamo un'estrazione sui nostri canali, vai sulla <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">nostra piattaforma</a>, registra il tuo username Raffall e guarda l'estrazione live. Una iscrizione per persona per competizione.` },
+      { q: "Quanto velocemente vengono pagati i premi?", a: "Tutti i premi vengono pagati entro 24 ore dall'estrazione tramite bonifico bancario. Ti contatteremo direttamente." },
+      { q: "Posso vincere più di un premio istantaneo?", a: "No. Ogni partecipante può vincere un solo premio istantaneo per competizione. Se vinci, vieni automaticamente rimosso dalle estrazioni successive." },
+      { q: "Cosa succede se non viene raggiunto il minimo di biglietti?", a: "L'estrazione avviene comunque. Il vincitore riceve il 50% del totale delle vendite di biglietti. Se acquisti un biglietto, un'estrazione avrà sempre luogo." },
+      { q: "Come so che le estrazioni sono corrette?", a: "Entrambe le estrazioni sono completamente trasparenti. Il premio principale viene estratto automaticamente da Raffall. I premi istantanei vengono estratti live sulla nostra piattaforma dove chiunque può guardare in tempo reale." },
+      { q: "Come posso contattarvi?", a: `Supporto privato: Telegram <a href="https://t.me/SuportGiveaways" target="_blank" style="color:var(--gold);font-weight:600">@SuportGiveaways</a>, WhatsApp <a href="https://wa.me/40756455748" target="_blank" style="color:var(--gold);font-weight:600">+40756455748</a>, email <a href="mailto:contact1.giveaways@gmail.com" style="color:var(--gold);font-weight:600">contact1.giveaways@gmail.com</a>.<br><br>Chat aperte: <a href="https://t.me/+2vxJ82x8hh1iZWNk" target="_blank" style="color:var(--gold);font-weight:600">Gruppo Telegram</a> · <a href="https://chat.whatsapp.com/DeddO55mXfvKhpCx1WkB2R" target="_blank" style="color:var(--gold);font-weight:600">Gruppo WhatsApp</a>` },
+    ]
+  }
+};
+
+let currentLang = localStorage.getItem('gw_lang') || 'en';
+
+function t(key) { return TRANSLATIONS[currentLang][key] || TRANSLATIONS.en[key] || key; }
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('gw_lang', lang);
+  applyTranslations();
+  renderAll();
+  initFAQ();
+  startCountdowns(homeData.raffles || []);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('lang-active', b.dataset.lang === lang));
+}
+
+function applyTranslations() {
+  const ids = {
+    'nav-raffles':'nav_raffles','nav-how':'nav_how','nav-winners':'nav_winners','nav-community':'nav_community',
+    'nav-faq':'nav_faq','nav-join-btn':'nav_join','hero-slogan-text':'hero_slogan','hero-slogan-bold':'hero_slogan_bold',
+    'hero-title1':'hero_title1','hero-title2':'hero_title2','hero-title3':'hero_title3','hero-subtitle':'hero_subtitle',
+    'hero-btn-raffles':'hero_btn_raffles','hero-btn-community':'hero_btn_community',
+    'hero-stat-winners':'hero_stat_winners','hero-stat-raffles':'hero_stat_raffles','hero-stat-live':'hero_stat_live',
+    'raffles-tag':'raffles_tag','raffles-title':'raffles_title','raffles-sub':'raffles_sub',
+    'how-tag':'how_tag','how-title':'how_title','how-sub':'how_sub',
+    'how1-title':'how1_title','how1-text':'how1_text','how2-title':'how2_title',
+    'how3-title':'how3_title','how3-text':'how3_text','how4-title':'how4_title',
+    'winners-tag':'winners_tag','winners-title':'winners_title','winners-sub':'winners_sub',
+    'community-tag':'community_tag','community-title':'community_title','community-sub':'community_sub',
+    'tg-name':'tg_name','tg-members':'tg_members','tg-desc':'tg_desc','tg-btn':'tg_btn',
+    'wa-name':'wa_name','wa-members':'wa_members','wa-desc':'wa_desc','wa-btn':'wa_btn',
+    'about-tag':'about_tag','about-title':'about_title','about-text':'about_text',
+    'about-cashback-title':'about_cashback_title','about-cashback-text':'about_cashback_text','about-cashback-link':'about_cashback_link',
+    'about-instant-title':'about_instant_title','about-instant-text':'about_instant_text','about-instant-link':'about_instant_link',
+    'about-slogan-text':'about_slogan','about-slogan-bold':'about_slogan_bold',
+    'faq-tag':'faq_tag','faq-title':'faq_title','footer-copy':'footer_copy',
+    'join-modal-title':'join_modal_title','join-modal-sub':'join_modal_sub',
+    'join-tg-btn':'join_tg_btn','join-wa-btn':'join_wa_btn'
+  };
+  const L = TRANSLATIONS[currentLang];
+  Object.entries(ids).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = L[key] || TRANSLATIONS.en[key] || '';
+  });
+}
+
+
 // ════════════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════════════
@@ -905,6 +1121,9 @@ let adminLoggedIn = false;
 // ════════════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", async () => {
   setTimeout(() => document.getElementById("loading-overlay").classList.add("hidden"), 8000);
+  // Set active lang button on load
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('lang-active', b.dataset.lang === currentLang));
+  applyTranslations();
   await loadHomeData();
   document.getElementById("loading-overlay").classList.add("hidden");
   initFAQ();
@@ -1055,22 +1274,15 @@ function updateHeroStats(data) {
 // ════════════════════════════════════════════════════════
 //  FAQ
 // ════════════════════════════════════════════════════════
-const FAQS = [
-  { q: "How do I enter?", a: `Buy tickets for any active competition at <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>.<br><br>To also enter the instant prizes for free, register your Raffall username at <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>.<br><br>Then follow us on <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> or <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> and turn on notifications so you never miss a draw.` },
-  { q: "How do instant prizes work?", a: `Every competition includes instant prizes on top of the main Raffall draw — free to enter for any ticket holder.<br><br>When we announce a draw on our channels, head to <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>, register your Raffall username, and watch the live draw. One entry per person per competition.` },
-  { q: "How quickly are prizes paid?", a: "All prizes are paid within 24 hours of the draw via bank transfer. We'll contact you directly — no need to chase us." },
-  { q: "Can I win more than one instant prize?", a: "No. Each participant can win one instant prize per competition. If you win, you're automatically removed from subsequent draws in that competition — giving everyone else a fair shot." },
-  { q: "What if the minimum ticket threshold isn't reached?", a: "The draw still happens. The winner receives 50% of the total ticket sales — no cancellations, no refunds games. If you buy a ticket, a draw will always take place." },
-  { q: "How do I know the draws are fair?", a: "Both draws are fully transparent. The main prize is drawn automatically by Raffall — a large, established platform with its own verified draw system. The instant prizes are drawn live on our platform where anyone can watch in real time, see the full participants list, and verify the result." },
-  { q: "How do I contact you?", a: `Private support: Telegram <a href="https://t.me/SuportGiveaways" target="_blank" style="color:var(--gold);font-weight:600">@SuportGiveaways</a>, WhatsApp <a href="https://wa.me/40756455748" target="_blank" style="color:var(--gold);font-weight:600">+40756455748</a>, or email <a href="mailto:contact1.giveaways@gmail.com" style="color:var(--gold);font-weight:600">contact1.giveaways@gmail.com</a>.<br><br>Open community chats: <a href="https://t.me/+2vxJ82x8hh1iZWNk" target="_blank" style="color:var(--gold);font-weight:600">Telegram Group</a> · <a href="https://chat.whatsapp.com/DeddO55mXfvKhpCx1WkB2R" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp Group</a>` },
-];
+
 
 function initFAQ() {
   const list = document.getElementById("faq-list");
-  list.innerHTML = FAQS.map((f, i) => `
+  const faqs = TRANSLATIONS[currentLang].faqs;
+  list.innerHTML = faqs.map((f, i) => `
     <div class="faq-item" id="faq-${i}">
       <div class="faq-q" onclick="toggleFAQ(${i})">
-        <span>${esc(f.q)}</span>
+        <span>${f.q}</span>
         <div class="faq-arrow">▼</div>
       </div>
       <div class="faq-a">${f.a}</div>
