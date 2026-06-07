@@ -45,6 +45,17 @@ body{
   font-family:'DM Sans',sans-serif;
   line-height:1.6;
   overflow-x:hidden;
+  position:relative;
+}
+#bg-parallax{
+  position:fixed;
+  inset:-60px;
+  background:url('bg.png') center center / cover no-repeat;
+  opacity:0.55;
+  pointer-events:none;
+  z-index:0;
+  will-change:transform;
+  transition:transform 0.1s ease-out;
 }
 img{display:block;max-width:100%}
 a{text-decoration:none;color:inherit}
@@ -138,6 +149,7 @@ a{text-decoration:none;color:inherit}
 /* ── NAV ─────────────────────────────────────────────── */
 nav{
   position:sticky;top:0;z-index:100;
+  isolation:isolate;
   background:rgba(250,250,248,0.92);
   backdrop-filter:blur(12px);
   border-bottom:1px solid var(--border);
@@ -715,6 +727,26 @@ function closeWelcomeJoin() {
   setTimeout(() => openJoinModal(), 300);
 }
 
+
+// ════════════════════════════════════════════════════════
+//  PARALLAX BACKGROUND
+// ════════════════════════════════════════════════════════
+(function() {
+  const bg = document.getElementById('bg-parallax');
+  if (!bg) return;
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const y = window.scrollY * 0.25;
+        bg.style.transform = 'translateY(' + y + 'px)';
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+
 </script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -744,9 +776,31 @@ function closeWelcomeJoin() {
   setTimeout(() => openJoinModal(), 300);
 }
 
+
+// ════════════════════════════════════════════════════════
+//  PARALLAX BACKGROUND
+// ════════════════════════════════════════════════════════
+(function() {
+  const bg = document.getElementById('bg-parallax');
+  if (!bg) return;
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const y = window.scrollY * 0.25;
+        bg.style.transform = 'translateY(' + y + 'px)';
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+
 </script>
 </head>
 <body>
+
+<div id="bg-parallax"></div>
 
 <div id="loading-overlay">
   <div class="ld-spinner"></div>
@@ -1562,6 +1616,26 @@ function closeWelcomeJoin() {
   closeWelcome();
   setTimeout(() => openJoinModal(), 300);
 }
+
+
+// ════════════════════════════════════════════════════════
+//  PARALLAX BACKGROUND
+// ════════════════════════════════════════════════════════
+(function() {
+  const bg = document.getElementById('bg-parallax');
+  if (!bg) return;
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const y = window.scrollY * 0.25;
+        bg.style.transform = 'translateY(' + y + 'px)';
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+})();
 
 </script>
 </body>
