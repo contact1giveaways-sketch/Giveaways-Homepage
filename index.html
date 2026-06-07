@@ -59,6 +59,71 @@ a{text-decoration:none;color:inherit}
 .section{padding:80px 0}
 
 
+
+/* ── WELCOME POPUP ───────────────────────────────────── */
+#welcome-popup {
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.65);
+  z-index:500;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  backdrop-filter:blur(4px);
+}
+#welcome-popup.hidden{display:none}
+.welcome-box {
+  background:var(--white);
+  border-radius:24px;
+  padding:36px 28px;
+  max-width:420px;width:100%;
+  position:relative;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,0.2);
+  animation:popIn .35s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
+.welcome-close{
+  position:absolute;top:14px;right:16px;
+  background:var(--border);border:none;
+  width:28px;height:28px;border-radius:50%;
+  font-size:14px;cursor:pointer;color:var(--gray);
+  display:grid;place-items:center;transition:background .2s;
+}
+.welcome-close:hover{background:var(--gold);color:#fff}
+.welcome-emoji{font-size:48px;margin-bottom:12px;display:block}
+.welcome-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:26px;letter-spacing:2px;color:var(--black);
+  margin-bottom:14px;line-height:1.1;
+}
+.welcome-title span{color:var(--gold)}
+.welcome-body{
+  font-size:14px;color:var(--gray);
+  line-height:1.7;margin-bottom:20px;
+}
+.welcome-highlight{
+  background:var(--gold-pale);
+  border:1px solid var(--gold-line);
+  border-radius:12px;
+  padding:14px 16px;
+  margin-bottom:22px;
+  font-size:13px;color:var(--gray-dark);
+  line-height:1.6;
+}
+.welcome-highlight strong{color:var(--gold);font-size:15px}
+.welcome-btn{
+  width:100%;padding:14px;
+  background:var(--gold);color:var(--white);border:none;
+  border-radius:12px;font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:700;cursor:pointer;
+  transition:all .2s;
+  box-shadow:0 4px 20px rgba(201,149,42,0.35);
+}
+.welcome-btn:hover{background:#b8841f;transform:translateY(-1px)}
+.welcome-skip{
+  margin-top:12px;font-size:12px;color:var(--gray-light);
+  cursor:pointer;text-decoration:underline;background:none;border:none;
+}
+
 /* ── LANGUAGE SWITCHER ───────────────────────────────── */
 .lang-switcher{display:flex;gap:4px;align-items:center;margin-right:12px}
 .lang-btn{
@@ -627,13 +692,59 @@ footer{
 }
 </style>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BSVJT515DF"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BSVJT515DF">
+// ════════════════════════════════════════════════════════
+//  WELCOME POPUP
+// ════════════════════════════════════════════════════════
+function initWelcomePopup() {
+  if (!localStorage.getItem('gw_welcome_seen')) {
+    setTimeout(() => {
+      document.getElementById('welcome-popup').classList.remove('hidden');
+    }, 1500);
+  }
+}
+
+function closeWelcome() {
+  document.getElementById('welcome-popup').classList.add('hidden');
+  localStorage.setItem('gw_welcome_seen', '1');
+  document.body.style.overflow = '';
+}
+
+function closeWelcomeJoin() {
+  closeWelcome();
+  setTimeout(() => openJoinModal(), 300);
+}
+
+</script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-BSVJT515DF');
-  </script>
+  
+// ════════════════════════════════════════════════════════
+//  WELCOME POPUP
+// ════════════════════════════════════════════════════════
+function initWelcomePopup() {
+  if (!localStorage.getItem('gw_welcome_seen')) {
+    setTimeout(() => {
+      document.getElementById('welcome-popup').classList.remove('hidden');
+    }, 1500);
+  }
+}
+
+function closeWelcome() {
+  document.getElementById('welcome-popup').classList.add('hidden');
+  localStorage.setItem('gw_welcome_seen', '1');
+  document.body.style.overflow = '';
+}
+
+function closeWelcomeJoin() {
+  closeWelcome();
+  setTimeout(() => openJoinModal(), 300);
+}
+
+</script>
 </head>
 <body>
 
@@ -855,6 +966,28 @@ footer{
 </section>
 
 <!-- ── FOOTER ─────────────────────────────────────────── -->
+
+<!-- WELCOME POPUP -->
+<div id="welcome-popup" class="hidden">
+  <div class="welcome-box">
+    <button class="welcome-close" onclick="closeWelcome()">✕</button>
+    <span class="welcome-emoji">🦁</span>
+    <div class="welcome-title">Here's <span>The Deal</span></div>
+    <p class="welcome-body">
+      Join our community — and when we hit <strong>1,000 active members</strong>, we'll run a <strong>£1,000 raffle every single day.</strong>
+    </p>
+    <div class="welcome-highlight">
+      💡 The logic is simple:<br>
+      <strong>£1 ticket × 1,000 people = £1,000 prize daily</strong><br>
+      Someone wins every 24 hours.<br>
+      <strong>Maybe it's you next. 🏆</strong>
+    </div>
+    <button class="welcome-btn" onclick="closeWelcomeJoin()">Join the Community →</button>
+    <br>
+    <button class="welcome-skip" onclick="closeWelcome()">Just browse for now</button>
+  </div>
+</div>
+
 
 <!-- JOIN MODAL -->
 <div id="join-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;padding:20px;align-items:center;justify-content:center;">
@@ -1135,6 +1268,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadHomeData();
   document.getElementById("loading-overlay").classList.add("hidden");
   initFAQ();
+  initWelcomePopup();
 });
 
 async function loadHomeData() {
@@ -1404,6 +1538,29 @@ function startCountdowns(raffles) {
     tick();
     countdownIntervals[r.id] = setInterval(tick, 1000);
   });
+}
+
+
+// ════════════════════════════════════════════════════════
+//  WELCOME POPUP
+// ════════════════════════════════════════════════════════
+function initWelcomePopup() {
+  if (!localStorage.getItem('gw_welcome_seen')) {
+    setTimeout(() => {
+      document.getElementById('welcome-popup').classList.remove('hidden');
+    }, 1500);
+  }
+}
+
+function closeWelcome() {
+  document.getElementById('welcome-popup').classList.add('hidden');
+  localStorage.setItem('gw_welcome_seen', '1');
+  document.body.style.overflow = '';
+}
+
+function closeWelcomeJoin() {
+  closeWelcome();
+  setTimeout(() => openJoinModal(), 300);
 }
 
 </script>
