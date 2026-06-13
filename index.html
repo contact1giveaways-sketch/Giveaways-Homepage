@@ -732,6 +732,7 @@ let messaging = null;
 
 function initFirebase() {
   try {
+    if (typeof firebase === 'undefined') return;
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     messaging = firebase.messaging();
   } catch(e) {
@@ -865,6 +866,7 @@ let messaging = null;
 
 function initFirebase() {
   try {
+    if (typeof firebase === 'undefined') return;
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     messaging = firebase.messaging();
   } catch(e) {
@@ -1055,6 +1057,7 @@ let messaging = null;
 
 function initFirebase() {
   try {
+    if (typeof firebase === 'undefined') return;
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     messaging = firebase.messaging();
   } catch(e) {
@@ -1248,6 +1251,7 @@ let messaging = null;
 
 function initFirebase() {
   try {
+    if (typeof firebase === 'undefined') return;
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     messaging = firebase.messaging();
   } catch(e) {
@@ -1881,7 +1885,7 @@ let adminLoggedIn = false;
 //  INIT
 // ════════════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", async () => {
-  setTimeout(() => document.getElementById("loading-overlay").classList.add("hidden"), 8000);
+  setTimeout(() => document.getElementById("loading-overlay").classList.add("hidden"), 5000);
   // Set active lang button on load
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('lang-active', b.dataset.lang === currentLang));
   applyTranslations();
@@ -1889,9 +1893,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("loading-overlay").classList.add("hidden");
   initFAQ();
   initWelcomePopup();
-  initFirebase();
-  initNotifications();
-  initNotifBanner();
+  // Load Firebase dynamically — only after page is visible
+  setTimeout(() => {
+    const s1 = document.createElement('script');
+    s1.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js';
+    s1.onload = () => {
+      const s2 = document.createElement('script');
+      s2.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js';
+      s2.onload = () => {
+        try { initFirebase(); initNotifications(); } catch(e) { console.log('FCM:', e); }
+        setTimeout(initNotifBanner, 5000);
+      };
+      document.head.appendChild(s2);
+    };
+    document.head.appendChild(s1);
+  }, 2000);
 });
 
 async function loadHomeData() {
@@ -2236,6 +2252,7 @@ let messaging = null;
 
 function initFirebase() {
   try {
+    if (typeof firebase === 'undefined') return;
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     messaging = firebase.messaging();
   } catch(e) {
