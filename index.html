@@ -704,15 +704,14 @@ footer{
 
 
   <!-- Google tag (gtag.js) -->
+  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BSVJT515DF"></script>
-
-</script>
-<script>
+  <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-BSVJT515DF');
-</script>
+  </script>
 
 </head>
 <body>
@@ -1450,7 +1449,7 @@ function closeJoinModal() {
   document.getElementById("join-modal").style.display = "none";
   document.body.style.overflow = "";
 }
-document.addEventListener("keydown", e => { if(e.key === "Escape") { closeJoinModal(); closeAdmin(); } });
+document.addEventListener("keydown", e => { if(e.key === "Escape") { closeJoinModal(); } });
 
 // ════════════════════════════════════════════════════════
 //  UTILS
