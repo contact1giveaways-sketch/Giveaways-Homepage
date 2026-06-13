@@ -1884,21 +1884,31 @@ let adminLoggedIn = false;
 // ════════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════════
-document.addEventListener("DOMContentLoaded", async () => {
-  // HARD failsafe — always hide after 3 seconds
-  setTimeout(() => {
+document.addEventListener("DOMContentLoaded", () => {
+  // Hide loading after max 3 seconds no matter what
+  const hideLoading = () => {
     const lo = document.getElementById("loading-overlay");
     if (lo) lo.style.display = "none";
-  }, 3000);
-  // Set active lang button on load
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('lang-active', b.dataset.lang === currentLang));
-  applyTranslations();
-  await loadHomeData();
-  document.getElementById("loading-overlay").classList.add("hidden");
-  initFAQ();
-  initWelcomePopup();
-  // Firebase notifications — disabled temporarily
-  setTimeout(initNotifBanner, 5000);
+  };
+  setTimeout(hideLoading, 3000);
+
+  // Run everything in a safe async wrapper
+  (async () => {
+    try {
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('lang-active', b.dataset.lang === currentLang));
+      applyTranslations();
+    } catch(e) { console.log('Translation error:', e); }
+
+    try {
+      await loadHomeData();
+    } catch(e) { console.log('Data load error:', e); }
+
+    hideLoading();
+
+    try { initFAQ(); } catch(e) {}
+    try { initWelcomePopup(); } catch(e) {}
+    setTimeout(() => { try { initNotifBanner(); } catch(e) {} }, 5000);
+  })();
 });
 
 async function loadHomeData() {
