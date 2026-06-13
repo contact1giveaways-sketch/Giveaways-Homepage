@@ -573,19 +573,7 @@ footer{
 .footer-links a{transition:color .2s}
 .footer-links a:hover{color:var(--gold)}
 
-/* ── LOADING ─────────────────────────────────────────── */
-#loading-overlay{
-  position:fixed;inset:0;background:var(--bg);
-  display:grid;place-items:center;z-index:200;
-  transition:opacity .4s;
-}
-#loading-overlay.hidden{opacity:0;pointer-events:none}
-.ld-spinner{
-  width:36px;height:36px;
-  border:3px solid var(--border);
-  border-top-color:var(--gold);
-  border-radius:50%;animation:spin .7s linear infinite;
-}
+/* loading overlay removed */
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── ADMIN PANEL ─────────────────────────────────────── */
@@ -1372,9 +1360,7 @@ function dismissNotifBanner() {
 
 <div id="bg-parallax"></div>
 
-<div id="loading-overlay">
-  <div class="ld-spinner"></div>
-</div>
+<!-- no loading overlay -->
 
 <!-- ── NAV ───────────────────────────────────────────── -->
 <nav>
@@ -1886,11 +1872,7 @@ let adminLoggedIn = false;
 // ════════════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
   // Hide loading after max 3 seconds no matter what
-  const hideLoading = () => {
-    const lo = document.getElementById("loading-overlay");
-    if (lo) lo.style.display = "none";
-  };
-  setTimeout(hideLoading, 3000);
+  // no loading overlay
 
   // Run everything in a safe async wrapper
   (async () => {
@@ -1903,7 +1885,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await loadHomeData();
     } catch(e) { console.log('Data load error:', e); }
 
-    hideLoading();
+  
 
     try { initFAQ(); } catch(e) {}
     try { initWelcomePopup(); } catch(e) {}
