@@ -1,5 +1,6 @@
 // ============================================================
 //  Giveaways Community — Firebase Messaging Service Worker
+//  Place this file at the ROOT of your Vercel project
 // ============================================================
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
@@ -15,34 +16,36 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Background message handler
+// ── Background messages (when tab is closed / not in focus) ──
 messaging.onBackgroundMessage(payload => {
-  const { title, body, icon } = payload.notification || {};
-  self.registration.showNotification(title || 'Giveaways Community', {
-    body: body || '',
-    icon: icon || '/icon-192.png',
+  const n = payload.notification || {};
+  self.registration.showNotification(n.title || 'Giveaways Community 🦁', {
+    body: n.body || '',
+    icon: n.icon || '/icon-192.png',
     badge: '/icon-192.png',
     vibrate: [200, 100, 200],
-    data: payload.data || {},
+    tag: 'giveaways-notif',
+    renotify: true,
+    data: { url: (payload.data && payload.data.url) || 'https://giveaways-homepage.vercel.app' },
     actions: [
       { action: 'open', title: '🎟️ Open App' },
-      { action: 'close', title: 'Dismiss' }
+      { action: 'dismiss', title: 'Dismiss' }
     ]
   });
 });
 
-// Notification click handler
+// ── Notification click ──
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  if (e.action === 'close') return;
+  if (e.action === 'dismiss') return;
+  const targetUrl = (e.notification.data && e.notification.data.url)
+    || 'https://giveaways-homepage.vercel.app';
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const client of list) {
-        if (client.url.includes('giveaways-homepage') && 'focus' in client) {
-          return client.focus();
-        }
+        if (client.url === targetUrl && 'focus' in client) return client.focus();
       }
-      return clients.openWindow('https://giveaways-homepage.vercel.app');
+      return clients.openWindow(targetUrl);
     })
   );
 });
