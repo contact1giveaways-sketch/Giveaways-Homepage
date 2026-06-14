@@ -548,7 +548,15 @@ async function saveFCMToken(token) {
   const already = localStorage.getItem('gw_fcm_token');
   if (already === token) return;
   localStorage.setItem('gw_fcm_token', token);
-  try { await apiFetch({ action: 'saveFCMToken', token }); } catch(e) { /* silent */ }
+  try {
+    const bodyObj = { action: 'saveFCMToken', token };
+    const r = await fetch(API_URL + '?' + new URLSearchParams({
+      action: 'saveFCMToken',
+      body: JSON.stringify(bodyObj)
+    }));
+    const result = await r.json();
+    console.log('FCM token saved:', result);
+  } catch(e) { console.warn('saveFCMToken error:', e); }
 }
 
 function showNotifToast(msg, isError = false) {
