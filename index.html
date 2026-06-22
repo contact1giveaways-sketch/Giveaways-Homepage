@@ -20,9 +20,6 @@
 <meta name="twitter:image" content="https://giveaways-homepage.vercel.app/og-image.png">
 <meta name="description" content="Transparent raffles, live draws, instant prizes and cashback pool. Every ticket counts.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Firebase Cloud Messaging -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-BSVJT515DF"></script>
 <script>
 window.dataLayer=window.dataLayer||[];
@@ -41,6 +38,8 @@ img{display:block;max-width:100%}
 .container{max-width:1080px;margin:0 auto;padding:0 24px}
 .section{padding:80px 0}
 .divider{height:1px;background:var(--border)}
+
+/* NAV */
 nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px 0}
 .nav-inner{display:flex;align-items:center;justify-content:space-between}
 .nav-logo{display:flex;align-items:center;gap:12px}
@@ -55,6 +54,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .lang-btn{padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;font-size:11px;font-weight:700;color:var(--gray);cursor:pointer;transition:all .2s}
 .lang-btn:hover{border-color:var(--gold);color:var(--gold)}
 .lang-btn.lang-active{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* HERO */
 .hero{padding:100px 0 80px;position:relative;overflow:hidden}
 .hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1}
 .hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,6vw,80px);letter-spacing:3px;line-height:1;color:var(--black);margin-bottom:12px}
@@ -73,11 +74,15 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .stat-icon.blue{background:rgba(59,130,246,0.1)}
 .stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--black);letter-spacing:1px;line-height:1}
 .stat-lbl{font-size:12px;color:var(--gray-light);margin-top:2px}
+
+/* SECTIONS */
 .sec-header{margin-bottom:48px}
 .sec-tag{font-size:11px;font-weight:600;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
 .sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4vw,48px);letter-spacing:2px;color:var(--black);line-height:1;margin-bottom:10px}
 .sec-sub{font-size:15px;color:var(--gray);max-width:480px}
 .raffles-bg,.winners-bg{background:var(--white)}
+
+/* RAFFLES */
 .raffles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
 .raffle-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .25s;position:relative;overflow:hidden}
 .raffle-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light))}
@@ -111,12 +116,16 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .draw-done{font-size:12px;color:var(--green);font-weight:600;text-align:center;padding:8px;background:rgba(34,197,94,0.1);border-radius:8px;margin-bottom:14px}
 .empty-raffles{text-align:center;padding:60px 20px;color:var(--gray);grid-column:1/-1}
 .empty-raffles .empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
+
+/* HOW IT WORKS */
 .how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
 .how-card{padding:28px 24px;text-align:center;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);transition:all .25s}
 .how-card:hover{border-color:var(--gold-line);box-shadow:0 4px 20px rgba(201,149,42,0.08)}
 .how-num{width:48px;height:48px;border-radius:50%;background:var(--gold-pale);border:2px solid var(--gold-line);display:grid;place-items:center;margin:0 auto 16px;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold)}
 .how-title{font-weight:600;font-size:15px;margin-bottom:8px;color:var(--black)}
 .how-text{font-size:13px;color:var(--gray);line-height:1.6}
+
+/* WINNERS */
 .winners-list{display:flex;flex-direction:column;gap:10px}
 .winner-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:12px;transition:border-color .2s}
 .winner-row:hover{border-color:var(--gold-line)}
@@ -127,6 +136,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .w-prize{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--gold)}
 .w-date{font-size:11px;color:var(--gray-light);margin-top:2px;text-align:right}
 .trophy-badge{width:28px;height:28px;border-radius:50%;background:rgba(201,149,42,0.1);display:grid;place-items:center;font-size:14px}
+
+/* CHANNELS */
 .channels-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .channel-card{border-radius:var(--radius);padding:28px;display:flex;flex-direction:column;gap:16px;transition:transform .2s}
 .channel-card:hover{transform:translateY(-2px)}
@@ -137,6 +148,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .ch-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:13px;font-weight:600;color:var(--white);width:fit-content;transition:background .2s}
 .ch-btn:hover{background:rgba(255,255,255,0.3)}
 .ch-members{font-size:11px;opacity:.7;letter-spacing:1px;text-transform:uppercase}
+
+/* ABOUT */
 .about-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
 .about-values{display:flex;flex-direction:column;gap:12px;margin-top:24px}
 .value-row{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--white);border:1px solid var(--border);border-radius:10px}
@@ -147,6 +160,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .about-lion{font-size:80px;margin-bottom:16px;display:block}
 .about-slogan{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:var(--gray-dark);line-height:1.6}
 .about-slogan strong{color:var(--gold);font-style:normal}
+
+/* FAQ */
 .faq-list{display:flex;flex-direction:column;gap:2px}
 .faq-item{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--white)}
 .faq-q{padding:18px 20px;min-height:52px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-weight:500;font-size:15px;color:var(--black);transition:color .2s;user-select:none;gap:12px}
@@ -155,12 +170,16 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .faq-item.open .faq-arrow{transform:rotate(180deg)}
 .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s;font-size:14px;color:var(--gray);line-height:1.7;padding:0 20px}
 .faq-item.open .faq-a{max-height:300px;padding:0 20px 18px}
+
+/* FOOTER */
 footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-size:13px}
 .footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
 .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--gold)}
 .footer-links{display:flex;gap:20px}
 .footer-links a{transition:color .2s}
 .footer-links a:hover{color:var(--gold)}
+
+/* WELCOME POPUP */
 #welcome-popup{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 #welcome-popup.hidden{display:none}
 .welcome-box{background:var(--white);border-radius:24px;padding:36px 28px;max-width:420px;width:100%;position:relative;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
@@ -173,6 +192,8 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 .welcome-highlight strong{color:var(--gold);font-size:15px}
 .welcome-btn{width:100%;padding:14px;background:var(--gold);color:var(--white);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(201,149,42,0.35)}
 .welcome-skip{margin-top:12px;font-size:12px;color:var(--gray-light);cursor:pointer;text-decoration:underline;background:none;border:none}
+
+/* RESPONSIVE */
 @media(max-width:768px){
 .nav-links{display:none}
 .nav-cta{padding:8px 14px;font-size:12px}
@@ -198,30 +219,13 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 .how-grid{grid-template-columns:1fr}
 .hero-title{font-size:44px}
 }
-/* ── PWA INSTALL BANNER ──────────────────────────────── */
-#pwa-banner{position:sticky;top:65px;z-index:99;background:linear-gradient(135deg,#1a1a1a,#2a2010);border-bottom:1px solid rgba(245,200,66,0.25);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;animation:slideDown .4s ease}
-#pwa-banner.hidden{display:none}
-@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.pwa-banner-text{font-size:13px;color:rgba(255,255,255,0.85);flex:1;text-align:center}
-.pwa-banner-text strong{color:var(--gold-light)}
-.pwa-install-btn{padding:7px 16px;background:var(--gold);color:#000;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.pwa-dismiss-btn{background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1}
-#pwa-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(4px)}
-#pwa-modal.open{display:flex}
-.pwa-modal-box{background:var(--white);border-radius:24px 24px 0 0;padding:28px 24px 36px;width:100%;max-width:480px;animation:slideUp .35s ease}
-.pwa-modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--black);margin-bottom:6px}
-.pwa-modal-sub{font-size:13px;color:var(--gray);margin-bottom:20px}
-.pwa-step{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:8px}
-.pwa-step-num{width:26px;height:26px;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center;flex-shrink:0}
-.pwa-step-text{font-size:14px;color:var(--gray-dark);line-height:1.5}
-.pwa-step-text strong{color:var(--black)}
-.pwa-modal-close{float:right;background:var(--border);border:none;width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;color:var(--gray);display:grid;place-items:center;margin-top:-4px}
-.pwa-os-tabs{display:flex;gap:8px;margin-bottom:16px}
-.pwa-os-tab{flex:1;padding:8px;border:2px solid var(--border);border-radius:10px;background:var(--bg);font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s}
-.pwa-os-tab.active{border-color:var(--gold);background:var(--gold-pale);color:var(--gold)}
+
+.btn-instant:hover{border-color:rgba(245,200,66,0.6)!important;background:linear-gradient(135deg,#222,#1a1a00)!important;transform:translateY(-1px)}
+.btn-leaderboard:hover{border-color:rgba(255,255,255,0.15)!important;background:linear-gradient(135deg,#222,#1a1a1a)!important;transform:translateY(-1px)}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes popIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
-@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 </style>
 </head>
 <body>
@@ -232,7 +236,7 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
   <div class="container">
     <div class="nav-inner">
       <div class="nav-logo">
-        <div class="nav-icon" style="background:none;padding:0;overflow:hidden"><img src="/icon-192.png" alt="G" style="width:40px;height:40px;border-radius:10px;display:block;object-fit:cover"></div>
+        <div class="nav-icon">🎁</div>
         <div class="nav-name">Giveaways</div>
       </div>
       <div class="nav-links">
@@ -252,37 +256,7 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
   </div>
 </nav>
 
-<!-- ── PWA INSTALL BANNER ── -->
-<div id="pwa-banner" class="hidden">
-  <span class="pwa-banner-text">📲 <strong>Get the app</strong> — install Giveaways on your home screen for instant notifications</span>
-  <button class="pwa-install-btn" onclick="showInstallModal()">Install App</button>
-  <button class="pwa-dismiss-btn" onclick="dismissPWABanner()">✕</button>
-</div>
-
-<!-- ── PWA INSTALL MODAL ── -->
-<div id="pwa-modal">
-  <div class="pwa-modal-box">
-    <button class="pwa-modal-close" onclick="closePWAModal()">✕</button>
-    <div class="pwa-modal-title">📲 Install the App</div>
-    <p class="pwa-modal-sub">Free, no App Store needed. Works like a native app.</p>
-    <div class="pwa-os-tabs">
-      <button class="pwa-os-tab active" id="tab-ios" onclick="switchTab('ios')">🍎 iPhone / iPad</button>
-      <button class="pwa-os-tab" id="tab-android" onclick="switchTab('android')">🤖 Android</button>
-    </div>
-    <div id="steps-ios">
-      <div class="pwa-step"><div class="pwa-step-num">1</div><div class="pwa-step-text">Open <strong>giveaways-homepage.vercel.app</strong> in <strong>Safari</strong> (not Chrome)</div></div>
-      <div class="pwa-step"><div class="pwa-step-num">2</div><div class="pwa-step-text">Tap the <strong>Share button</strong> <span style="font-size:16px">⬆️</span> at the bottom of the screen</div></div>
-      <div class="pwa-step"><div class="pwa-step-num">3</div><div class="pwa-step-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div></div>
-      <div class="pwa-step"><div class="pwa-step-num">4</div><div class="pwa-step-text">Tap <strong>"Add"</strong> — the Giveaways icon appears on your home screen 🎉</div></div>
-    </div>
-    <div id="steps-android" style="display:none">
-      <div class="pwa-step"><div class="pwa-step-num">1</div><div class="pwa-step-text">Open this page in <strong>Chrome</strong></div></div>
-      <div class="pwa-step"><div class="pwa-step-num">2</div><div class="pwa-step-text">Tap the <strong>3 dots menu</strong> <span style="font-size:16px">⋮</span> in the top right corner</div></div>
-      <div class="pwa-step"><div class="pwa-step-num">3</div><div class="pwa-step-text">Tap <strong>"Add to Home screen"</strong></div></div>
-      <div class="pwa-step"><div class="pwa-step-num">4</div><div class="pwa-step-text">Tap <strong>"Add"</strong> — the Giveaways icon appears on your home screen 🎉</div></div>
-    </div>
-  </div>
-</div>
+<section class="hero">
   <div class="container">
     <div class="hero-inner">
       <div>
@@ -295,6 +269,14 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
         <div class="hero-btns">
           <a href="#raffles" id="hero-btn-raffles" class="btn-primary" style="width:100%;justify-content:center">🎟️ View Active Raffles</a>
           <button id="hero-btn-community" onclick="openJoinModal()" class="btn-secondary" style="width:100%;justify-content:center">Join Community</button>
+          <a href="https://instant-scratch.vercel.app" target="_blank" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 20px;background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:1px solid rgba(245,200,66,0.3);border-radius:10px;text-decoration:none;transition:all .2s;box-sizing:border-box">
+            <span style="font-size:14px;font-weight:700;color:#F5C842;letter-spacing:0.5px">⚡ Instant Prizes</span>
+            <span style="font-size:11px;color:#888">Only for ticket holders</span>
+          </a>
+          <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vShJYg-6ogBou61TLOiC3MV78ZEgydS0d4XLbH23LNGpShEZj0VF3vzWBwu8_OrDCaM0Av8oXHmU2hI/pubhtml?gid=1728509083&single=true" target="_blank" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 20px;background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:1px solid rgba(255,255,255,0.08);border-radius:10px;text-decoration:none;transition:all .2s;box-sizing:border-box">
+            <span style="font-size:14px;font-weight:700;color:#fff;letter-spacing:0.5px">🏆 Cashback Pool</span>
+            <span style="font-size:11px;color:#888">View Leaderboard →</span>
+          </a>
         </div>
       </div>
       <div class="hero-visual">
@@ -517,6 +499,7 @@ const TR = {
   }
 };
 
+// ── TRANSLATIONS APPLY ──────────────────────────────────
 function t(k){ return (TR[currentLang]||TR.en)[k] || TR.en[k] || k; }
 
 function setLang(lang){
@@ -558,70 +541,6 @@ async function apiFetch(params){
   return r.json();
 }
 
-// ── FIREBASE CLOUD MESSAGING ─────────────────────────────
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDGv3TtfD2XgA-PWjImMgyY_5CLOFawMSI",
-  authDomain: "giveaways-community.firebaseapp.com",
-  projectId: "giveaways-community",
-  storageBucket: "giveaways-community.firebasestorage.app",
-  messagingSenderId: "335882371621",
-  appId: "1:335882371621:web:2ab7ceb418b1524b1e75cc"
-};
-const VAPID_KEY = "BNfB_MPBOLh3eFn60Xvadi5B_sRtqpU1wLqHps-fz_9Js5BaI8B95IdPrzfnlaOupqW4iJ1cfOUQ9bxbBGLE23I";
-
-let _messaging = null;
-
-function initFCM() {
-  try {
-    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-    _messaging = firebase.messaging();
-    // Show toast for foreground messages (tab is open)
-    _messaging.onMessage(payload => {
-      const n = payload.notification || {};
-      showNotifToast('🔔 ' + (n.title||'Giveaways') + (n.body ? ' — ' + n.body : ''));
-    });
-  } catch(e) { console.warn('Firebase init error:', e); }
-}
-
-async function getFCMToken() {
-  try {
-    if (!_messaging) initFCM();
-    if (!_messaging) return null;
-    const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    const token = await _messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
-    return token;
-  } catch(e) { console.warn('FCM getToken error:', e); return null; }
-}
-
-async function saveFCMToken(token) {
-  if (!token) return;
-  const already = localStorage.getItem('gw_fcm_token');
-  if (already === token) return;
-  localStorage.setItem('gw_fcm_token', token);
-  try {
-    const bodyObj = { action: 'saveFCMToken', token };
-    const r = await fetch(API_URL + '?' + new URLSearchParams({
-      action: 'saveFCMToken',
-      body: JSON.stringify(bodyObj)
-    }));
-    const result = await r.json();
-    console.log('FCM token saved:', result);
-  } catch(e) { console.warn('saveFCMToken error:', e); }
-}
-
-function showNotifToast(msg, isError = false) {
-  const el = document.createElement('div');
-  el.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-    background:${isError ? '#c0392b' : 'var(--green)'};color:#fff;
-    padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;
-    z-index:10000;box-shadow:0 4px 20px rgba(0,0,0,0.25);
-    animation:fadeUp .3s ease;max-width:90vw;text-align:center`;
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => { el.style.transition='opacity .4s'; el.style.opacity='0'; }, 3500);
-  setTimeout(() => el.remove(), 4000);
-}
-
 // ── INIT ────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async ()=>{
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('lang-active',b.dataset.lang===currentLang));
@@ -637,11 +556,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   } catch(e){ console.error('Load error:',e); }
   initFAQ();
   initWelcomePopup();
-  setTimeout(initNotifBanner, 1000);
-  initPWABanner();
-  // Register Firebase SW
+  setTimeout(initNotifBanner, 5000);
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(e=>console.warn('SW reg error:',e));
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
   }
   window.addEventListener('scroll',()=>{
     const bg=document.getElementById('bg-parallax');
@@ -753,115 +670,21 @@ function openJoinModal(){document.getElementById('join-modal').style.display='fl
 function closeJoinModal(){document.getElementById('join-modal').style.display='none';document.body.style.overflow='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeJoinModal();}});
 
-// ── PWA INSTALL BANNER ───────────────────────────────────
-let deferredPrompt = null;
-
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-});
-
-function initPWABanner() {
-  // Don't show if already installed as PWA
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  if (isStandalone) return;
-  // Don't show if dismissed
-  if (localStorage.getItem('gw_pwa_dismissed')) return;
-  // Show after 3 seconds
-  setTimeout(() => {
-    document.getElementById('pwa-banner').classList.remove('hidden');
-    // Auto-detect OS for modal default tab
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (!isIOS) switchTab('android');
-  }, 3000);
-}
-
-function showInstallModal() {
-  // On Android Chrome, try native prompt first
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(choice => {
-      if (choice.outcome === 'accepted') {
-        dismissPWABanner();
-        localStorage.setItem('gw_pwa_dismissed', '1');
-      }
-      deferredPrompt = null;
-    });
-    return;
-  }
-  // Otherwise show manual instructions
-  document.getElementById('pwa-modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closePWAModal() {
-  document.getElementById('pwa-modal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function dismissPWABanner() {
-  document.getElementById('pwa-banner').classList.add('hidden');
-  localStorage.setItem('gw_pwa_dismissed', '1');
-}
-
-function switchTab(os) {
-  document.getElementById('steps-ios').style.display = os === 'ios' ? 'block' : 'none';
-  document.getElementById('steps-android').style.display = os === 'android' ? 'block' : 'none';
-  document.getElementById('tab-ios').classList.toggle('active', os === 'ios');
-  document.getElementById('tab-android').classList.toggle('active', os === 'android');
-}
-
-document.getElementById('pwa-modal').addEventListener('click', function(e) {
-  if (e.target === this) closePWAModal();
-});
-
-// ── NOTIFICATIONS BANNER (Firebase FCM) ─────────────────
+// ── NOTIFICATIONS BANNER ────────────────────────────────
 function initNotifBanner(){
-  if(localStorage.getItem('gw_notif_asked')) return;
-  if(!('Notification' in window)) return;
-  if(Notification.permission === 'granted'){
-    // Already granted — silently refresh token
-    getFCMToken().then(token => saveFCMToken(token));
-    return;
-  }
-  const banner = document.createElement('div');
-  banner.id = 'notif-banner';
-  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--black);border-top:2px solid rgba(245,200,66,0.3);padding:16px 20px;display:flex;align-items:center;gap:12px;z-index:9998;flex-wrap:wrap;justify-content:center;animation:slideUp .4s ease';
-  banner.innerHTML = '<span style="color:#fff;font-size:14px;flex:1;min-width:200px">🔔 <strong style="color:var(--gold-light)">Never miss a draw</strong> — get instant push notifications</span><button onclick="enableNotifs()" style="background:var(--gold);color:#000;border:none;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0">Enable Notifications</button><button onclick="dismissNotifBanner()" style="background:transparent;color:var(--gray-light);border:none;font-size:22px;cursor:pointer;padding:4px 10px;flex-shrink:0">✕</button>';
-  document.body.appendChild(banner);
+  if(localStorage.getItem('gw_notif_asked'))return;
+  if(!('Notification' in window))return;
+  if(Notification.permission==='granted')return;
+  setTimeout(()=>{
+    const banner=document.createElement('div');
+    banner.id='notif-banner';
+    banner.style.cssText='position:fixed;bottom:0;left:0;right:0;background:var(--black);border-top:2px solid rgba(245,200,66,0.3);padding:16px 20px;display:flex;align-items:center;gap:12px;z-index:9998;flex-wrap:wrap;justify-content:center';
+    banner.innerHTML='<span style="color:#fff;font-size:14px;flex:1;min-width:200px">🔔 <strong style="color:var(--gold)">Never miss a draw</strong> — enable notifications</span><button onclick="enableNotifs()" style="background:var(--gold);color:#000;border:none;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">Enable Notifications</button><button onclick="dismissNotifBanner()" style="background:transparent;color:#666;border:none;font-size:20px;cursor:pointer;padding:4px 8px">✕</button>';
+    document.body.appendChild(banner);
+  },30000);
 }
-
-async function enableNotifs(){
-  localStorage.setItem('gw_notif_asked','1');
-  document.getElementById('notif-banner')?.remove();
-  if(!('Notification' in window)){
-    showNotifToast('Notifications not supported in this browser.', true);
-    return;
-  }
-  try {
-    const perm = await Notification.requestPermission();
-    if(perm === 'granted'){
-      showNotifToast('⏳ Registering...');
-      const token = await getFCMToken();
-      if(token){
-        await saveFCMToken(token);
-        showNotifToast("🔔 Notifications enabled! You'll hear from us first. 🦁");
-      } else {
-        showNotifToast('Enabled but registration failed — try reloading.', true);
-      }
-    } else {
-      showNotifToast('Notifications blocked. Enable them in browser settings.', true);
-    }
-  } catch(e){
-    console.error('enableNotifs error:', e);
-    showNotifToast('Something went wrong. Please try again.', true);
-  }
-}
-
-function dismissNotifBanner(){
-  localStorage.setItem('gw_notif_asked','1');
-  document.getElementById('notif-banner')?.remove();
-}
+function enableNotifs(){localStorage.setItem('gw_notif_asked','1');document.getElementById('notif-banner')?.remove();Notification.requestPermission();}
+function dismissNotifBanner(){localStorage.setItem('gw_notif_asked','1');document.getElementById('notif-banner')?.remove();}
 </script>
 </body>
 </html>
