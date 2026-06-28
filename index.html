@@ -285,6 +285,8 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
         <div class="hero-btns">
           <a href="#raffles" id="hero-btn-raffles" class="btn-primary" style="width:100%;justify-content:center">🎟️ View Active Raffles</a>
           <button id="hero-btn-community" onclick="openJoinModal()" class="btn-secondary" style="width:100%;justify-content:center">Join Community</button>
+          <a href="https://instant-scratch.vercel.app/" target="_blank" style="width:100%;justify-content:center;display:inline-flex;align-items:center;gap:8px;padding:13px 20px;background:#1a1a1a;color:var(--gold-light);border:1px solid rgba(245,200,66,0.3);border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s" onmouseover="this.style.background='#2a2a2a'" onmouseout="this.style.background='#1a1a1a'">⚡ Instant Prizes</a>
+          <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vShJYg-6ogBou61TLOiC3MV78ZEgydS0d4XLbH23LNGpShEZj0VF3vzWBwu8_OrDCaM0Av8oXHmU2hI/pubhtml?gid=1728509083&single=true" target="_blank" style="width:100%;justify-content:center;display:inline-flex;align-items:center;gap:8px;padding:13px 20px;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-line);border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s" onmouseover="this.style.background='#f0e8c8'" onmouseout="this.style.background='var(--gold-pale)'">🏆 Cashback Pool — View Leaderboard →</a>
         </div>
       </div>
       <div class="hero-visual">
@@ -799,13 +801,15 @@ document.getElementById('pwa-modal').addEventListener('click', function(e) {
 
 // ── NOTIFICATIONS BANNER (Firebase FCM) ─────────────────
 function initNotifBanner(){
-  if(localStorage.getItem('gw_notif_asked')) return;
   if(!('Notification' in window)) return;
   if(Notification.permission === 'granted'){
-    // Already granted — silently refresh token
     getFCMToken().then(token => saveFCMToken(token));
     return;
   }
+  // În PWA standalone, arată întotdeauna bannerul dacă nu e granted
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if(!isStandalone && localStorage.getItem('gw_notif_asked')) return;
+
   const banner = document.createElement('div');
   banner.id = 'notif-banner';
   banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--black);border-top:2px solid rgba(245,200,66,0.3);padding:16px 20px;display:flex;align-items:center;gap:12px;z-index:9998;flex-wrap:wrap;justify-content:center;animation:slideUp .4s ease';
