@@ -637,6 +637,23 @@ function renderAll(){
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmtDate(s){if(!s)return'';const d=new Date(s);return isNaN(d)?s:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
 
+// Auto-add £ if value is numeric and doesn't already have a currency symbol
+function fmtPrice(p){
+  if(!p)return'';
+  p=String(p).trim();
+  if(p.toLowerCase()==='free')return'FREE';
+  if(p.startsWith('£')||p.startsWith('$')||p.startsWith('€'))return p;
+  if(/^\d/.test(p))return'£'+p;
+  return p;
+}
+function fmtPrize(p){
+  if(!p)return'';
+  p=String(p).trim();
+  if(p.startsWith('£')||p.toLowerCase().startsWith('free'))return p;
+  if(/^\d/.test(p))return'£'+p;
+  return p;
+}
+
 function renderRaffles(data){
   const grid=document.getElementById('raffles-grid');
   const raffles=data.raffles||[];
@@ -654,9 +671,9 @@ function renderRaffles(data){
       <div class="raffle-desc">${r.type==='pool'?'50% of the total cash pool goes to the winner':esc(r.fixedPrize||'')}</div>
       ${r.type==='pool'?`<div class="pool-display"><div class="pool-label">💰 Current Pool</div><div class="pool-val">£${parseFloat(r.pool||0).toFixed(2)}</div></div>`:''}
       ${soldPct!==null?`<div class="progress-wrap"><div class="progress-label"><span>Tickets sold</span><strong>${r.sold}/${r.total} (${soldPct}%)</strong></div><div class="progress-bar"><div class="progress-fill" style="width:${soldPct}%"></div></div></div>`:r.sold>0?`<div class="raffle-meta"><div class="raffle-pill">🎟️ <span>${r.sold} tickets sold</span></div></div>`:''}
-      ${instants.length?`<div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">⚡ Instant Prizes</div><div class="instant-prizes">${instants.map(p=>`<div class="prize-chip">${esc(p)}</div>`).join('')}</div>`:''}
+      ${instants.length?`<div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">⚡ Instant Prizes</div><div class="instant-prizes">${instants.map(p=>`<div class="prize-chip">${esc(fmtPrize(p))}</div>`).join('')}</div>`:''}
       ${promos.length?`<div style="margin-bottom:14px"><div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">🎟️ Promo Codes</div>${promos.map(p=>`<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,149,42,0.08);border:1px solid rgba(201,149,42,0.2);border-radius:8px;padding:5px 12px;margin:3px;font-size:12px;"><span style="font-family:'DM Mono',monospace;font-weight:600;color:var(--black)">${esc(p.code)}</span><span style="color:var(--gray)">${p.uses} use${p.uses!==1?'s':''} left</span></div>`).join('')}</div>`:''}
-      <div class="raffle-meta">${r.price?`<div class="raffle-pill">💷 <span>${esc(r.price)} per ticket</span></div>`:''}<div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div></div>
+      <div class="raffle-meta">${r.price?`<div class="raffle-pill">💷 <span>${esc(fmtPrice(r.price))} per ticket</span></div>`:''}<div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div></div>
       ${r.drawDate?`<div class="countdown-wrap" id="cd-${r.id}"><div class="countdown-label">🎰 Draw in</div><div class="countdown-timer"><div class="cd-block"><span class="cd-num" id="cd-d-${r.id}">--</span><div class="cd-lbl">Days</div></div><div class="cd-sep">:</div><div class="cd-block"><span class="cd-num" id="cd-h-${r.id}">--</span><div class="cd-lbl">Hours</div></div><div class="cd-sep">:</div><div class="cd-block"><span class="cd-num" id="cd-m-${r.id}">--</span><div class="cd-lbl">Mins</div></div><div class="cd-sep">:</div><div class="cd-block"><span class="cd-num" id="cd-s-${r.id}">--</span><div class="cd-lbl">Secs</div></div></div></div>`:''}
       <div class="raffle-cta">${r.link?`<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>`:''}</div>
     </div>`;
@@ -667,7 +684,7 @@ function renderWinners(data){
   const list=document.getElementById('winners-list');
   const winners=(data.winners||[]).slice().reverse().slice(0,10);
   if(!winners.length){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray)"><div style="font-size:36px;margin-bottom:12px;opacity:.4">🏆</div><p>First winners coming soon!</p></div>';return;}
-  list.innerHTML=winners.map(w=>`<div class="winner-row"><div class="w-avatar">${(w.username||'?')[0].toUpperCase()}</div><div class="w-main"><div class="w-name">${esc(w.username)}</div><div class="w-raffle">${esc(w.raffle)}</div></div><div style="text-align:right"><div class="w-prize">${esc(w.prize)}</div><div class="w-date">${fmtDate(w.date)}</div></div><div class="trophy-badge">🏆</div></div>`).join('');
+  list.innerHTML=winners.map(w=>`<div class="winner-row"><div class="w-avatar">${(w.username||'?')[0].toUpperCase()}</div><div class="w-main"><div class="w-name">${esc(w.username)}</div><div class="w-raffle">${esc(w.raffle)}</div></div><div style="text-align:right"><div class="w-prize">${esc(fmtPrize(w.prize))}</div><div class="w-date">${fmtDate(w.date)}</div></div><div class="trophy-badge">🏆</div></div>`).join('');
 }
 
 function updateHeroStats(data){
