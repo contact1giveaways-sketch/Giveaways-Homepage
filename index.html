@@ -20,48 +20,27 @@
 <meta name="twitter:image" content="https://giveaways-homepage.vercel.app/og-image.png">
 <meta name="description" content="Transparent raffles, live draws, instant prizes and cashback pool. Every ticket counts.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-BSVJT515DF">
-// ── REFRESH ─────────────────────────────────────────────
-async function refreshPage() {
-  const btn = document.getElementById('refresh-fab');
-  if (btn) btn.classList.add('spinning');
-  try {
-    await loadHomeData();
-  } catch(e) {}
-  setTimeout(() => { if (btn) btn.classList.remove('spinning'); }, 600);
-}
-
-</script>
+<!-- Firebase Cloud Messaging -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BSVJT515DF"></script>
 <script>
 window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());
 gtag('config','G-BSVJT515DF');
-
-// ── REFRESH ─────────────────────────────────────────────
-async function refreshPage() {
-  const btn = document.getElementById('refresh-fab');
-  if (btn) btn.classList.add('spinning');
-  try {
-    await loadHomeData();
-  } catch(e) {}
-  setTimeout(() => { if (btn) btn.classList.remove('spinning'); }, 600);
-}
-
 </script>
 <style>
 :root{--gold:#C9952A;--gold-light:#F5C842;--gold-pale:#FDF6E3;--gold-line:rgba(201,149,42,0.2);--black:#0F0F0F;--gray-dark:#2A2A2A;--gray:#666;--gray-light:#999;--border:#E8E0D0;--bg:#FAFAF8;--white:#FFFFFF;--green:#2D7D46;--radius:16px}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;font-size:16px;scroll-padding-top:70px}
-body{background:var(--bg);color:var(--gray-dark);font-family:'DM Sans',sans-serif;line-height:1.6;overflow-x:hidden;position:relative;overscroll-behavior-y:contain}
-
+body{background:var(--bg);color:var(--gray-dark);font-family:'DM Sans',sans-serif;line-height:1.6;overflow-x:hidden;position:relative}
+#bg-parallax{position:fixed;inset:-60px;background:url('bg.png') center/cover no-repeat;opacity:0.55;pointer-events:none;z-index:0;will-change:transform}
 a{text-decoration:none;color:inherit}
 img{display:block;max-width:100%}
 .container{max-width:1080px;margin:0 auto;padding:0 24px}
 .section{padding:80px 0}
 .divider{height:1px;background:var(--border)}
-
-/* NAV */
 nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px 0}
 .nav-inner{display:flex;align-items:center;justify-content:space-between}
 .nav-logo{display:flex;align-items:center;gap:12px}
@@ -76,8 +55,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .lang-btn{padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;font-size:11px;font-weight:700;color:var(--gray);cursor:pointer;transition:all .2s}
 .lang-btn:hover{border-color:var(--gold);color:var(--gold)}
 .lang-btn.lang-active{background:var(--gold);color:#fff;border-color:var(--gold)}
-
-/* HERO */
 .hero{padding:100px 0 80px;position:relative;overflow:hidden}
 .hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1}
 .hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,6vw,80px);letter-spacing:3px;line-height:1;color:var(--black);margin-bottom:12px}
@@ -96,15 +73,11 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .stat-icon.blue{background:rgba(59,130,246,0.1)}
 .stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--black);letter-spacing:1px;line-height:1}
 .stat-lbl{font-size:12px;color:var(--gray-light);margin-top:2px}
-
-/* SECTIONS */
 .sec-header{margin-bottom:48px}
 .sec-tag{font-size:11px;font-weight:600;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
 .sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4vw,48px);letter-spacing:2px;color:var(--black);line-height:1;margin-bottom:10px}
 .sec-sub{font-size:15px;color:var(--gray);max-width:480px}
 .raffles-bg,.winners-bg{background:var(--white)}
-
-/* RAFFLES */
 .raffles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
 .raffle-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:all .25s;position:relative;overflow:hidden}
 .raffle-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light))}
@@ -138,16 +111,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .draw-done{font-size:12px;color:var(--green);font-weight:600;text-align:center;padding:8px;background:rgba(34,197,94,0.1);border-radius:8px;margin-bottom:14px}
 .empty-raffles{text-align:center;padding:60px 20px;color:var(--gray);grid-column:1/-1}
 .empty-raffles .empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
-
-/* HOW IT WORKS */
 .how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
 .how-card{padding:28px 24px;text-align:center;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);transition:all .25s}
 .how-card:hover{border-color:var(--gold-line);box-shadow:0 4px 20px rgba(201,149,42,0.08)}
 .how-num{width:48px;height:48px;border-radius:50%;background:var(--gold-pale);border:2px solid var(--gold-line);display:grid;place-items:center;margin:0 auto 16px;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold)}
 .how-title{font-weight:600;font-size:15px;margin-bottom:8px;color:var(--black)}
 .how-text{font-size:13px;color:var(--gray);line-height:1.6}
-
-/* WINNERS */
 .winners-list{display:flex;flex-direction:column;gap:10px}
 .winner-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:12px;transition:border-color .2s}
 .winner-row:hover{border-color:var(--gold-line)}
@@ -158,8 +127,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .w-prize{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--gold)}
 .w-date{font-size:11px;color:var(--gray-light);margin-top:2px;text-align:right}
 .trophy-badge{width:28px;height:28px;border-radius:50%;background:rgba(201,149,42,0.1);display:grid;place-items:center;font-size:14px}
-
-/* CHANNELS */
 .channels-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .channel-card{border-radius:var(--radius);padding:28px;display:flex;flex-direction:column;gap:16px;transition:transform .2s}
 .channel-card:hover{transform:translateY(-2px)}
@@ -170,8 +137,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .ch-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:13px;font-weight:600;color:var(--white);width:fit-content;transition:background .2s}
 .ch-btn:hover{background:rgba(255,255,255,0.3)}
 .ch-members{font-size:11px;opacity:.7;letter-spacing:1px;text-transform:uppercase}
-
-/* ABOUT */
 .about-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
 .about-values{display:flex;flex-direction:column;gap:12px;margin-top:24px}
 .value-row{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--white);border:1px solid var(--border);border-radius:10px}
@@ -182,8 +147,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .about-lion{font-size:80px;margin-bottom:16px;display:block}
 .about-slogan{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:var(--gray-dark);line-height:1.6}
 .about-slogan strong{color:var(--gold);font-style:normal}
-
-/* FAQ */
 .faq-list{display:flex;flex-direction:column;gap:2px}
 .faq-item{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--white)}
 .faq-q{padding:18px 20px;min-height:52px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-weight:500;font-size:15px;color:var(--black);transition:color .2s;user-select:none;gap:12px}
@@ -192,8 +155,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .faq-item.open .faq-arrow{transform:rotate(180deg)}
 .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s;font-size:14px;color:var(--gray);line-height:1.7;padding:0 20px}
 .faq-item.open .faq-a{max-height:300px;padding:0 20px 18px}
-
-/* FOOTER */
 footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-size:13px}
 .footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
 .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--gold)}
@@ -201,21 +162,6 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 .footer-links a{transition:color .2s}
 .footer-links a:hover{color:var(--gold)}
 
-/* WELCOME POPUP */
-#welcome-popup{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
-#welcome-popup.hidden{display:none}
-.welcome-box{background:var(--white);border-radius:24px;padding:36px 28px;max-width:420px;width:100%;position:relative;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
-.welcome-close{position:absolute;top:14px;right:16px;background:var(--border);border:none;width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;color:var(--gray);display:grid;place-items:center}
-.welcome-emoji{font-size:48px;margin-bottom:12px;display:block}
-.welcome-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--black);margin-bottom:14px;line-height:1.1}
-.welcome-title span{color:var(--gold)}
-.welcome-body{font-size:14px;color:var(--gray);line-height:1.7;margin-bottom:20px}
-.welcome-highlight{background:var(--gold-pale);border:1px solid var(--gold-line);border-radius:12px;padding:14px 16px;margin-bottom:22px;font-size:13px;color:var(--gray-dark);line-height:1.6}
-.welcome-highlight strong{color:var(--gold);font-size:15px}
-.welcome-btn{width:100%;padding:14px;background:var(--gold);color:var(--white);border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(201,149,42,0.35)}
-.welcome-skip{margin-top:12px;font-size:12px;color:var(--gray-light);cursor:pointer;text-decoration:underline;background:none;border:none}
-
-/* RESPONSIVE */
 @media(max-width:768px){
 .nav-links{display:none}
 .nav-cta{padding:8px 14px;font-size:12px}
@@ -241,37 +187,41 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 .how-grid{grid-template-columns:1fr}
 .hero-title{font-size:44px}
 }
-
-.btn-instant:hover{border-color:rgba(245,200,66,0.6)!important;background:linear-gradient(135deg,#222,#1a1a00)!important;transform:translateY(-1px)}
-.btn-leaderboard:hover{border-color:rgba(255,255,255,0.15)!important;background:linear-gradient(135deg,#222,#1a1a1a)!important;transform:translateY(-1px)}
-
-
-/* REFRESH BUTTON */
-.refresh-fab{
-  position:fixed;bottom:24px;right:20px;
-  width:46px;height:46px;border-radius:50%;
-  background:var(--gold);color:#000;
-  border:none;font-size:20px;cursor:pointer;
-  box-shadow:0 4px 20px rgba(201,149,42,0.4);
-  display:grid;place-items:center;
-  z-index:200;transition:all .2s;
-}
-.refresh-fab:hover{transform:scale(1.1)}
-.refresh-fab.spinning{animation:spinFab .6s linear infinite}
-@keyframes spinFab{to{transform:rotate(360deg)}}
-
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* ── PWA INSTALL BANNER ──────────────────────────────── */
+#pwa-banner{position:sticky;top:65px;z-index:99;background:linear-gradient(135deg,#1a1a1a,#2a2010);border-bottom:1px solid rgba(245,200,66,0.25);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;animation:slideDown .4s ease}
+#pwa-banner.hidden{display:none}
+@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.pwa-banner-text{font-size:13px;color:rgba(255,255,255,0.85);flex:1;text-align:center}
+.pwa-banner-text strong{color:var(--gold-light)}
+.pwa-install-btn{padding:7px 16px;background:var(--gold);color:#000;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.pwa-dismiss-btn{background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1}
+#pwa-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(4px)}
+#pwa-modal.open{display:flex}
+.pwa-modal-box{background:var(--white);border-radius:24px 24px 0 0;padding:28px 24px 36px;width:100%;max-width:480px;animation:slideUp .35s ease}
+.pwa-modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--black);margin-bottom:6px}
+.pwa-modal-sub{font-size:13px;color:var(--gray);margin-bottom:20px}
+.pwa-step{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:8px}
+.pwa-step-num{width:26px;height:26px;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center;flex-shrink:0}
+.pwa-step-text{font-size:14px;color:var(--gray-dark);line-height:1.5}
+.pwa-step-text strong{color:var(--black)}
+.pwa-modal-close{float:right;background:var(--border);border:none;width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;color:var(--gray);display:grid;place-items:center;margin-top:-4px}
+.pwa-os-tabs{display:flex;gap:8px;margin-bottom:16px}
+.pwa-os-tab{flex:1;padding:8px;border:2px solid var(--border);border-radius:10px;background:var(--bg);font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s}
+.pwa-os-tab.active{border-color:var(--gold);background:var(--gold-pale);color:var(--gold)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes popIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 </style>
 </head>
 <body>
+
+<div id="bg-parallax"></div>
 
 <nav>
   <div class="container">
     <div class="nav-inner">
       <div class="nav-logo">
-        <div class="nav-icon">🎁</div>
+        <div class="nav-icon" style="background:none;padding:0;overflow:hidden"><img src="/icon-192.png" alt="G" style="width:40px;height:40px;border-radius:10px;display:block;object-fit:cover"></div>
         <div class="nav-name">Giveaways</div>
       </div>
       <div class="nav-links">
@@ -291,7 +241,38 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
   </div>
 </nav>
 
-<section class="hero">
+<!-- ── PWA INSTALL BANNER ── -->
+<div id="pwa-banner" class="hidden">
+  <span class="pwa-banner-text">📲 <strong>Get the app</strong> — install Giveaways on your home screen for instant notifications</span>
+  <button class="pwa-install-btn" onclick="showInstallModal()">Install App</button>
+  <button class="pwa-dismiss-btn" onclick="dismissPWABanner()">✕</button>
+</div>
+
+<!-- ── PWA INSTALL MODAL ── -->
+<div id="pwa-modal">
+  <div class="pwa-modal-box">
+    <button class="pwa-modal-close" onclick="closePWAModal()">✕</button>
+    <div class="pwa-modal-title">📲 Install the App</div>
+    <p class="pwa-modal-sub">Free, no App Store needed. Works like a native app.</p>
+    <div class="pwa-os-tabs">
+      <button class="pwa-os-tab active" id="tab-ios" onclick="switchTab('ios')">🍎 iPhone / iPad</button>
+      <button class="pwa-os-tab" id="tab-android" onclick="switchTab('android')">🤖 Android</button>
+    </div>
+    <div id="steps-ios">
+      <div class="pwa-step"><div class="pwa-step-num">1</div><div class="pwa-step-text">Open <strong>giveaways-homepage.vercel.app</strong> in <strong>Safari</strong> (not Chrome)</div></div>
+      <div class="pwa-step"><div class="pwa-step-num">2</div><div class="pwa-step-text">Tap the <strong>Share button</strong> <span style="font-size:16px">⬆️</span> at the bottom of the screen</div></div>
+      <div class="pwa-step"><div class="pwa-step-num">3</div><div class="pwa-step-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div></div>
+      <div class="pwa-step"><div class="pwa-step-num">4</div><div class="pwa-step-text">Tap <strong>"Add"</strong> — the Giveaways icon appears on your home screen 🎉</div></div>
+    </div>
+    <div id="steps-android" style="display:none">
+      <div style="background:rgba(201,149,42,0.08);border:1px solid var(--gold-line);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--gray-dark)">⚠️ <strong>Important:</strong> Use <strong>Google Chrome</strong> only. Samsung Browser and other browsers do not support PWA installation correctly.</div>
+      <div class="pwa-step"><div class="pwa-step-num">1</div><div class="pwa-step-text">Open this page in <strong>Google Chrome</strong> (not Samsung Browser)</div></div>
+      <div class="pwa-step"><div class="pwa-step-num">2</div><div class="pwa-step-text">Tap the <strong>3 dots menu</strong> <span style="font-size:16px">⋮</span> in the top right corner</div></div>
+      <div class="pwa-step"><div class="pwa-step-num">3</div><div class="pwa-step-text">Tap <strong>"Add to Home screen"</strong></div></div>
+      <div class="pwa-step"><div class="pwa-step-num">4</div><div class="pwa-step-text">Tap <strong>"Add"</strong> — the Giveaways icon appears on your home screen 🎉</div></div>
+    </div>
+  </div>
+</div>
   <div class="container">
     <div class="hero-inner">
       <div>
@@ -304,14 +285,6 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
         <div class="hero-btns">
           <a href="#raffles" id="hero-btn-raffles" class="btn-primary" style="width:100%;justify-content:center">🎟️ View Active Raffles</a>
           <button id="hero-btn-community" onclick="openJoinModal()" class="btn-secondary" style="width:100%;justify-content:center">Join Community</button>
-          <a href="https://instant-scratch.vercel.app" target="_blank" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 20px;background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:1px solid rgba(245,200,66,0.3);border-radius:10px;text-decoration:none;transition:all .2s;box-sizing:border-box">
-            <span style="font-size:14px;font-weight:700;color:#F5C842;letter-spacing:0.5px">⚡ Instant Prizes</span>
-            <span style="font-size:11px;color:#888">Only for ticket holders</span>
-          </a>
-          <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vShJYg-6ogBou61TLOiC3MV78ZEgydS0d4XLbH23LNGpShEZj0VF3vzWBwu8_OrDCaM0Av8oXHmU2hI/pubhtml?gid=1728509083&single=true" target="_blank" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 20px;background:linear-gradient(135deg,#1a1a1a,#0d0d0d);border:1px solid rgba(255,255,255,0.08);border-radius:10px;text-decoration:none;transition:all .2s;box-sizing:border-box">
-            <span style="font-size:14px;font-weight:700;color:#fff;letter-spacing:0.5px">🏆 Cashback Pool</span>
-            <span style="font-size:11px;color:#888">View Leaderboard →</span>
-          </a>
         </div>
       </div>
       <div class="hero-visual">
@@ -357,7 +330,7 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
     <div class="how-grid">
       <div class="how-card"><div class="how-num">1</div><div class="how-title" id="how1-title">Buy Tickets</div><div class="how-text" id="how1-text">Buy tickets in any active raffle on Raffall.</div></div>
       <div class="how-card"><div class="how-num">2</div><div class="how-title" id="how2-title">Join the Community</div><div class="how-text">Join us on <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> or <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a>.</div></div>
-      <div class="how-card"><div class="how-num">3</div><div class="how-title" id="how3-title">Enter Instant Draws</div><div class="how-text" id="how3-text">If you have tickets, enter the instant prizes for free on our <a href="https://instant-scratch.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platform</a>.</div></div>
+      <div class="how-card"><div class="how-num">3</div><div class="how-title" id="how3-title">Enter Instant Draws</div><div class="how-text" id="how3-text">If you have tickets, enter the instant prizes for free on our <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platform</a>.</div></div>
       <div class="how-card"><div class="how-num">4</div><div class="how-title" id="how4-title">Watch Live &amp; Win</div><div class="how-text"></div></div>
     </div>
   </div>
@@ -423,7 +396,7 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
             <div class="value-text">
               <strong id="about-instant-title">Instant Prizes on Every Competition</strong>
               <span id="about-instant-text">Every competition comes with instant prizes on top of the main draw — at zero extra cost. Buy a ticket, register your username on our platform, and you're automatically in.</span>
-              <a href="https://instant-scratch.vercel.app" target="_blank" style="color:var(--gold);font-weight:600" id="about-instant-link">Go to Instant Win platform →</a>
+              <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600" id="about-instant-link">Go to Instant Win platform →</a>
             </div>
           </div>
         </div>
@@ -448,18 +421,6 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
   </div>
 </section>
 
-<div id="welcome-popup" class="hidden">
-  <div class="welcome-box">
-    <button class="welcome-close" onclick="closeWelcome()">✕</button>
-    <span class="welcome-emoji">🦁</span>
-    <div class="welcome-title">Here's <span>The Deal</span></div>
-    <p class="welcome-body">Join our community — and when we hit <strong>1,000 active members</strong>, we'll run a <strong>£1,000 raffle every single day.</strong></p>
-    <div class="welcome-highlight">💡 The logic is simple:<br><strong>£1 ticket × 1,000 people = £1,000 prize daily</strong><br>Someone wins every 24 hours.<br><strong>Maybe it's you next. 🏆</strong></div>
-    <button class="welcome-btn" onclick="closeWelcomeJoin()">Join the Community →</button><br>
-    <button class="welcome-skip" onclick="closeWelcome()">Just browse for now</button>
-  </div>
-</div>
-
 <div id="join-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;padding:20px;align-items:center;justify-content:center">
   <div style="background:var(--white);border-radius:20px;padding:36px 32px;width:100%;max-width:400px;text-align:center;position:relative">
     <button onclick="closeJoinModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--gray)">✕</button>
@@ -483,7 +444,7 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
       <div class="footer-links">
         <a href="https://t.me/GiveawaysEn" target="_blank">Telegram</a>
         <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank">WhatsApp</a>
-        <a href="https://instant-scratch.vercel.app" target="_blank">Instant Win</a>
+        <a href="https://instant-win-xi.vercel.app" target="_blank">Instant Win</a>
       </div>
     </div>
   </div>
@@ -501,8 +462,8 @@ let currentLang = localStorage.getItem('gw_lang') || 'en';
 const TR = {
   en: { nav_raffles:"Raffles",nav_how:"How it works",nav_winners:"Winners",nav_community:"Community",nav_faq:"FAQ",nav_join:"Join",hero_slogan:"At other raffles you either win or lose.",hero_slogan_bold:"With us, you win either way.",hero_title1:"Win",hero_title2:"Real",hero_title3:"Prizes.",hero_subtitle:"Transparent raffles, live draws, instant prizes — every ticket counts.",hero_btn_raffles:"🎟️ View Active Raffles",hero_btn_community:"Join Community",hero_stat_winners:"Total Winners",hero_stat_raffles:"Active Raffles",hero_stat_live:"Instant Win Draws",raffles_tag:"Active Now",raffles_title:"Live Raffles",raffles_sub:"Every raffle is drawn transparently. Watch it happen live on our Instant Win platform.",winners_tag:"Hall of Fame",winners_title:"Recent Winners",winners_sub:"Every winner, every prize. Full transparency — always.",community_tag:"Stay Connected",community_title:"Join the Community",community_sub:"Get notified the moment a new draw opens. Don't miss your window.",tg_name:"Telegram Channel",tg_members:"Main channel · Draw announcements · Winners",tg_desc:"All draw announcements happen here first. Turn on notifications and never miss an instant prize window.",tg_btn:"Join Channel →",wa_name:"WhatsApp Channel",wa_members:"Announcements · Updates · Winners",wa_desc:"Follow our WhatsApp channel for all the latest updates, draw announcements, and winner reveals.",wa_btn:"Follow Channel →",about_tag:"About Us",about_title:"Who We Are",about_text:"We're a UK-based raffle community built around one simple idea: everyone who plays should have a real chance to win something.",about_cashback_title:"Cashback Pool — Win Even When You Lose",about_cashback_text:"20% of the gross profit from every raffle goes into a shared pool. At Christmas, that money comes back to players — proportionally to how many tickets each person bought. The more you play, the more you get back.",about_cashback_link:"View live leaderboard →",about_instant_title:"Instant Prizes on Every Competition",about_instant_text:"Every competition comes with instant prizes on top of the main draw — at zero extra cost. Buy a ticket, register your username on our platform, and you're automatically in.",about_instant_link:"Go to Instant Win platform →",about_slogan:"At other raffles you either win or lose.",about_slogan_bold:"With us, you win either way.",faq_tag:"Got Questions?",faq_title:"FAQ",footer_copy:"© 2026 · UK Registered · All rights reserved",how_tag:"Simple Process",how_title:"How It Works",how_sub:"From ticket to winner in four easy steps.",how1_title:"Buy Tickets",how1_text:"Buy tickets in any active raffle on Raffall.",how2_title:"Join the Community",how3_title:"Enter Instant Draws",how3_text:"If you have tickets, enter the instant prizes for free on our platform.",how4_title:"Watch Live & Win",join_modal_title:"Join the Community",join_modal_sub:"Choose your preferred platform. Turn on notifications to never miss a draw.",join_tg_btn:"Telegram Channel",join_wa_btn:"WhatsApp Channel",
     faqs:[
-      {q:"How do I enter?",a:`Buy tickets at <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>. To enter instant prizes for free, register your Raffall username at <a href="https://instant-scratch.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>. Then follow us on <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> or <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> and turn on notifications.`},
-      {q:"How do instant prizes work?",a:`Every competition includes instant prizes on top of the main Raffall draw — free for any ticket holder. When we announce a draw on our channels, head to <a href="https://instant-scratch.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>, register your Raffall username, and watch the live draw. One entry per person per competition.`},
+      {q:"How do I enter?",a:`Buy tickets at <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>. To enter instant prizes for free, register your Raffall username at <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>. Then follow us on <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> or <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> and turn on notifications.`},
+      {q:"How do instant prizes work?",a:`Every competition includes instant prizes on top of the main Raffall draw — free for any ticket holder. When we announce a draw on our channels, head to <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>, register your Raffall username, and watch the live draw. One entry per person per competition.`},
       {q:"How quickly are prizes paid?",a:"All prizes are paid within 24 hours via bank transfer. We'll contact you directly."},
       {q:"Can I win more than one instant prize?",a:"No. Each participant can win one instant prize per competition. If you win, you're automatically removed from subsequent draws."},
       {q:"What if the minimum ticket threshold isn't reached?",a:"The draw still happens. The winner receives 50% of the total ticket sales. If you buy a ticket, a draw will always take place."},
@@ -512,8 +473,8 @@ const TR = {
   },
   ro: { nav_raffles:"Tombole",nav_how:"Cum funcționează",nav_winners:"Câștigători",nav_community:"Comunitate",nav_faq:"Întrebări",nav_join:"Alătură-te",hero_slogan:"La alte tombole ori câștigești, ori pierzi.",hero_slogan_bold:"La noi câștigi oricum.",hero_title1:"Câștigă",hero_title2:"Premii",hero_title3:"Reale.",hero_subtitle:"Tombole transparente, extrageri live, premii instant — fiecare bilet contează.",hero_btn_raffles:"🎟️ Vezi Tombolele Active",hero_btn_community:"Intră în Comunitate",hero_stat_winners:"Câștigători Totali",hero_stat_raffles:"Tombole Active",hero_stat_live:"Extrageri Instant Win",raffles_tag:"Active Acum",raffles_title:"Tombole Live",raffles_sub:"Fiecare tombolă este extrasă transparent. Urmărește live pe platforma noastră Instant Win.",winners_tag:"Hall of Fame",winners_title:"Câștigători Recenți",winners_sub:"Fiecare câștigător, fiecare premiu. Transparență totală — mereu.",community_tag:"Rămâi Conectat",community_title:"Intră în Comunitate",community_sub:"Fii notificat imediat ce se deschide o nouă extragere. Nu rata nicio șansă.",tg_name:"Canal Telegram",tg_members:"Canal principal · Anunțuri · Câștigători",tg_desc:"Toate anunțurile de extragere apar aici primele. Activează notificările.",tg_btn:"Intră pe Canal →",wa_name:"Canal WhatsApp",wa_members:"Anunțuri · Actualizări · Câștigători",wa_desc:"Urmărește canalul nostru de WhatsApp pentru toate actualizările și anunțurile.",wa_btn:"Urmărește Canalul →",about_tag:"Despre Noi",about_title:"Cine Suntem",about_text:"Suntem o comunitate de tombole cu sediul în UK construită în jurul unei idei simple: toți cei care joacă ar trebui să aibă o șansă reală de a câștiga ceva.",about_cashback_title:"Cashback Pool — Câștigi Chiar și Când Pierzi",about_cashback_text:"20% din profitul brut al fiecărei tombole merge într-un pool comun. De Crăciun, acești bani se întorc la jucători proporțional cu câte bilete a cumpărat fiecare.",about_cashback_link:"Vezi clasamentul live →",about_instant_title:"Premii Instant la Fiecare Competiție",about_instant_text:"Fiecare competiție vine cu premii instant pe lângă premiul principal — fără costuri suplimentare.",about_instant_link:"Mergi la platforma Instant Win →",about_slogan:"La alte tombole ori câștigești, ori pierzi.",about_slogan_bold:"La noi câștigi oricum.",faq_tag:"Ai Întrebări?",faq_title:"Întrebări Frecvente",footer_copy:"© 2026 · Înregistrat în UK · Toate drepturile rezervate",how_tag:"Proces Simplu",how_title:"Cum Funcționează",how_sub:"De la bilet la câștigător în patru pași simpli.",how1_title:"Cumpără Bilete",how1_text:"Cumpără bilete la orice tombolă activă pe Raffall.",how2_title:"Intră în Comunitate",how3_title:"Înscrie-te la Instant",how3_text:"Dacă ai bilete, înscrie-te gratuit la premiile instant pe platforma noastră.",how4_title:"Urmărește Live & Câștigă",join_modal_title:"Intră în Comunitate",join_modal_sub:"Alege platforma preferată. Activează notificările să nu ratezi nicio extragere.",join_tg_btn:"Canal Telegram",join_wa_btn:"Canal WhatsApp",
     faqs:[
-      {q:"Cum mă înscriu?",a:`Cumpără bilete pe <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>. Pentru premiile instant, înregistrează-ți username-ul pe <a href="https://instant-scratch.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platforma noastră</a>. Urmărește-ne pe <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> sau <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a>.`},
-      {q:"Cum funcționează premiile instant?",a:`Fiecare competiție include premii instant gratuit pentru orice deținător de bilet. Când anunțăm o extragere, mergi pe <a href="https://instant-scratch.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platforma noastră</a> și înregistrează-ți username-ul.`},
+      {q:"Cum mă înscriu?",a:`Cumpără bilete pe <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>. Pentru premiile instant, înregistrează-ți username-ul pe <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platforma noastră</a>. Urmărește-ne pe <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> sau <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a>.`},
+      {q:"Cum funcționează premiile instant?",a:`Fiecare competiție include premii instant gratuit pentru orice deținător de bilet. Când anunțăm o extragere, mergi pe <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">platforma noastră</a> și înregistrează-ți username-ul.`},
       {q:"Cât de repede sunt plătite premiile?",a:"Toate premiile sunt plătite în 24 de ore prin transfer bancar. Te contactăm noi direct."},
       {q:"Pot câștiga mai mult de un premiu instant?",a:"Nu. Fiecare participant poate câștiga un singur premiu instant per competiție."},
       {q:"Ce se întâmplă dacă nu se vând minimul de bilete?",a:"Extragerea are loc oricum. Câștigătorul primește 50% din totalul vânzărilor."},
@@ -523,8 +484,8 @@ const TR = {
   },
   it: { nav_raffles:"Lotterie",nav_how:"Come funziona",nav_winners:"Vincitori",nav_community:"Comunità",nav_faq:"FAQ",nav_join:"Unisciti",hero_slogan:"In altre lotterie o vinci o perdi.",hero_slogan_bold:"Con noi vinci sempre.",hero_title1:"Vinci",hero_title2:"Premi",hero_title3:"Veri.",hero_subtitle:"Lotterie trasparenti, estrazioni live, premi istantanei — ogni biglietto conta.",hero_btn_raffles:"🎟️ Vedi Lotterie Attive",hero_btn_community:"Unisciti alla Comunità",hero_stat_winners:"Vincitori Totali",hero_stat_raffles:"Lotterie Attive",hero_stat_live:"Estrazioni Instant Win",raffles_tag:"Attive Ora",raffles_title:"Lotterie Live",raffles_sub:"Ogni lotteria viene estratta in modo trasparente. Guardalo live sulla nostra piattaforma.",winners_tag:"Hall of Fame",winners_title:"Vincitori Recenti",winners_sub:"Ogni vincitore, ogni premio. Trasparenza totale — sempre.",community_tag:"Resta Connesso",community_title:"Unisciti alla Comunità",community_sub:"Ricevi notifiche nel momento in cui si apre una nuova estrazione.",tg_name:"Canale Telegram",tg_members:"Canale principale · Annunci · Vincitori",tg_desc:"Tutti gli annunci di estrazione appaiono qui per primi. Attiva le notifiche.",tg_btn:"Unisciti al Canale →",wa_name:"Canale WhatsApp",wa_members:"Annunci · Aggiornamenti · Vincitori",wa_desc:"Segui il nostro canale WhatsApp per tutti gli aggiornamenti e gli annunci.",wa_btn:"Segui il Canale →",about_tag:"Chi Siamo",about_title:"Chi Siamo",about_text:"Siamo una comunità di lotterie con sede nel Regno Unito costruita attorno a un'idea semplice: tutti dovrebbero avere una vera possibilità di vincere.",about_cashback_title:"Cashback Pool — Vinci Anche Quando Perdi",about_cashback_text:"Il 20% del profitto lordo di ogni lotteria va in un pool condiviso. A Natale, quei soldi tornano ai giocatori proporzionalmente.",about_cashback_link:"Vedi la classifica live →",about_instant_title:"Premi Istantanei in Ogni Competizione",about_instant_text:"Ogni competizione include premi istantanei oltre al premio principale — senza costi aggiuntivi.",about_instant_link:"Vai alla piattaforma Instant Win →",about_slogan:"In altre lotterie o vinci o perdi.",about_slogan_bold:"Con noi vinci sempre.",faq_tag:"Hai Domande?",faq_title:"FAQ",footer_copy:"© 2026 · Registrato nel Regno Unito · Tutti i diritti riservati",how_tag:"Processo Semplice",how_title:"Come Funziona",how_sub:"Dal biglietto al vincitore in quattro semplici passaggi.",how1_title:"Acquista Biglietti",how1_text:"Acquista biglietti per qualsiasi lotteria attiva su Raffall.",how2_title:"Unisciti alla Comunità",how3_title:"Partecipa alle Estrazioni",how3_text:"Se hai biglietti, iscriviti gratuitamente ai premi istantanei sulla nostra piattaforma.",how4_title:"Guarda Live & Vinci",join_modal_title:"Unisciti alla Comunità",join_modal_sub:"Scegli la tua piattaforma preferita. Attiva le notifiche.",join_tg_btn:"Canale Telegram",join_wa_btn:"Canale WhatsApp",
     faqs:[
-      {q:"Come mi iscrivo?",a:`Acquista biglietti su <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>. Per i premi istantanei, registra il tuo username su <a href="https://instant-scratch.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">nostra piattaforma</a>. Seguici su <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> o <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a>.`},
-      {q:"Come funzionano i premi istantanei?",a:`Ogni competizione include premi istantanei gratuiti per qualsiasi detentore di biglietto. Quando annunciamo un'estrazione, vai sulla <a href="https://instant-scratch.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">nostra piattaforma</a> e registra il tuo username.`},
+      {q:"Come mi iscrivo?",a:`Acquista biglietti su <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>. Per i premi istantanei, registra il tuo username su <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">nostra piattaforma</a>. Seguici su <a href="https://t.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> o <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a>.`},
+      {q:"Come funzionano i premi istantanei?",a:`Ogni competizione include premi istantanei gratuiti per qualsiasi detentore di biglietto. Quando annunciamo un'estrazione, vai sulla <a href="https://instant-win-xi.vercel.app" target="_blank" style="color:var(--gold);font-weight:600">nostra piattaforma</a> e registra il tuo username.`},
       {q:"Quanto velocemente vengono pagati i premi?",a:"Tutti i premi vengono pagati entro 24 ore tramite bonifico bancario. Ti contatteremo direttamente."},
       {q:"Posso vincere più di un premio istantaneo?",a:"No. Ogni partecipante può vincere un solo premio istantaneo per competizione."},
       {q:"Cosa succede se non viene raggiunto il minimo di biglietti?",a:"L'estrazione avviene comunque. Il vincitore riceve il 50% del totale delle vendite."},
@@ -534,7 +495,6 @@ const TR = {
   }
 };
 
-// ── TRANSLATIONS APPLY ──────────────────────────────────
 function t(k){ return (TR[currentLang]||TR.en)[k] || TR.en[k] || k; }
 
 function setLang(lang){
@@ -576,6 +536,70 @@ async function apiFetch(params){
   return r.json();
 }
 
+// ── FIREBASE CLOUD MESSAGING ─────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDGv3TtfD2XgA-PWjImMgyY_5CLOFawMSI",
+  authDomain: "giveaways-community.firebaseapp.com",
+  projectId: "giveaways-community",
+  storageBucket: "giveaways-community.firebasestorage.app",
+  messagingSenderId: "335882371621",
+  appId: "1:335882371621:web:2ab7ceb418b1524b1e75cc"
+};
+const VAPID_KEY = "BNfB_MPBOLh3eFn60Xvadi5B_sRtqpU1wLqHps-fz_9Js5BaI8B95IdPrzfnlaOupqW4iJ1cfOUQ9bxbBGLE23I";
+
+let _messaging = null;
+
+function initFCM() {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    _messaging = firebase.messaging();
+    // Show toast for foreground messages (tab is open)
+    _messaging.onMessage(payload => {
+      const n = payload.notification || {};
+      showNotifToast('🔔 ' + (n.title||'Giveaways') + (n.body ? ' — ' + n.body : ''));
+    });
+  } catch(e) { console.warn('Firebase init error:', e); }
+}
+
+async function getFCMToken() {
+  try {
+    if (!_messaging) initFCM();
+    if (!_messaging) return null;
+    const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const token = await _messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
+    return token;
+  } catch(e) { console.warn('FCM getToken error:', e); return null; }
+}
+
+async function saveFCMToken(token) {
+  if (!token) return;
+  const already = localStorage.getItem('gw_fcm_token');
+  if (already === token) return;
+  localStorage.setItem('gw_fcm_token', token);
+  try {
+    const bodyObj = { action: 'saveFCMToken', token };
+    const r = await fetch(API_URL + '?' + new URLSearchParams({
+      action: 'saveFCMToken',
+      body: JSON.stringify(bodyObj)
+    }));
+    const result = await r.json();
+    console.log('FCM token saved:', result);
+  } catch(e) { console.warn('saveFCMToken error:', e); }
+}
+
+function showNotifToast(msg, isError = false) {
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:${isError ? '#c0392b' : 'var(--green)'};color:#fff;
+    padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;
+    z-index:10000;box-shadow:0 4px 20px rgba(0,0,0,0.25);
+    animation:fadeUp .3s ease;max-width:90vw;text-align:center`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.transition='opacity .4s'; el.style.opacity='0'; }, 3500);
+  setTimeout(() => el.remove(), 4000);
+}
+
 // ── INIT ────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async ()=>{
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('lang-active',b.dataset.lang===currentLang));
@@ -590,12 +614,16 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     renderAll();
   } catch(e){ console.error('Load error:',e); }
   initFAQ();
-  initWelcomePopup();
-  setTimeout(initNotifBanner, 5000);
+  setTimeout(initNotifBanner, 500);
+  initPWABanner();
+  // Register Firebase SW
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(e=>console.warn('SW reg error:',e));
   }
-
+  window.addEventListener('scroll',()=>{
+    const bg=document.getElementById('bg-parallax');
+    if(bg) bg.style.transform='translateY('+(window.scrollY*0.25)+'px)';
+  },{passive:true});
 });
 
 // ── RENDER ──────────────────────────────────────────────
@@ -618,7 +646,7 @@ function renderRaffles(data){
   }
   grid.innerHTML=raffles.map(r=>{
     const soldPct=r.total>0?Math.min(100,Math.round((r.sold/r.total)*100)):null;
-    const instants=r.instants?r.instants.split(',').map(s=>s.trim()).filter(Boolean):[];
+    const instants=r.instants?String(r.instants).split(',').map(s=>s.trim()).filter(Boolean):[];
     const promos=(r.promos||[]).filter(p=>p.uses>0);
     return `<div class="raffle-card">
       <div class="raffle-badge">🟢 Active</div>
@@ -685,50 +713,120 @@ function startCountdowns(raffles){
   });
 }
 
-// ── WELCOME POPUP ───────────────────────────────────────
-function initWelcomePopup(){
-  if(!localStorage.getItem('gw_welcome_seen')){
-    setTimeout(()=>document.getElementById('welcome-popup').classList.remove('hidden'),1500);
-  }
-}
-function closeWelcome(){
-  document.getElementById('welcome-popup').classList.add('hidden');
-  localStorage.setItem('gw_welcome_seen','1');
-}
-function closeWelcomeJoin(){closeWelcome();setTimeout(()=>openJoinModal(),300);}
-
 // ── JOIN MODAL ──────────────────────────────────────────
 function openJoinModal(){document.getElementById('join-modal').style.display='flex';document.body.style.overflow='hidden';}
 function closeJoinModal(){document.getElementById('join-modal').style.display='none';document.body.style.overflow='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeJoinModal();}});
 
-// ── NOTIFICATIONS BANNER ────────────────────────────────
+// ── PWA INSTALL BANNER ───────────────────────────────────
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+function initPWABanner() {
+  // Don't show if already installed as PWA
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (isStandalone) return;
+  // Don't show if dismissed
+  if (localStorage.getItem('gw_pwa_dismissed')) return;
+  // Show after 3 seconds
+  setTimeout(() => {
+    document.getElementById('pwa-banner').classList.remove('hidden');
+    // Auto-detect OS for modal default tab
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (!isIOS) switchTab('android');
+  }, 3000);
+}
+
+function showInstallModal() {
+  // On Android Chrome, try native prompt first
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') {
+        dismissPWABanner();
+        localStorage.setItem('gw_pwa_dismissed', '1');
+      }
+      deferredPrompt = null;
+    });
+    return;
+  }
+  // Otherwise show manual instructions
+  document.getElementById('pwa-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePWAModal() {
+  document.getElementById('pwa-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function dismissPWABanner() {
+  document.getElementById('pwa-banner').classList.add('hidden');
+  localStorage.setItem('gw_pwa_dismissed', '1');
+}
+
+function switchTab(os) {
+  document.getElementById('steps-ios').style.display = os === 'ios' ? 'block' : 'none';
+  document.getElementById('steps-android').style.display = os === 'android' ? 'block' : 'none';
+  document.getElementById('tab-ios').classList.toggle('active', os === 'ios');
+  document.getElementById('tab-android').classList.toggle('active', os === 'android');
+}
+
+document.getElementById('pwa-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePWAModal();
+});
+
+// ── NOTIFICATIONS BANNER (Firebase FCM) ─────────────────
 function initNotifBanner(){
-  if(localStorage.getItem('gw_notif_asked'))return;
-  if(!('Notification' in window))return;
-  if(Notification.permission==='granted')return;
-  setTimeout(()=>{
-    const banner=document.createElement('div');
-    banner.id='notif-banner';
-    banner.style.cssText='position:fixed;bottom:0;left:0;right:0;background:var(--black);border-top:2px solid rgba(245,200,66,0.3);padding:16px 20px;display:flex;align-items:center;gap:12px;z-index:9998;flex-wrap:wrap;justify-content:center';
-    banner.innerHTML='<span style="color:#fff;font-size:14px;flex:1;min-width:200px">🔔 <strong style="color:var(--gold)">Never miss a draw</strong> — enable notifications</span><button onclick="enableNotifs()" style="background:var(--gold);color:#000;border:none;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">Enable Notifications</button><button onclick="dismissNotifBanner()" style="background:transparent;color:#666;border:none;font-size:20px;cursor:pointer;padding:4px 8px">✕</button>';
-    document.body.appendChild(banner);
-  },30000);
+  if(localStorage.getItem('gw_notif_asked')) return;
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'granted'){
+    // Already granted — silently refresh token
+    getFCMToken().then(token => saveFCMToken(token));
+    return;
+  }
+  const banner = document.createElement('div');
+  banner.id = 'notif-banner';
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--black);border-top:2px solid rgba(245,200,66,0.3);padding:16px 20px;display:flex;align-items:center;gap:12px;z-index:9998;flex-wrap:wrap;justify-content:center;animation:slideUp .4s ease';
+  banner.innerHTML = '<span style="color:#fff;font-size:14px;flex:1;min-width:200px">🔔 <strong style="color:var(--gold-light)">Never miss a draw</strong> — get instant push notifications</span><button onclick="enableNotifs()" style="background:var(--gold);color:#000;border:none;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0">Enable Notifications</button><button onclick="dismissNotifBanner()" style="background:transparent;color:var(--gray-light);border:none;font-size:22px;cursor:pointer;padding:4px 10px;flex-shrink:0">✕</button>';
+  document.body.appendChild(banner);
 }
-function enableNotifs(){localStorage.setItem('gw_notif_asked','1');document.getElementById('notif-banner')?.remove();Notification.requestPermission();}
-function dismissNotifBanner(){localStorage.setItem('gw_notif_asked','1');document.getElementById('notif-banner')?.remove();}
 
-// ── REFRESH ─────────────────────────────────────────────
-async function refreshPage() {
-  const btn = document.getElementById('refresh-fab');
-  if (btn) btn.classList.add('spinning');
+async function enableNotifs(){
+  localStorage.setItem('gw_notif_asked','1');
+  document.getElementById('notif-banner')?.remove();
+  if(!('Notification' in window)){
+    showNotifToast('Notifications not supported in this browser.', true);
+    return;
+  }
   try {
-    await loadHomeData();
-  } catch(e) {}
-  setTimeout(() => { if (btn) btn.classList.remove('spinning'); }, 600);
+    const perm = await Notification.requestPermission();
+    if(perm === 'granted'){
+      showNotifToast('⏳ Registering...');
+      const token = await getFCMToken();
+      if(token){
+        await saveFCMToken(token);
+        showNotifToast("🔔 Notifications enabled! You'll hear from us first. 🦁");
+      } else {
+        showNotifToast('Enabled but registration failed — try reloading.', true);
+      }
+    } else {
+      showNotifToast('Notifications blocked. Enable them in browser settings.', true);
+    }
+  } catch(e){
+    console.error('enableNotifs error:', e);
+    showNotifToast('Something went wrong. Please try again.', true);
+  }
 }
 
+function dismissNotifBanner(){
+  localStorage.setItem('gw_notif_asked','1');
+  document.getElementById('notif-banner')?.remove();
+}
 </script>
-<button class="refresh-fab" id="refresh-fab" onclick="refreshPage()" title="Refresh">↻</button>
 </body>
 </html>
