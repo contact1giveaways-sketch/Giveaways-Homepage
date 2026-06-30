@@ -16,25 +16,12 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// ── Background messages (when tab is closed / not in focus) ──
-messaging.onBackgroundMessage(payload => {
-  const n = payload.notification || {};
-  self.registration.showNotification(n.title || 'Giveaways Community 🦁', {
-    body: n.body || '',
-    icon: n.icon || '/icon-192.png',
-    badge: '/icon-192.png',
-    vibrate: [200, 100, 200],
-    tag: 'giveaways-notif',
-    renotify: true,
-    data: { url: (payload.data && payload.data.url) || 'https://giveaways-homepage.vercel.app' },
-    actions: [
-      { action: 'open', title: '🎟️ Open App' },
-      { action: 'dismiss', title: 'Dismiss' }
-    ]
-  });
-});
+// ── IMPORTANT: Nu apelăm onBackgroundMessage ──────────────
+// FCM afișează automat notificarea din câmpul webpush.notification
+// din payload. Dacă adăugam și onBackgroundMessage care apelează
+// showNotification(), apărea notificarea de 2 ori.
 
-// ── Notification click ──
+// ── Notification click → deschide URL-ul din payload ──────
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   if (e.action === 'dismiss') return;
