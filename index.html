@@ -211,6 +211,7 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes popIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
 @keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
 </style>
 </head>
 <body>
@@ -273,8 +274,9 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
     </div>
   </div>
 </div>
+
+<section class="hero">
   <div class="container">
-    <div class="hero-inner">
       <div>
         <p style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--gray);margin-bottom:16px;line-height:1.5">
           <span id="hero-slogan-text">At other raffles you either win or lose.</span><br>
@@ -672,7 +674,20 @@ function renderRaffles(data){
       <div class="raffle-name">${esc(r.name)}</div>
       <div class="raffle-desc">${r.type==='pool'?'50% of the total cash pool goes to the winner':esc(r.fixedPrize||'')}</div>
       ${r.type==='pool'?`<div class="pool-display"><div class="pool-label">💰 Current Pool</div><div class="pool-val">£${parseFloat(r.pool||0).toFixed(2)}</div></div>`:''}
-      ${soldPct!==null?`<div class="progress-wrap"><div class="progress-label"><span>Tickets sold</span><strong>${r.sold}/${r.total} (${soldPct}%)</strong></div><div class="progress-bar"><div class="progress-fill" style="width:${soldPct}%"></div></div></div>`:r.sold>0?`<div class="raffle-meta"><div class="raffle-pill">🎟️ <span>${r.sold} tickets sold</span></div></div>`:''}
+      ${soldPct!==null?`
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Tickets sold</span><strong>${r.sold} / ${r.total} (${soldPct}%)</strong></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${soldPct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-light);margin-top:4px"><span>0</span><span style="color:${soldPct>75?'#e74c3c':soldPct>50?'#e67e22':'var(--green)'};font-weight:600">${soldPct}% sold${soldPct>75?' — Almost full!':soldPct>50?' — Selling fast!':''}</span><span>${r.total}</span></div>
+      </div>`:r.sold>0?`
+      <div class="progress-wrap">
+        <div class="progress-label" style="margin-bottom:6px"><span>Tickets sold</span><strong>${r.sold} tickets</strong></div>
+        <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;position:relative">
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,var(--gold) 0px,var(--gold-light) 8px,var(--gold) 16px);animation:shimmer 2s linear infinite;border-radius:4px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--gray);margin-top:4px;text-align:center">🎟️ ${r.sold} ticket${r.sold!==1?'s':''} sold · Unlimited entries</div>
+      </div>`:''}
+
       ${instants.length?`<div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">⚡ Instant Prizes</div><div class="instant-prizes">${instants.map(p=>`<div class="prize-chip">${esc(fmtPrize(p))}</div>`).join('')}</div>`:''}
       ${promos.length?`<div style="margin-bottom:14px"><div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">🎟️ Promo Codes</div>${promos.map(p=>`<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,149,42,0.08);border:1px solid rgba(201,149,42,0.2);border-radius:8px;padding:5px 12px;margin:3px;font-size:12px;"><span style="font-family:'DM Mono',monospace;font-weight:600;color:var(--black)">${esc(p.code)}</span><span style="color:var(--gray)">${p.uses} use${p.uses!==1?'s':''} left</span></div>`).join('')}</div>`:''}
       <div class="raffle-meta">${r.price?`<div class="raffle-pill">💷 <span>${esc(fmtPrice(r.price))} per ticket</span></div>`:''}<div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div></div>
