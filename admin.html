@@ -53,6 +53,26 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 .progress-preview{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px}
 .progress-preview-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--gold-light));transition:width .5s ease}
 .tickets-info{font-size:11px;color:var(--gray);margin-top:4px;text-align:right}
+
+/* ── IMAGE MANAGER ── */
+.img-preview-box{
+  width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;
+  background:var(--bg);border:2px dashed var(--border);
+  display:flex;align-items:center;justify-content:center;
+  margin-top:8px;position:relative;transition:border-color .2s;
+}
+.img-preview-box img{width:100%;height:100%;object-fit:cover;display:none}
+.img-preview-box .placeholder{font-size:13px;color:var(--gray-light);text-align:center;padding:16px}
+.img-preview-box.has-img{border-color:var(--gold-line)}
+.img-preview-box.has-img img{display:block}
+.img-preview-box.has-img .placeholder{display:none}
+.extra-img-item{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.extra-img-item input{flex:1}
+.extra-img-thumb{width:48px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--border);background:var(--bg);flex-shrink:0}
+.extra-img-remove{background:rgba(239,68,68,0.1);border:none;color:#ef4444;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px;flex-shrink:0}
+.add-img-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold-line);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:fit-content;margin-top:4px}
+.add-img-btn:hover{background:#f0e8c8}
+
 @media(max-width:600px){.form-row{grid-template-columns:1fr}.form-row-3{grid-template-columns:1fr 1fr}.admin-box{padding:20px}.notif-stats-bar{flex-direction:column;gap:16px}}
 </style>
 </head>
@@ -101,6 +121,22 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
       </div>
       <div class="form-group"><label>Instant Prizes (comma separated)</label><input type="text" id="r-instants" placeholder="50, 75, 100, 200"/></div>
       <div class="form-group"><label>Draw Date & Time</label><input type="datetime-local" id="r-drawdate"/></div>
+
+      <!-- IMAGES - Add Raffle -->
+      <div class="form-group">
+        <label>🖼️ Cover Image (URL Cloudinary)</label>
+        <input type="text" id="r-cover" placeholder="https://res.cloudinary.com/..." oninput="previewCover('r-cover-preview', this.value)"/>
+        <div class="img-preview-box" id="r-cover-preview">
+          <img src="" alt="Cover preview"/>
+          <div class="placeholder">📷 Paste URL to preview</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>🖼️ Extra Images (slider)</label>
+        <div id="r-images-list"></div>
+        <button class="add-img-btn" onclick="addImageField('r-images-list', 'r-img')">+ Add Image</button>
+      </div>
+
       <button class="admin-btn" onclick="addRaffle()">✅ Add Raffle</button>
 
       <!-- ── ACTIVE RAFFLES ── -->
@@ -134,7 +170,6 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
         <div class="admin-section-title">💰 Update Raffle</div>
         <div class="form-group"><label>Select Raffle</label><select id="pool-raffle-select" onchange="loadRaffleForEdit()"></select></div>
 
-        <!-- Progress preview -->
         <div id="progress-preview-wrap" style="display:none;margin-bottom:16px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
           <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray);margin-bottom:6px">
             <span>Ticket progress</span>
@@ -147,10 +182,26 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
         <div class="form-row-3">
           <div class="form-group"><label>Pool (£)</label><input type="number" id="pool-amount" placeholder="0.00" step="0.01"/></div>
           <div class="form-group"><label>Tickets Sold</label><input type="number" id="update-sold" placeholder="0" oninput="updateProgressPreview()"/></div>
-          <div class="form-group"><label>Total Tickets</label><input type="number" id="update-total" placeholder="500 (0=unlimited)" oninput="updateProgressPreview()"/></div>
+          <div class="form-group"><label>Total Tickets</label><input type="number" id="update-total" placeholder="500" oninput="updateProgressPreview()"/></div>
         </div>
         <div class="form-group"><label>Promo Codes (one per line: CODE | uses left)</label><textarea id="update-promos" placeholder="GIVE | 50&#10;START | 10&#10;VIP | 5" rows="4"></textarea></div>
         <div class="form-group"><label>Draw Date & Time</label><input type="datetime-local" id="update-drawdate"/></div>
+
+        <!-- IMAGES - Update Raffle -->
+        <div class="form-group">
+          <label>🖼️ Cover Image (URL Cloudinary)</label>
+          <input type="text" id="u-cover" placeholder="https://res.cloudinary.com/..." oninput="previewCover('u-cover-preview', this.value)"/>
+          <div class="img-preview-box" id="u-cover-preview">
+            <img src="" alt="Cover preview"/>
+            <div class="placeholder">📷 Paste URL to preview</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>🖼️ Extra Images (slider)</label>
+          <div id="u-images-list"></div>
+          <button class="add-img-btn" onclick="addImageField('u-images-list', 'u-img')">+ Add Image</button>
+        </div>
+
         <button class="admin-btn" onclick="updateRaffle()">💰 Update Raffle</button>
       </div>
 
@@ -252,6 +303,68 @@ function togglePoolField() {
   document.getElementById("fixed-field").style.display = type === "fixed" ? "block" : "none";
 }
 
+// ── IMAGE HELPERS ──
+function previewCover(previewId, url) {
+  const box = document.getElementById(previewId);
+  if (!box) return;
+  const img = box.querySelector('img');
+  if (url && url.startsWith('http')) {
+    img.src = url;
+    img.onload = () => box.classList.add('has-img');
+    img.onerror = () => box.classList.remove('has-img');
+  } else {
+    box.classList.remove('has-img');
+    img.src = '';
+  }
+}
+
+let imgCounter = 0;
+function addImageField(listId, prefix, existingUrl = '') {
+  const list = document.getElementById(listId);
+  const id = prefix + '_' + (++imgCounter);
+  const item = document.createElement('div');
+  item.className = 'extra-img-item';
+  item.id = 'item_' + id;
+  item.innerHTML = `
+    <img class="extra-img-thumb" id="thumb_${id}" src="${existingUrl||''}" style="${existingUrl?'':'display:none'}" alt=""/>
+    <input type="text" placeholder="https://res.cloudinary.com/..." value="${existingUrl}"
+      oninput="updateThumb('${id}', this.value)" style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--black);background:var(--bg);outline:none"/>
+    <button class="extra-img-remove" onclick="removeImageField('item_${id}')">✕</button>
+  `;
+  list.appendChild(item);
+  if (existingUrl) updateThumb(id, existingUrl);
+}
+
+function updateThumb(id, url) {
+  const thumb = document.getElementById('thumb_' + id);
+  if (!thumb) return;
+  if (url && url.startsWith('http')) {
+    thumb.src = url;
+    thumb.style.display = 'block';
+  } else {
+    thumb.style.display = 'none';
+  }
+}
+
+function removeImageField(itemId) {
+  const el = document.getElementById(itemId);
+  if (el) el.remove();
+}
+
+function getImageUrls(listId) {
+  const list = document.getElementById(listId);
+  if (!list) return [];
+  return Array.from(list.querySelectorAll('input[type="text"]'))
+    .map(inp => inp.value.trim())
+    .filter(url => url.startsWith('http'));
+}
+
+function clearImageFields(listId) {
+  const list = document.getElementById(listId);
+  if (list) list.innerHTML = '';
+}
+
+// ── ADD RAFFLE ──
 async function addRaffle() {
   const name = document.getElementById("r-name").value.trim();
   if (!name) return showAlert("create-alert", "error", "Enter a raffle name.");
@@ -267,12 +380,18 @@ async function addRaffle() {
     total: parseInt(document.getElementById("r-total").value) || 0,
     instants: document.getElementById("r-instants").value.trim(),
     drawDate: document.getElementById("r-drawdate").value,
-    promos: []
+    promos: [],
+    coverImage: document.getElementById("r-cover").value.trim(),
+    images: getImageUrls("r-images-list")
   });
   if (d.error) return showAlert("create-alert", "error", d.error);
   showAlert("create-alert", "success", "✅ Raffle added!");
   await loadHomeData(); renderAdminRaffles(); populatePoolSelect();
-  ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants","r-drawdate"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants","r-drawdate","r-cover"].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = "";
+  });
+  clearImageFields("r-images-list");
+  previewCover("r-cover-preview", "");
 }
 
 function renderAdminRaffles() {
@@ -280,10 +399,16 @@ function renderAdminRaffles() {
   if (!homeData.raffles.length) { list.innerHTML = '<p style="font-size:13px;color:var(--gray)">No raffles yet.</p>'; return; }
   list.innerHTML = homeData.raffles.map(r => {
     const pct = r.total > 0 ? Math.min(100, Math.round((r.sold/r.total)*100)) : null;
+    const allImgs = [r.coverImage, ...(r.images||[])].filter(Boolean);
     return `<div class="admin-raffle-item" style="flex-direction:column;align-items:stretch;gap:8px">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <div><div style="font-weight:600">${esc(r.name)}</div>
-        <div style="font-size:11px;color:var(--gray)">${r.type==="pool"?"Pool: £"+(r.pool||0).toFixed(2):r.fixedPrize} · ${r.sold} sold${r.total>0?" / "+r.total+" ("+pct+"%)":""}</div></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${allImgs.length ? `<img src="${allImgs[0]}" style="width:48px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--border)" alt=""/>` : '<div style="width:48px;height:36px;background:var(--bg);border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px">🖼️</div>'}
+          <div>
+            <div style="font-weight:600">${esc(r.name)}</div>
+            <div style="font-size:11px;color:var(--gray)">${r.type==="pool"?"Pool: £"+(r.pool||0).toFixed(2):r.fixedPrize} · ${r.sold} sold${r.total>0?" / "+r.total+" ("+pct+"%)":""} · ${allImgs.length} foto</div>
+          </div>
+        </div>
         <button class="del-btn" onclick="deleteRaffle(${r.id})">Delete</button>
       </div>
       ${pct!==null?`<div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:3px"></div></div>`:""}
@@ -362,6 +487,13 @@ function loadRaffleForEdit() {
   } else {
     document.getElementById("update-drawdate").value = "";
   }
+  // Load images
+  const coverUrl = r.coverImage || "";
+  document.getElementById("u-cover").value = coverUrl;
+  previewCover("u-cover-preview", coverUrl);
+  clearImageFields("u-images-list");
+  (r.images||[]).forEach(url => addImageField("u-images-list", "u-img", url));
+
   updateProgressPreview();
 }
 
@@ -374,8 +506,7 @@ function updateProgressPreview() {
     wrap.style.display = "block";
     document.getElementById("progress-preview-fill").style.width = pct + "%";
     document.getElementById("progress-label-text").textContent = pct + "% sold";
-    const color = pct>75?"#e74c3c":pct>50?"#e67e22":"var(--green)";
-    document.getElementById("progress-label-text").style.color = color;
+    document.getElementById("progress-label-text").style.color = pct>75?"#e74c3c":pct>50?"#e67e22":"var(--green)";
     document.getElementById("tickets-info-text").textContent = `${sold} / ${total} tickets · ${total-sold} remaining`;
   } else {
     wrap.style.display = sold > 0 ? "block" : "none";
@@ -399,11 +530,13 @@ async function updateRaffle() {
   showAlert("create-alert", "info", "Saving...");
   const d = await apiPost({
     action: "updateHomeRaffle", password: ADMIN_PASS, id,
-    pool:     parseFloat(document.getElementById("pool-amount").value)  || 0,
-    sold:     parseInt(document.getElementById("update-sold").value)    || 0,
-    total:    parseInt(document.getElementById("update-total").value)   || 0,
+    pool:        parseFloat(document.getElementById("pool-amount").value) || 0,
+    sold:        parseInt(document.getElementById("update-sold").value)   || 0,
+    total:       parseInt(document.getElementById("update-total").value)  || 0,
     promos,
-    drawDate: drawDateVal ? new Date(drawDateVal).toISOString() : ""
+    drawDate:    drawDateVal ? new Date(drawDateVal).toISOString() : "",
+    coverImage:  document.getElementById("u-cover").value.trim(),
+    images:      getImageUrls("u-images-list")
   });
   if (d.error) return showAlert("create-alert", "error", d.error);
   showAlert("create-alert", "success", "✅ Updated!");
@@ -416,7 +549,7 @@ async function loadFCMStats() {
   try {
     const d = await apiPost({ action: "getFCMStats", password: ADMIN_PASS });
     if (d.ok) document.getElementById("notif-subscriber-count").textContent = d.subscribers;
-  } catch(e) { console.error("FCM stats:", e); }
+  } catch(e) {}
 }
 
 function fillNotifTemplate(type) {
