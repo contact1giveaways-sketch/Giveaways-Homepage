@@ -636,7 +636,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       apiFetch({action:'getHomeRaffles'}),
       apiFetch({action:'getHomeWinners'})
     ]);
-    homeData.raffles = r1.raffles||[];
+    homeData.raffles = (r1.raffles||[]).sort((a,b)=>(a.order||999)-(b.order||999));
     homeData.winners = r2.winners||[];
     renderAll();
   } catch(e){ console.error('Load error:',e); }
