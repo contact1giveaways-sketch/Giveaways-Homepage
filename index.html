@@ -187,7 +187,19 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 .how-grid{grid-template-columns:1fr}
 .hero-title{font-size:44px}
 }
-/* ── PWA INSTALL BANNER ──────────────────────────────── */
+/* ── RAFFLE IMAGE SLIDER ─────────────────────────────── */
+.raffle-slider{width:calc(100% + 48px);margin:-24px -24px 18px;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;aspect-ratio:16/9;position:relative;background:#f0ebe2}
+.slider-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease}
+.slider-img.active{opacity:1}
+.slider-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.45);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;z-index:3;transition:background .2s;line-height:1}
+.slider-btn:hover{background:rgba(0,0,0,0.7)}
+.slider-prev{left:10px}
+.slider-next{right:10px}
+.slider-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3}
+.slider-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;transition:background .2s;border:none;padding:0}
+.slider-dot.active{background:#fff}
+
+
 #pwa-banner{position:sticky;top:65px;z-index:99;background:linear-gradient(135deg,#1a1a1a,#2a2010);border-bottom:1px solid rgba(245,200,66,0.25);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;animation:slideDown .4s ease}
 #pwa-banner.hidden{display:none}
 @keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -212,6 +224,17 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 @keyframes popIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
 @keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+/* ── IMAGE SLIDER ── */
+.card-slider{position:relative;width:100%;border-radius:12px;overflow:hidden;margin-bottom:16px;background:#111;aspect-ratio:16/9}
+.slider-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease}
+.slider-img.active{opacity:1}
+.slider-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.55);color:#fff;border:none;width:32px;height:32px;border-radius:50%;font-size:20px;line-height:1;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.slider-btn:hover{background:rgba(0,0,0,0.85)}
+.slider-prev{left:8px}
+.slider-next{right:8px}
+.slider-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2}
+.slider-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.45);cursor:pointer;transition:background .2s;border:none;padding:0}
+.slider-dot.active{background:#fff}
 </style>
 </head>
 <body>
@@ -658,6 +681,46 @@ function fmtPrize(p){
   return p;
 }
 
+function buildSlider(r) {
+  const allImgs = [];
+  if (r.coverImage && r.coverImage.startsWith('http')) allImgs.push(r.coverImage);
+  if (r.images) {
+    r.images.split(',').map(s=>s.trim()).filter(s=>s.startsWith('http')).forEach(u=>allImgs.push(u));
+  }
+  if (!allImgs.length) return '';
+  const slides = allImgs.map((url,i) =>
+    `<img class="slider-img${i===0?' active':''}" src="${esc(url)}" alt="photo ${i+1}" loading="lazy"/>`
+  ).join('');
+  const dots = allImgs.length > 1
+    ? `<div class="slider-dots">${allImgs.map((_,i)=>`<button class="slider-dot${i===0?' active':''}" onclick="goSlide('${r.id}',${i})"></button>`).join('')}</div>`
+    : '';
+  const btns = allImgs.length > 1
+    ? `<button class="slider-btn slider-prev" onclick="shiftSlide('${r.id}',-1)">‹</button>
+       <button class="slider-btn slider-next" onclick="shiftSlide('${r.id}',1)">›</button>`
+    : '';
+  return `<div class="raffle-slider" id="slider-${r.id}">${slides}${btns}${dots}</div>`;
+}
+
+const _sliderIdx = {};
+function shiftSlide(id, dir) {
+  const wrap = document.getElementById('slider-${id}');
+  const wrapEl = document.getElementById(`slider-${id}`);
+  if (!wrapEl) return;
+  const imgs = wrapEl.querySelectorAll('.slider-img');
+  const dots = wrapEl.querySelectorAll('.slider-dot');
+  const n = imgs.length;
+  _sliderIdx[id] = ((_sliderIdx[id]||0) + dir + n) % n;
+  imgs.forEach((el,i) => el.classList.toggle('active', i === _sliderIdx[id]));
+  dots.forEach((el,i) => el.classList.toggle('active', i === _sliderIdx[id]));
+}
+function goSlide(id, idx) {
+  const wrapEl = document.getElementById(`slider-${id}`);
+  if (!wrapEl) return;
+  _sliderIdx[id] = idx;
+  wrapEl.querySelectorAll('.slider-img').forEach((el,i) => el.classList.toggle('active', i===idx));
+  wrapEl.querySelectorAll('.slider-dot').forEach((el,i) => el.classList.toggle('active', i===idx));
+}
+
 function renderRaffles(data){
   const grid=document.getElementById('raffles-grid');
   const raffles=data.raffles||[];
@@ -669,8 +732,18 @@ function renderRaffles(data){
     const soldPct=r.total>0?Math.min(100,Math.round((r.sold/r.total)*100)):null;
     const instants=r.instants?String(r.instants).split(',').map(s=>s.trim()).filter(Boolean):[];
     const promos=(r.promos||[]).filter(p=>p.uses>0);
+    const allImages=[r.coverImage,...(r.images||[])].filter(Boolean);
+    const sliderHTML=allImages.length?`
+      <div class="card-slider" id="slider-${r.id}" data-count="${allImages.length}" data-index="0">
+        ${allImages.map((img,i)=>`<img class="slider-img${i===0?' active':''}" src="${esc(img)}" alt="${esc(r.name)}" loading="lazy"/>`).join('')}
+        ${allImages.length>1?`
+        <button class="slider-btn slider-prev" onclick="slideRaffle('${r.id}',-1)">‹</button>
+        <button class="slider-btn slider-next" onclick="slideRaffle('${r.id}',1)">›</button>
+        <div class="slider-dots">${allImages.map((_,i)=>`<button class="slider-dot${i===0?' active':''}" onclick="goToSlide('${r.id}',${i})"></button>`).join('')}</div>`:''}
+      </div>`:'';
     return `<div class="raffle-card">
       <div class="raffle-badge">🟢 Active</div>
+      ${sliderHTML}
       <div class="raffle-name">${esc(r.name)}</div>
       <div class="raffle-desc">${r.type==='pool'?'50% of the total cash pool goes to the winner':esc(r.fixedPrize||'')}</div>
       ${r.type==='pool'?`<div class="pool-display"><div class="pool-label">💰 Current Pool</div><div class="pool-val">£${parseFloat(r.pool||0).toFixed(2)}</div></div>`:''}
@@ -695,6 +768,28 @@ function renderRaffles(data){
       <div class="raffle-cta">${r.link?`<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>`:''}</div>
     </div>`;
   }).join('');
+}
+
+// ── IMAGE SLIDER FUNCTIONS ──
+function slideRaffle(id, dir){
+  const slider = document.getElementById('slider-'+id);
+  if(!slider) return;
+  const count = parseInt(slider.dataset.count);
+  let index = parseInt(slider.dataset.index);
+  index = (index + dir + count) % count;
+  showSlide(id, index);
+}
+function goToSlide(id, index){
+  showSlide(id, index);
+}
+function showSlide(id, index){
+  const slider = document.getElementById('slider-'+id);
+  if(!slider) return;
+  slider.dataset.index = index;
+  const imgs = slider.querySelectorAll('.slider-img');
+  const dots = slider.querySelectorAll('.slider-dot');
+  imgs.forEach((img,i)=>img.classList.toggle('active', i===index));
+  dots.forEach((dot,i)=>dot.classList.toggle('active', i===index));
 }
 
 function renderWinners(data){
