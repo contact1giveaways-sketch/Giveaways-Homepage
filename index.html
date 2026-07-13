@@ -235,6 +235,17 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 .slider-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2}
 .slider-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.45);cursor:pointer;transition:background .2s;border:none;padding:0}
 .slider-dot.active{background:#fff}
+/* ── VIDEO IN SLIDER ── */
+.slider-video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease;cursor:pointer}
+.slider-video.active{opacity:1}
+.slider-play-badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px;z-index:3;display:flex;align-items:center;gap:4px;pointer-events:none}
+/* ── LIGHTBOX ── */
+#video-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;padding:20px}
+#video-lightbox.open{display:flex}
+#video-lightbox video{max-width:100%;max-height:85vh;border-radius:12px;box-shadow:0 10px 60px rgba(0,0,0,0.5)}
+#video-lightbox img{max-width:100%;max-height:85vh;border-radius:12px}
+.lightbox-close{position:absolute;top:20px;right:24px;background:rgba(255,255,255,0.12);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10000}
+.lightbox-close:hover{background:rgba(255,255,255,0.25)}
 </style>
 </head>
 <body>
@@ -459,6 +470,12 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
       <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" onclick="closeJoinModal()" style="display:flex;align-items:center;justify-content:center;padding:14px 20px;background:linear-gradient(135deg,#25D366,#1aab52);color:#fff;border-radius:12px;font-weight:600;font-size:15px" id="join-wa-btn">WhatsApp Channel</a>
     </div>
   </div>
+</div>
+
+<!-- ── VIDEO/IMAGE LIGHTBOX ── -->
+<div id="video-lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox(event, true)">✕</button>
+  <div id="lightbox-content"></div>
 </div>
 
 <footer>
@@ -733,9 +750,15 @@ function renderRaffles(data){
     const instants=r.instants?String(r.instants).split(',').map(s=>s.trim()).filter(Boolean):[];
     const promos=(r.promos||[]).filter(p=>p.uses>0);
     const allImages=[r.coverImage,...(r.images||[])].filter(Boolean);
+    const isVideo=(url)=>/\.(mp4|webm|mov|m4v)(\?|$)/i.test(url);
     const sliderHTML=allImages.length?`
       <div class="card-slider" id="slider-${r.id}" data-count="${allImages.length}" data-index="0">
-        ${allImages.map((img,i)=>`<img class="slider-img${i===0?' active':''}" src="${esc(img)}" alt="${esc(r.name)}" loading="lazy"/>`).join('')}
+        ${allImages.map((media,i)=>{
+          if(isVideo(media)){
+            return `<video class="slider-video${i===0?' active':''}" src="${esc(media)}" muted loop playsinline autoplay onclick="openLightbox('${esc(media)}',true)"></video>`;
+          }
+          return `<img class="slider-img${i===0?' active':''}" src="${esc(media)}" alt="${esc(r.name)}" loading="lazy" onclick="openLightbox('${esc(media)}',false)"/>`;
+        }).join('')}
         ${allImages.length>1?`
         <button class="slider-btn slider-prev" onclick="slideRaffle('${r.id}',-1)">‹</button>
         <button class="slider-btn slider-next" onclick="slideRaffle('${r.id}',1)">›</button>
@@ -786,10 +809,39 @@ function showSlide(id, index){
   const slider = document.getElementById('slider-'+id);
   if(!slider) return;
   slider.dataset.index = index;
-  const imgs = slider.querySelectorAll('.slider-img');
+  const media = slider.querySelectorAll('.slider-img, .slider-video');
   const dots = slider.querySelectorAll('.slider-dot');
-  imgs.forEach((img,i)=>img.classList.toggle('active', i===index));
+  media.forEach((m,i)=>{
+    m.classList.toggle('active', i===index);
+    // Pauzează video-urile care nu sunt active, pornește-l pe cel activ
+    if(m.tagName==='VIDEO'){
+      if(i===index){ m.play().catch(()=>{}); }
+      else { m.pause(); }
+    }
+  });
   dots.forEach((dot,i)=>dot.classList.toggle('active', i===index));
+}
+
+// ── LIGHTBOX ──
+function openLightbox(url, isVideo){
+  const box = document.getElementById('video-lightbox');
+  const content = document.getElementById('lightbox-content');
+  if(isVideo){
+    content.innerHTML = `<video src="${url}" controls autoplay playsinline style="max-width:100%;max-height:85vh;border-radius:12px"></video>`;
+  } else {
+    content.innerHTML = `<img src="${url}" alt="" style="max-width:100%;max-height:85vh;border-radius:12px"/>`;
+  }
+  box.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(e, force){
+  const box = document.getElementById('video-lightbox');
+  // Închide doar dacă s-a dat click pe fundal sau pe X
+  if(force || e.target === box){
+    box.classList.remove('open');
+    document.getElementById('lightbox-content').innerHTML = '';
+    document.body.style.overflow = '';
+  }
 }
 
 function renderWinners(data){
