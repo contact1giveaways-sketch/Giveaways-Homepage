@@ -54,6 +54,17 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 .progress-preview-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--gold-light));transition:width .5s ease}
 .tickets-info{font-size:11px;color:var(--gray);margin-top:4px;text-align:right}
 
+/* ── TIMEZONE ── */
+.tz-bar{background:linear-gradient(135deg,#1a1a1a,#2a2010);border:1px solid rgba(245,200,66,0.25);border-radius:12px;padding:14px 18px;margin-bottom:20px}
+.tz-bar-title{font-size:12px;font-weight:700;color:var(--gold-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.tz-bar-sub{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:10px;line-height:1.5}
+.tz-toggle{display:flex;gap:8px}
+.tz-opt{flex:1;padding:9px;border:2px solid rgba(255,255,255,0.15);border-radius:9px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s}
+.tz-opt.active{border-color:var(--gold);background:rgba(245,200,66,0.15);color:var(--gold-light)}
+.time-hint{font-size:11px;color:var(--gray);margin-top:5px;line-height:1.5;font-family:'DM Mono',monospace;min-height:16px}
+.time-hint strong{color:var(--gold);font-weight:600}
+.time-hint.warn{color:#e67e22}
+
 /* ── IMAGE MANAGER ── */
 .img-preview-box{
   width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;
@@ -102,8 +113,18 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 
     <!-- MAIN -->
     <div id="admin-main-view" style="display:none">
-      <h2>Manage Raffles & Winners</h2>
+      <h2>Manage Raffles &amp; Winners</h2>
       <div id="create-alert" class="alert"></div>
+
+      <!-- ── TIMEZONE SELECTOR ── -->
+      <div class="tz-bar">
+        <div class="tz-bar-title">🕐 Orele pe care le introduci sunt în:</div>
+        <div class="tz-bar-sub">Raffall afișează countdown-ul în ora locală a fiecărui vizitator. Alege aici în ce fus scrii tu orele — restul se calculează automat.</div>
+        <div class="tz-toggle">
+          <button class="tz-opt" id="tz-uk" onclick="setTZ('uk')">🇬🇧 Ora UK (London)</button>
+          <button class="tz-opt" id="tz-local" onclick="setTZ('local')">🇷🇴 Ora mea locală</button>
+        </div>
+      </div>
 
       <!-- ── ADD RAFFLE ── -->
       <div class="admin-section-title">➕ Add New Raffle</div>
@@ -121,7 +142,23 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
       </div>
       <div class="form-group"><label>📍 Display Order (1 = prima pe site)</label><input type="number" id="r-order" placeholder="1"/></div>
       <div class="form-group"><label>Instant Prizes (comma separated)</label><input type="text" id="r-instants" placeholder="50, 75, 100, 200"/></div>
-      <div class="form-group"><label>Draw Date & Time</label><input type="datetime-local" id="r-drawdate"/></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>⏳ Opens At (deschidere)</label>
+          <input type="datetime-local" id="r-opensat" oninput="renderTimeHint('r-opensat','r-opensat-hint')"/>
+          <div class="time-hint" id="r-opensat-hint"></div>
+        </div>
+        <div class="form-group">
+          <label>🎰 Draw Date &amp; Time</label>
+          <input type="datetime-local" id="r-drawdate" oninput="renderTimeHint('r-drawdate','r-drawdate-hint')"/>
+          <div class="time-hint" id="r-drawdate-hint"></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--gray);margin:-6px 0 16px;line-height:1.5">
+        💡 Lasă <strong>Opens At</strong> gol dacă tombola e deja deschisă — atunci homepage-ul arată direct „Draw in".
+        <button onclick="fillDailyCashPot()" style="margin-left:6px;padding:3px 10px;border:1px solid var(--gold-line);border-radius:6px;background:var(--gold-pale);color:var(--gold);font-size:11px;font-weight:600;cursor:pointer">⚡ Daily Cash Pot (10:00 → mâine 12:00)</button>
+      </div>
 
       <!-- IMAGES - Add Raffle -->
       <div class="form-group">
@@ -186,10 +223,20 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
           <div class="form-group"><label>Total Tickets</label><input type="number" id="update-total" placeholder="500" oninput="updateProgressPreview()"/></div>
         </div>
         <div class="form-group"><label>Promo Codes (one per line: CODE | uses left)</label><textarea id="update-promos" placeholder="GIVE | 50&#10;START | 10&#10;VIP | 5" rows="4"></textarea></div>
+
         <div class="form-row">
-          <div class="form-group"><label>Draw Date & Time</label><input type="datetime-local" id="update-drawdate"/></div>
-          <div class="form-group"><label>📍 Display Order</label><input type="number" id="update-order" placeholder="1"/></div>
+          <div class="form-group">
+            <label>⏳ Opens At (deschidere)</label>
+            <input type="datetime-local" id="update-opensat" oninput="renderTimeHint('update-opensat','update-opensat-hint')"/>
+            <div class="time-hint" id="update-opensat-hint"></div>
+          </div>
+          <div class="form-group">
+            <label>🎰 Draw Date &amp; Time</label>
+            <input type="datetime-local" id="update-drawdate" oninput="renderTimeHint('update-drawdate','update-drawdate-hint')"/>
+            <div class="time-hint" id="update-drawdate-hint"></div>
+          </div>
         </div>
+        <div class="form-group"><label>📍 Display Order</label><input type="number" id="update-order" placeholder="1"/></div>
 
         <!-- IMAGES - Update Raffle -->
         <div class="form-group">
@@ -246,6 +293,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
             <button onclick="fillNotifTemplate('winner')" style="padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)">🏆 Winner</button>
             <button onclick="fillNotifTemplate('instant')" style="padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)">⚡ Instant Prize</button>
             <button onclick="fillNotifTemplate('reminder')" style="padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)">⏰ Reminder</button>
+            <button onclick="fillNotifTemplate('pot_open')" style="padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)">💰 Daily Pot Open</button>
           </div>
         </div>
         <button class="notif-send-btn" id="notif-send-btn" onclick="sendPushNotification()">🔔 SEND TO ALL SUBSCRIBERS</button>
@@ -276,6 +324,109 @@ async function apiPost(body) {
 let homeData = { raffles: [], winners: [] };
 let adminLoggedIn = false;
 
+// ════════════════════════════════════════════════════════
+//  TIMEZONE
+//  Toate datele se salvează ca UTC ISO (ex: 2026-08-21T09:00:00.000Z).
+//  Aici doar traducem între ceea ce scrii tu și UTC.
+// ════════════════════════════════════════════════════════
+let tzMode = localStorage.getItem('gw_tz_mode') || 'uk';   // 'uk' | 'local'
+const UK_TZ = 'Europe/London';
+
+function setTZ(mode){
+  tzMode = mode;
+  localStorage.setItem('gw_tz_mode', mode);
+  document.getElementById('tz-uk').classList.toggle('active', mode==='uk');
+  document.getElementById('tz-local').classList.toggle('active', mode==='local');
+  // recalculează toate câmpurile deja completate
+  ['r-opensat','r-drawdate','update-opensat','update-drawdate'].forEach(id=>{
+    renderTimeHint(id, id+'-hint');
+  });
+}
+
+// Câte minute e fusul `tz` față de UTC la momentul `date`
+function tzOffsetMinutes(date, tz){
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, hour12: false,
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit'
+  });
+  const p = {};
+  dtf.formatToParts(date).forEach(x => { p[x.type] = x.value; });
+  let h = parseInt(p.hour, 10);
+  if (h === 24) h = 0;
+  const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, h, +p.minute, +p.second);
+  return (asUTC - date.getTime()) / 60000;
+}
+
+// "2026-08-21T10:00" (ora scrisă în fusul ales) → UTC ISO
+function inputToISO(localStr){
+  if(!localStr) return "";
+  if(tzMode === 'local'){
+    const d = new Date(localStr);
+    return isNaN(d) ? "" : d.toISOString();
+  }
+  // interpretăm string-ul ca oră de perete în UK
+  const naiveUTC = new Date(localStr + ':00Z').getTime();
+  if(isNaN(naiveUTC)) return "";
+  let ts = naiveUTC;
+  for(let i=0;i<3;i++){                     // 3 iterații acoperă saltul DST
+    const off = tzOffsetMinutes(new Date(ts), UK_TZ);
+    ts = naiveUTC - off*60000;
+  }
+  return new Date(ts).toISOString();
+}
+
+// UTC ISO → "2026-08-21T10:00" pentru <input type="datetime-local">
+function isoToInput(iso){
+  if(!iso) return "";
+  const d = new Date(iso);
+  if(isNaN(d)) return "";
+  if(tzMode === 'local'){
+    return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  }
+  const off = tzOffsetMinutes(d, UK_TZ);
+  return new Date(d.getTime() + off*60000).toISOString().slice(0,16);
+}
+
+// Afișează sub câmp ora în UK ȘI ora locală, ca verificare
+function renderTimeHint(inputId, hintId){
+  const inp  = document.getElementById(inputId);
+  const hint = document.getElementById(hintId);
+  if(!inp || !hint) return;
+  if(!inp.value){ hint.textContent = ''; hint.classList.remove('warn'); return; }
+  const iso = inputToISO(inp.value);
+  if(!iso){ hint.textContent = 'Dată invalidă'; hint.classList.add('warn'); return; }
+  const d = new Date(iso);
+  const uk = d.toLocaleString('en-GB', { timeZone: UK_TZ, weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  const ro = d.toLocaleString('ro-RO', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  hint.classList.remove('warn');
+  hint.innerHTML = '🇬🇧 <strong>' + uk + '</strong> &nbsp;·&nbsp; 🇷🇴 ' + ro;
+}
+
+// Preumple programul Daily Cash Pot: azi 10:00 → mâine 12:00 (în fusul ales)
+function fillDailyCashPot(){
+  const now = new Date();
+  const base = tzMode === 'uk'
+    ? new Date(now.getTime() + tzOffsetMinutes(now, UK_TZ)*60000)   // "acum" în ora UK
+    : now;
+  const y = base.getUTCFullYear ? null : null; // (folosim componente locale mai jos)
+  const pad = n => String(n).padStart(2,'0');
+  // ziua curentă în fusul ales
+  const parts = tzMode === 'uk'
+    ? base.toISOString().slice(0,10)
+    : `${base.getFullYear()}-${pad(base.getMonth()+1)}-${pad(base.getDate())}`;
+  const today = parts;
+  const tomorrow = (() => {
+    const d = new Date(today + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + 1);
+    return d.toISOString().slice(0,10);
+  })();
+  document.getElementById('r-opensat').value  = today + 'T10:00';
+  document.getElementById('r-drawdate').value = tomorrow + 'T12:00';
+  renderTimeHint('r-opensat','r-opensat-hint');
+  renderTimeHint('r-drawdate','r-drawdate-hint');
+}
+
 async function loadHomeData() {
   try {
     const [r1, r2] = await Promise.all([
@@ -294,6 +445,7 @@ async function doAdminLogin() {
   adminLoggedIn = true;
   document.getElementById("admin-login-view").style.display = "none";
   document.getElementById("admin-main-view").style.display = "block";
+  setTZ(tzMode);
   await loadHomeData();
   renderAdminRaffles();
   renderAdminWinners();
@@ -372,6 +524,13 @@ function clearImageFields(listId) {
 async function addRaffle() {
   const name = document.getElementById("r-name").value.trim();
   if (!name) return showAlert("create-alert", "error", "Enter a raffle name.");
+
+  const opensAtISO  = inputToISO(document.getElementById("r-opensat").value);
+  const drawDateISO = inputToISO(document.getElementById("r-drawdate").value);
+  if (opensAtISO && drawDateISO && new Date(opensAtISO) >= new Date(drawDateISO)) {
+    return showAlert("create-alert", "error", "Deschiderea trebuie să fie înainte de extragere.");
+  }
+
   showAlert("create-alert", "info", "Saving...");
   const d = await apiPost({
     action: "addHomeRaffle", password: ADMIN_PASS, name,
@@ -383,7 +542,8 @@ async function addRaffle() {
     sold: parseInt(document.getElementById("r-sold").value) || 0,
     total: parseInt(document.getElementById("r-total").value) || 0,
     instants: document.getElementById("r-instants").value.trim(),
-    drawDate: document.getElementById("r-drawdate").value,
+    drawDate: drawDateISO,
+    opensAt: opensAtISO,
     promos: [],
     coverImage: document.getElementById("r-cover").value.trim(),
     images: getImageUrls("r-images-list"),
@@ -392,11 +552,23 @@ async function addRaffle() {
   if (d.error) return showAlert("create-alert", "error", d.error);
   showAlert("create-alert", "success", "✅ Raffle added!");
   await loadHomeData(); renderAdminRaffles(); populatePoolSelect();
-  ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants","r-drawdate","r-cover","r-order"].forEach(id => {
+  ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants","r-drawdate","r-opensat","r-cover","r-order"].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = "";
   });
+  renderTimeHint('r-opensat','r-opensat-hint');
+  renderTimeHint('r-drawdate','r-drawdate-hint');
   clearImageFields("r-images-list");
   previewCover("r-cover-preview", "");
+}
+
+// Etichetă de stare pentru lista din admin
+function raffleStateLabel(r){
+  const now = Date.now();
+  const o = r.opensAt ? new Date(r.opensAt).getTime() : NaN;
+  const d = r.drawDate ? new Date(r.drawDate).getTime() : NaN;
+  if(!isNaN(o) && now < o) return '<span style="color:var(--gold);font-weight:600">🔜 Opens soon</span>';
+  if(!isNaN(d) && now >= d) return '<span style="color:var(--gray);font-weight:600">🏁 Drawn</span>';
+  return '<span style="color:var(--green);font-weight:600">🟢 Live</span>';
 }
 
 function renderAdminRaffles() {
@@ -411,7 +583,7 @@ function renderAdminRaffles() {
           ${allImgs.length ? `<img src="${allImgs[0]}" style="width:48px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--border)" alt=""/>` : '<div style="width:48px;height:36px;background:var(--bg);border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px">🖼️</div>'}
           <div>
             <div style="font-weight:600">${esc(r.name)}</div>
-            <div style="font-size:11px;color:var(--gray)">${r.type==="pool"?"Pool: £"+(r.pool||0).toFixed(2):r.fixedPrize} · ${r.sold} sold${r.total>0?" / "+r.total+" ("+pct+"%)":""} · ${allImgs.length} foto</div>
+            <div style="font-size:11px;color:var(--gray)">${raffleStateLabel(r)} · ${r.type==="pool"?"Pool: £"+(r.pool||0).toFixed(2):esc(r.fixedPrize||"")} · ${r.sold} sold${r.total>0?" / "+r.total+" ("+pct+"%)":""} · ${allImgs.length} foto</div>
           </div>
         </div>
         <button class="del-btn" onclick="deleteRaffle(${r.id})">Delete</button>
@@ -486,13 +658,12 @@ function loadRaffleForEdit() {
   document.getElementById("update-sold").value  = r.sold  || "";
   document.getElementById("update-total").value = r.total || "";
   document.getElementById("update-promos").value = (r.promos||[]).map(p=>`${p.code} | ${p.uses}`).join("\n");
-  if (r.drawDate) {
-    const dt = new Date(r.drawDate);
-    document.getElementById("update-drawdate").value = new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  } else {
-    document.getElementById("update-drawdate").value = "";
-  }
-  // Load images
+
+  document.getElementById("update-drawdate").value = isoToInput(r.drawDate);
+  document.getElementById("update-opensat").value  = isoToInput(r.opensAt);
+  renderTimeHint('update-drawdate','update-drawdate-hint');
+  renderTimeHint('update-opensat','update-opensat-hint');
+
   const coverUrl = r.coverImage || "";
   document.getElementById("u-cover").value = coverUrl;
   previewCover("u-cover-preview", coverUrl);
@@ -532,7 +703,13 @@ async function updateRaffle() {
   const promos = promosRaw
     ? promosRaw.split("\n").filter(l=>l.trim()).map(line=>{const parts=line.split("|").map(s=>s.trim());return{code:parts[0]||"",uses:parseInt(parts[1])||0};})
     : [];
-  const drawDateVal = document.getElementById("update-drawdate").value;
+
+  const opensAtISO  = inputToISO(document.getElementById("update-opensat").value);
+  const drawDateISO = inputToISO(document.getElementById("update-drawdate").value);
+  if (opensAtISO && drawDateISO && new Date(opensAtISO) >= new Date(drawDateISO)) {
+    return showAlert("create-alert", "error", "Deschiderea trebuie să fie înainte de extragere.");
+  }
+
   showAlert("create-alert", "info", "Saving...");
   const d = await apiPost({
     action: "updateHomeRaffle", password: ADMIN_PASS, id,
@@ -540,7 +717,8 @@ async function updateRaffle() {
     sold:        parseInt(document.getElementById("update-sold").value)   || 0,
     total:       parseInt(document.getElementById("update-total").value)  || 0,
     promos,
-    drawDate:    drawDateVal ? new Date(drawDateVal).toISOString() : "",
+    drawDate:    drawDateISO,
+    opensAt:     opensAtISO,
     coverImage:  document.getElementById("u-cover").value.trim(),
     images:      getImageUrls("u-images-list"),
     order:       parseInt(document.getElementById("update-order").value) || 999
@@ -564,7 +742,8 @@ function fillNotifTemplate(type) {
     new_draw: { title:"🎰 New Draw is LIVE!", body:"A new competition just launched. Buy your ticket and enter the Instant Win platform now!" },
     winner:   { title:"🏆 We Have a Winner!", body:"Congratulations to our latest winner! Check who won and join the next draw." },
     instant:  { title:"⚡ Instant Prize Draw — NOW!", body:"The Instant Win draw is happening right now! Register your username to enter for free." },
-    reminder: { title:"⏰ Draw Closing Soon!", body:"Last chance to buy tickets before the draw. Don't miss out — enter now!" }
+    reminder: { title:"⏰ Draw Closing Soon!", body:"Last chance to buy tickets before the draw. Don't miss out — enter now!" },
+    pot_open: { title:"💰 The Daily Cash Pot is OPEN!", body:"Today's pot is live — £0.50 a ticket, one winner takes it all. Draw tomorrow at 12:00." }
   }[type];
   if (!t) return;
   document.getElementById("notif-title").value = t.title;
