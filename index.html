@@ -83,6 +83,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .raffle-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light))}
 .raffle-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,0.08)}
 .raffle-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(45,125,70,0.08);border:1px solid rgba(45,125,70,0.2);border-radius:12px;padding:3px 10px;font-size:11px;font-weight:600;color:var(--green);letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px}
+.raffle-badge.upcoming{background:rgba(201,149,42,0.1);border-color:var(--gold-line);color:var(--gold)}
+.raffle-badge.drawn{background:rgba(0,0,0,0.05);border-color:var(--border);color:var(--gray)}
 .raffle-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--black);margin-bottom:6px;line-height:1.1}
 .raffle-desc{font-size:13px;color:var(--gray);margin-bottom:18px;line-height:1.5}
 .pool-display{background:var(--gold-pale);border:1px solid var(--gold-line);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
@@ -99,15 +101,19 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.92);backdrop
 .raffle-cta{display:flex}
 .raffle-btn{flex:1;text-align:center;padding:9px 20px;background:var(--gold);color:var(--white);border-radius:8px;font-size:13px;font-weight:600;transition:all .2s}
 .raffle-btn:hover{background:#b8841f}
+.raffle-btn.soon{background:var(--gray-dark)}
+.raffle-btn.soon:hover{background:var(--black)}
 .instant-prizes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
 .prize-chip{padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(201,149,42,0.08);border:1px solid var(--gold-line);color:var(--gold)}
 .countdown-wrap{background:var(--black);border-radius:10px;padding:12px 16px;margin-bottom:14px;text-align:center}
+.countdown-wrap.upcoming{background:linear-gradient(135deg,#2a2010,#1a1a1a);border:1px solid rgba(245,200,66,0.25)}
 .countdown-label{font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
 .countdown-timer{display:flex;gap:8px;justify-content:center;align-items:center}
 .cd-block{text-align:center}
 .cd-num{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold-light);line-height:1;background:rgba(245,200,66,0.1);border-radius:6px;padding:4px 10px;min-width:40px;display:block}
 .cd-lbl{font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
 .cd-sep{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);opacity:0.5;margin-bottom:8px}
+.cd-localtime{font-size:10px;color:rgba(255,255,255,0.35);margin-top:8px;letter-spacing:.5px}
 .draw-done{font-size:12px;color:var(--green);font-weight:600;text-align:center;padding:8px;background:rgba(34,197,94,0.1);border-radius:8px;margin-bottom:14px}
 .empty-raffles{text-align:center;padding:60px 20px;color:var(--gray);grid-column:1/-1}
 .empty-raffles .empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
@@ -187,18 +193,6 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 .how-grid{grid-template-columns:1fr}
 .hero-title{font-size:44px}
 }
-/* ── RAFFLE IMAGE SLIDER ─────────────────────────────── */
-.raffle-slider{width:calc(100% + 48px);margin:-24px -24px 18px;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;aspect-ratio:16/9;position:relative;background:#f0ebe2}
-.slider-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease}
-.slider-img.active{opacity:1}
-.slider-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.45);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;z-index:3;transition:background .2s;line-height:1}
-.slider-btn:hover{background:rgba(0,0,0,0.7)}
-.slider-prev{left:10px}
-.slider-next{right:10px}
-.slider-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3}
-.slider-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;transition:background .2s;border:none;padding:0}
-.slider-dot.active{background:#fff}
-
 
 #pwa-banner{position:sticky;top:65px;z-index:99;background:linear-gradient(135deg,#1a1a1a,#2a2010);border-bottom:1px solid rgba(245,200,66,0.25);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;animation:slideDown .4s ease}
 #pwa-banner.hidden{display:none}
@@ -317,6 +311,7 @@ footer{background:var(--black);color:rgba(255,255,255,0.5);padding:40px 0;font-s
 
 <section class="hero">
   <div class="container">
+    <div class="hero-inner">
       <div>
         <p style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--gray);margin-bottom:16px;line-height:1.5">
           <span id="hero-slogan-text">At other raffles you either win or lose.</span><br>
@@ -514,6 +509,7 @@ let currentLang = localStorage.getItem('gw_lang') || 'en';
 // ── TRANSLATIONS ────────────────────────────────────────
 const TR = {
   en: { nav_raffles:"Raffles",nav_how:"How it works",nav_winners:"Winners",nav_community:"Community",nav_faq:"FAQ",nav_join:"Join",hero_slogan:"At other raffles you either win or lose.",hero_slogan_bold:"With us, you win either way.",hero_title1:"Win",hero_title2:"Real",hero_title3:"Prizes.",hero_subtitle:"Transparent raffles, live draws, instant prizes — every ticket counts.",hero_btn_raffles:"🎟️ View Active Raffles",hero_btn_community:"Join Community",hero_stat_winners:"Total Winners",hero_stat_raffles:"Active Raffles",hero_stat_live:"Instant Win Draws",raffles_tag:"Active Now",raffles_title:"Live Raffles",raffles_sub:"Every raffle is drawn transparently. Watch it happen live on our Instant Win platform.",winners_tag:"Hall of Fame",winners_title:"Recent Winners",winners_sub:"Every winner, every prize. Full transparency — always.",community_tag:"Stay Connected",community_title:"Join the Community",community_sub:"Get notified the moment a new draw opens. Don't miss your window.",tg_name:"Telegram Channel",tg_members:"Main channel · Draw announcements · Winners",tg_desc:"All draw announcements happen here first. Turn on notifications and never miss an instant prize window.",tg_btn:"Join Channel →",wa_name:"WhatsApp Channel",wa_members:"Announcements · Updates · Winners",wa_desc:"Follow our WhatsApp channel for all the latest updates, draw announcements, and winner reveals.",wa_btn:"Follow Channel →",about_tag:"About Us",about_title:"Who We Are",about_text:"We're a UK-based raffle community built around one simple idea: everyone who plays should have a real chance to win something.",about_cashback_title:"Cashback Pool — Win Even When You Lose",about_cashback_text:"20% of the gross profit from every raffle goes into a shared pool. At Christmas, that money comes back to players — proportionally to how many tickets each person bought. The more you play, the more you get back.",about_cashback_link:"View live leaderboard →",about_instant_title:"Instant Prizes on Every Competition",about_instant_text:"Every competition comes with instant prizes on top of the main draw — at zero extra cost. Buy a ticket, register your username on our platform, and you're automatically in.",about_instant_link:"Go to Instant Win platform →",about_slogan:"At other raffles you either win or lose.",about_slogan_bold:"With us, you win either way.",faq_tag:"Got Questions?",faq_title:"FAQ",footer_copy:"© 2026 · UK Registered · All rights reserved",how_tag:"Simple Process",how_title:"How It Works",how_sub:"From ticket to winner in four easy steps.",how1_title:"Buy Tickets",how1_text:"Buy tickets in any active raffle on Raffall.",how2_title:"Join the Community",how3_title:"Enter Instant Draws",how3_text:"If you have tickets, enter the instant prizes for free on our platform.",how4_title:"Watch Live & Win",join_modal_title:"Join the Community",join_modal_sub:"Choose your preferred platform. Turn on notifications to never miss a draw.",join_tg_btn:"Telegram Channel",join_wa_btn:"WhatsApp Channel",
+    cd_opens_in:"⏳ Opens in",cd_draw_in:"🎰 Draw in",cd_drawing_now:"🎉 Draw is happening now!",cd_days:"Days",cd_hours:"Hours",cd_mins:"Mins",cd_secs:"Secs",cd_opens_at:"Opens at",cd_draws_at:"Draw at",badge_active:"🟢 Active",badge_upcoming:"🔜 Opens soon",badge_drawn:"🏁 Drawn",btn_buy:"Buy Tickets →",btn_view:"View on Raffall →",empty_title:"No active raffles right now",empty_sub:"Join our Telegram to be first to know when the next one launches.",
     faqs:[
       {q:"How do I enter?",a:`Buy tickets at <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>. To enter instant prizes for free, register your Raffall username at <a href="https://instant-scratch.vercel.app/" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>. Then follow us on <a href="https://telegram.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> or <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a> and turn on notifications.`},
       {q:"How do instant prizes work?",a:`Every competition includes instant prizes on top of the main Raffall draw — free for any ticket holder. When we announce a draw on our channels, head to <a href="https://instant-scratch.vercel.app/" target="_blank" style="color:var(--gold);font-weight:600">our platform</a>, register your Raffall username, and watch the live draw. One entry per person per competition.`},
@@ -525,6 +521,7 @@ const TR = {
     ]
   },
   ro: { nav_raffles:"Tombole",nav_how:"Cum funcționează",nav_winners:"Câștigători",nav_community:"Comunitate",nav_faq:"Întrebări",nav_join:"Alătură-te",hero_slogan:"La alte tombole ori câștigești, ori pierzi.",hero_slogan_bold:"La noi câștigi oricum.",hero_title1:"Câștigă",hero_title2:"Premii",hero_title3:"Reale.",hero_subtitle:"Tombole transparente, extrageri live, premii instant — fiecare bilet contează.",hero_btn_raffles:"🎟️ Vezi Tombolele Active",hero_btn_community:"Intră în Comunitate",hero_stat_winners:"Câștigători Totali",hero_stat_raffles:"Tombole Active",hero_stat_live:"Extrageri Instant Win",raffles_tag:"Active Acum",raffles_title:"Tombole Live",raffles_sub:"Fiecare tombolă este extrasă transparent. Urmărește live pe platforma noastră Instant Win.",winners_tag:"Hall of Fame",winners_title:"Câștigători Recenți",winners_sub:"Fiecare câștigător, fiecare premiu. Transparență totală — mereu.",community_tag:"Rămâi Conectat",community_title:"Intră în Comunitate",community_sub:"Fii notificat imediat ce se deschide o nouă extragere. Nu rata nicio șansă.",tg_name:"Canal Telegram",tg_members:"Canal principal · Anunțuri · Câștigători",tg_desc:"Toate anunțurile de extragere apar aici primele. Activează notificările.",tg_btn:"Intră pe Canal →",wa_name:"Canal WhatsApp",wa_members:"Anunțuri · Actualizări · Câștigători",wa_desc:"Urmărește canalul nostru de WhatsApp pentru toate actualizările și anunțurile.",wa_btn:"Urmărește Canalul →",about_tag:"Despre Noi",about_title:"Cine Suntem",about_text:"Suntem o comunitate de tombole cu sediul în UK construită în jurul unei idei simple: toți cei care joacă ar trebui să aibă o șansă reală de a câștiga ceva.",about_cashback_title:"Cashback Pool — Câștigi Chiar și Când Pierzi",about_cashback_text:"20% din profitul brut al fiecărei tombole merge într-un pool comun. De Crăciun, acești bani se întorc la jucători proporțional cu câte bilete a cumpărat fiecare.",about_cashback_link:"Vezi clasamentul live →",about_instant_title:"Premii Instant la Fiecare Competiție",about_instant_text:"Fiecare competiție vine cu premii instant pe lângă premiul principal — fără costuri suplimentare.",about_instant_link:"Mergi la platforma Instant Win →",about_slogan:"La alte tombole ori câștigești, ori pierzi.",about_slogan_bold:"La noi câștigi oricum.",faq_tag:"Ai Întrebări?",faq_title:"Întrebări Frecvente",footer_copy:"© 2026 · Înregistrat în UK · Toate drepturile rezervate",how_tag:"Proces Simplu",how_title:"Cum Funcționează",how_sub:"De la bilet la câștigător în patru pași simpli.",how1_title:"Cumpără Bilete",how1_text:"Cumpără bilete la orice tombolă activă pe Raffall.",how2_title:"Intră în Comunitate",how3_title:"Înscrie-te la Instant",how3_text:"Dacă ai bilete, înscrie-te gratuit la premiile instant pe platforma noastră.",how4_title:"Urmărește Live & Câștigă",join_modal_title:"Intră în Comunitate",join_modal_sub:"Alege platforma preferată. Activează notificările să nu ratezi nicio extragere.",join_tg_btn:"Canal Telegram",join_wa_btn:"Canal WhatsApp",
+    cd_opens_in:"⏳ Se deschide în",cd_draw_in:"🎰 Extragere în",cd_drawing_now:"🎉 Extragerea are loc acum!",cd_days:"Zile",cd_hours:"Ore",cd_mins:"Min",cd_secs:"Sec",cd_opens_at:"Se deschide la",cd_draws_at:"Extragere la",badge_active:"🟢 Activă",badge_upcoming:"🔜 Se deschide curând",badge_drawn:"🏁 Extrasă",btn_buy:"Cumpără Bilete →",btn_view:"Vezi pe Raffall →",empty_title:"Nicio tombolă activă momentan",empty_sub:"Intră pe Telegram ca să afli primul când se lansează următoarea.",
     faqs:[
       {q:"Cum mă înscriu?",a:`Cumpără bilete pe <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>. Pentru premiile instant, înregistrează-ți username-ul pe <a href="https://instant-scratch.vercel.app/" target="_blank" style="color:var(--gold);font-weight:600">platforma noastră</a>. Urmărește-ne pe <a href="https://telegram.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> sau <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a>.`},
       {q:"Cum funcționează premiile instant?",a:`Fiecare competiție include premii instant gratuit pentru orice deținător de bilet. Când anunțăm o extragere, mergi pe <a href="https://instant-scratch.vercel.app/" target="_blank" style="color:var(--gold);font-weight:600">platforma noastră</a> și înregistrează-ți username-ul.`},
@@ -536,6 +533,7 @@ const TR = {
     ]
   },
   it: { nav_raffles:"Lotterie",nav_how:"Come funziona",nav_winners:"Vincitori",nav_community:"Comunità",nav_faq:"FAQ",nav_join:"Unisciti",hero_slogan:"In altre lotterie o vinci o perdi.",hero_slogan_bold:"Con noi vinci sempre.",hero_title1:"Vinci",hero_title2:"Premi",hero_title3:"Veri.",hero_subtitle:"Lotterie trasparenti, estrazioni live, premi istantanei — ogni biglietto conta.",hero_btn_raffles:"🎟️ Vedi Lotterie Attive",hero_btn_community:"Unisciti alla Comunità",hero_stat_winners:"Vincitori Totali",hero_stat_raffles:"Lotterie Attive",hero_stat_live:"Estrazioni Instant Win",raffles_tag:"Attive Ora",raffles_title:"Lotterie Live",raffles_sub:"Ogni lotteria viene estratta in modo trasparente. Guardalo live sulla nostra piattaforma.",winners_tag:"Hall of Fame",winners_title:"Vincitori Recenti",winners_sub:"Ogni vincitore, ogni premio. Trasparenza totale — sempre.",community_tag:"Resta Connesso",community_title:"Unisciti alla Comunità",community_sub:"Ricevi notifiche nel momento in cui si apre una nuova estrazione.",tg_name:"Canale Telegram",tg_members:"Canale principale · Annunci · Vincitori",tg_desc:"Tutti gli annunci di estrazione appaiono qui per primi. Attiva le notifiche.",tg_btn:"Unisciti al Canale →",wa_name:"Canale WhatsApp",wa_members:"Annunci · Aggiornamenti · Vincitori",wa_desc:"Segui il nostro canale WhatsApp per tutti gli aggiornamenti e gli annunci.",wa_btn:"Segui il Canale →",about_tag:"Chi Siamo",about_title:"Chi Siamo",about_text:"Siamo una comunità di lotterie con sede nel Regno Unito costruita attorno a un'idea semplice: tutti dovrebbero avere una vera possibilità di vincere.",about_cashback_title:"Cashback Pool — Vinci Anche Quando Perdi",about_cashback_text:"Il 20% del profitto lordo di ogni lotteria va in un pool condiviso. A Natale, quei soldi tornano ai giocatori proporzionalmente.",about_cashback_link:"Vedi la classifica live →",about_instant_title:"Premi Istantanei in Ogni Competizione",about_instant_text:"Ogni competizione include premi istantanei oltre al premio principale — senza costi aggiuntivi.",about_instant_link:"Vai alla piattaforma Instant Win →",about_slogan:"In altre lotterie o vinci o perdi.",about_slogan_bold:"Con noi vinci sempre.",faq_tag:"Hai Domande?",faq_title:"FAQ",footer_copy:"© 2026 · Registrato nel Regno Unito · Tutti i diritti riservati",how_tag:"Processo Semplice",how_title:"Come Funziona",how_sub:"Dal biglietto al vincitore in quattro semplici passaggi.",how1_title:"Acquista Biglietti",how1_text:"Acquista biglietti per qualsiasi lotteria attiva su Raffall.",how2_title:"Unisciti alla Comunità",how3_title:"Partecipa alle Estrazioni",how3_text:"Se hai biglietti, iscriviti gratuitamente ai premi istantanei sulla nostra piattaforma.",how4_title:"Guarda Live & Vinci",join_modal_title:"Unisciti alla Comunità",join_modal_sub:"Scegli la tua piattaforma preferita. Attiva le notifiche.",join_tg_btn:"Canale Telegram",join_wa_btn:"Canale WhatsApp",
+    cd_opens_in:"⏳ Apre tra",cd_draw_in:"🎰 Estrazione tra",cd_drawing_now:"🎉 L'estrazione è in corso!",cd_days:"Giorni",cd_hours:"Ore",cd_mins:"Min",cd_secs:"Sec",cd_opens_at:"Apre alle",cd_draws_at:"Estrazione alle",badge_active:"🟢 Attiva",badge_upcoming:"🔜 Apre presto",badge_drawn:"🏁 Estratta",btn_buy:"Acquista Biglietti →",btn_view:"Vedi su Raffall →",empty_title:"Nessuna lotteria attiva al momento",empty_sub:"Unisciti al nostro Telegram per essere il primo a saperlo.",
     faqs:[
       {q:"Come mi iscrivo?",a:`Acquista biglietti su <a href="https://raffall.com/giveaways_community" target="_blank" style="color:var(--gold);font-weight:600">raffall.com/giveaways_community</a>. Per i premi istantanei, registra il tuo username su <a href="https://instant-scratch.vercel.app/" target="_blank" style="color:var(--gold);font-weight:600">nostra piattaforma</a>. Seguici su <a href="https://telegram.me/GiveawaysEn" target="_blank" style="color:var(--gold);font-weight:600">Telegram</a> o <a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank" style="color:var(--gold);font-weight:600">WhatsApp</a>.`},
       {q:"Come funzionano i premi istantanei?",a:`Ogni competizione include premi istantanei gratuiti per qualsiasi detentore di biglietto. Quando annunciamo un'estrazione, vai sulla <a href="https://instant-scratch.vercel.app/" target="_blank" style="color:var(--gold);font-weight:600">nostra piattaforma</a> e registra il tuo username.`},
@@ -556,7 +554,6 @@ function setLang(lang){
   applyTranslations();
   renderAll();
   initFAQ();
-  startCountdowns(homeData.raffles||[]);
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('lang-active',b.dataset.lang===lang));
 }
 
@@ -606,7 +603,6 @@ function initFCM() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     _messaging = firebase.messaging();
-    // Show toast for foreground messages (tab is open)
     _messaging.onMessage(payload => {
       const n = payload.notification || {};
       showNotifToast('🔔 ' + (n.title||'Giveaways') + (n.body ? ' — ' + n.body : ''));
@@ -669,7 +665,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   initFAQ();
   setTimeout(initNotifBanner, 500);
   initPWABanner();
-  // Register Firebase SW
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(e=>console.warn('SW reg error:',e));
   }
@@ -690,7 +685,16 @@ function renderAll(){
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmtDate(s){if(!s)return'';const d=new Date(s);return isNaN(d)?s:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
 
-// Auto-add £ if value is numeric and doesn't already have a currency symbol
+// Data + ora exactă în fusul vizitatorului (ex: "Fri 21 Aug, 12:00")
+function fmtDateTimeLocal(s){
+  if(!s) return '';
+  const d = new Date(s);
+  if(isNaN(d)) return '';
+  const localeMap = { en:'en-GB', ro:'ro-RO', it:'it-IT' };
+  return d.toLocaleString(localeMap[currentLang]||'en-GB',
+    {weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+
 function fmtPrice(p){
   if(!p)return'';
   p=String(p).trim();
@@ -707,54 +711,34 @@ function fmtPrize(p){
   return p;
 }
 
-function buildSlider(r) {
-  const allImgs = [];
-  if (r.coverImage && r.coverImage.startsWith('http')) allImgs.push(r.coverImage);
-  if (r.images) {
-    r.images.split(',').map(s=>s.trim()).filter(s=>s.startsWith('http')).forEach(u=>allImgs.push(u));
-  }
-  if (!allImgs.length) return '';
-  const slides = allImgs.map((url,i) =>
-    `<img class="slider-img${i===0?' active':''}" src="${esc(url)}" alt="photo ${i+1}" loading="lazy"/>`
-  ).join('');
-  const dots = allImgs.length > 1
-    ? `<div class="slider-dots">${allImgs.map((_,i)=>`<button class="slider-dot${i===0?' active':''}" onclick="goSlide('${r.id}',${i})"></button>`).join('')}</div>`
-    : '';
-  const btns = allImgs.length > 1
-    ? `<button class="slider-btn slider-prev" onclick="shiftSlide('${r.id}',-1)">‹</button>
-       <button class="slider-btn slider-next" onclick="shiftSlide('${r.id}',1)">›</button>`
-    : '';
-  return `<div class="raffle-slider" id="slider-${r.id}">${slides}${btns}${dots}</div>`;
+// ── STARE TOMBOLĂ ───────────────────────────────────────
+// 'upcoming' = nu s-a deschis încă | 'live' = deschisă | 'drawn' = extrasă
+function ts(v){ if(!v) return NaN; const d=new Date(v); return isNaN(d)?NaN:d.getTime(); }
+
+function raffleState(r){
+  const now = Date.now();
+  const o = ts(r.opensAt);
+  const d = ts(r.drawDate);
+  if(!isNaN(o) && now < o) return 'upcoming';
+  if(!isNaN(d) && now >= d) return 'drawn';
+  return 'live';
 }
 
-const _sliderIdx = {};
-function shiftSlide(id, dir) {
-  const wrap = document.getElementById('slider-${id}');
-  const wrapEl = document.getElementById(`slider-${id}`);
-  if (!wrapEl) return;
-  const imgs = wrapEl.querySelectorAll('.slider-img');
-  const dots = wrapEl.querySelectorAll('.slider-dot');
-  const n = imgs.length;
-  _sliderIdx[id] = ((_sliderIdx[id]||0) + dir + n) % n;
-  imgs.forEach((el,i) => el.classList.toggle('active', i === _sliderIdx[id]));
-  dots.forEach((el,i) => el.classList.toggle('active', i === _sliderIdx[id]));
-}
-function goSlide(id, idx) {
-  const wrapEl = document.getElementById(`slider-${id}`);
-  if (!wrapEl) return;
-  _sliderIdx[id] = idx;
-  wrapEl.querySelectorAll('.slider-img').forEach((el,i) => el.classList.toggle('active', i===idx));
-  wrapEl.querySelectorAll('.slider-dot').forEach((el,i) => el.classList.toggle('active', i===idx));
+function badgeText(state){
+  if(state==='upcoming') return t('badge_upcoming');
+  if(state==='drawn')    return t('badge_drawn');
+  return t('badge_active');
 }
 
 function renderRaffles(data){
   const grid=document.getElementById('raffles-grid');
   const raffles=data.raffles||[];
   if(!raffles.length){
-    grid.innerHTML='<div class="empty-raffles"><div class="empty-icon">🎟️</div><p style="font-size:15px;font-weight:500;margin-bottom:6px">No active raffles right now</p><p style="font-size:13px">Join our Telegram to be first to know when the next one launches.</p></div>';
+    grid.innerHTML='<div class="empty-raffles"><div class="empty-icon">🎟️</div><p style="font-size:15px;font-weight:500;margin-bottom:6px">'+esc(t('empty_title'))+'</p><p style="font-size:13px">'+esc(t('empty_sub'))+'</p></div>';
     return;
   }
   grid.innerHTML=raffles.map(r=>{
+    const state=raffleState(r);
     const soldPct=r.total>0?Math.min(100,Math.round((r.sold/r.total)*100)):null;
     const instants=r.instants?String(r.instants).split(',').map(s=>s.trim()).filter(Boolean):[];
     const promos=(r.promos||[]).filter(p=>p.uses>0);
@@ -762,6 +746,7 @@ function renderRaffles(data){
     const isVideo=(url)=>/\.(mp4|webm|mov|m4v)(\?|$)/i.test(url);
     window._raffleMedia=window._raffleMedia||{};
     window._raffleMedia[r.id]=allImages;
+
     const sliderHTML=allImages.length?`
       <div class="card-slider" id="slider-${r.id}" data-count="${allImages.length}" data-index="0">
         ${allImages.map((media,i)=>{
@@ -775,8 +760,29 @@ function renderRaffles(data){
         <button class="slider-btn slider-next" onclick="slideRaffle('${r.id}',1)">›</button>
         <div class="slider-dots">${allImages.map((_,i)=>`<button class="slider-dot${i===0?' active':''}" onclick="goToSlide('${r.id}',${i})"></button>`).join('')}</div>`:''}
       </div>`:'';
+
+    // ── COUNTDOWN: se afișează dacă există OpensAt sau DrawDate ──
+    const hasCd = !isNaN(ts(r.opensAt)) || !isNaN(ts(r.drawDate));
+    const countdownHTML = hasCd ? `
+      <div class="countdown-wrap${state==='upcoming'?' upcoming':''}" id="cd-${r.id}">
+        <div class="countdown-label" id="cd-lbl-${r.id}">${esc(state==='upcoming'?t('cd_opens_in'):t('cd_draw_in'))}</div>
+        <div class="countdown-timer">
+          <div class="cd-block"><span class="cd-num" id="cd-d-${r.id}">--</span><div class="cd-lbl">${esc(t('cd_days'))}</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block"><span class="cd-num" id="cd-h-${r.id}">--</span><div class="cd-lbl">${esc(t('cd_hours'))}</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block"><span class="cd-num" id="cd-m-${r.id}">--</span><div class="cd-lbl">${esc(t('cd_mins'))}</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block"><span class="cd-num" id="cd-s-${r.id}">--</span><div class="cd-lbl">${esc(t('cd_secs'))}</div></div>
+        </div>
+        <div class="cd-localtime" id="cd-when-${r.id}"></div>
+      </div>` : '';
+
+    const btnLabel = state==='upcoming' ? t('btn_view') : t('btn_buy');
+    const btnClass = state==='upcoming' ? 'raffle-btn soon' : 'raffle-btn';
+
     return `<div class="raffle-card">
-      <div class="raffle-badge">🟢 Active</div>
+      <div class="raffle-badge ${state==='upcoming'?'upcoming':state==='drawn'?'drawn':''}" id="badge-${r.id}">${esc(badgeText(state))}</div>
       ${sliderHTML}
       <div class="raffle-name">${esc(r.name)}</div>
       <div class="raffle-desc">${r.type==='pool'?'50% of the total cash pool goes to the winner':esc(r.fixedPrize||'')}</div>
@@ -798,8 +804,8 @@ function renderRaffles(data){
       ${instants.length?`<div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">⚡ Instant Prizes</div><div class="instant-prizes">${instants.map(p=>`<div class="prize-chip">${esc(fmtPrize(p))}</div>`).join('')}</div>`:''}
       ${promos.length?`<div style="margin-bottom:14px"><div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:600">🎟️ Promo Codes</div>${promos.map(p=>`<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,149,42,0.08);border:1px solid rgba(201,149,42,0.2);border-radius:8px;padding:5px 12px;margin:3px;font-size:12px;"><span style="font-family:'DM Mono',monospace;font-weight:600;color:var(--black)">${esc(p.code)}</span><span style="color:var(--gray)">${p.uses} use${p.uses!==1?'s':''} left</span></div>`).join('')}</div>`:''}
       <div class="raffle-meta">${r.price?`<div class="raffle-pill">💷 <span>${esc(fmtPrice(r.price))} per ticket</span></div>`:''}<div class="raffle-pill">⚡ <span>Live draw on Instant Win</span></div></div>
-      ${r.drawDate?`<div class="countdown-wrap" id="cd-${r.id}"><div class="countdown-label">🎰 Draw in</div><div class="countdown-timer"><div class="cd-block"><span class="cd-num" id="cd-d-${r.id}">--</span><div class="cd-lbl">Days</div></div><div class="cd-sep">:</div><div class="cd-block"><span class="cd-num" id="cd-h-${r.id}">--</span><div class="cd-lbl">Hours</div></div><div class="cd-sep">:</div><div class="cd-block"><span class="cd-num" id="cd-m-${r.id}">--</span><div class="cd-lbl">Mins</div></div><div class="cd-sep">:</div><div class="cd-block"><span class="cd-num" id="cd-s-${r.id}">--</span><div class="cd-lbl">Secs</div></div></div></div>`:''}
-      <div class="raffle-cta">${r.link?`<a href="${esc(r.link)}" target="_blank" class="raffle-btn">Buy Tickets →</a>`:''}</div>
+      ${countdownHTML}
+      <div class="raffle-cta">${r.link?`<a href="${esc(r.link)}" target="_blank" class="${btnClass}">${esc(btnLabel)}</a>`:''}</div>
     </div>`;
   }).join('');
 }
@@ -824,7 +830,6 @@ function showSlide(id, index){
   const dots = slider.querySelectorAll('.slider-dot');
   media.forEach((m,i)=>{
     m.classList.toggle('active', i===index);
-    // Pauzează video-urile care nu sunt active, pornește-l pe cel activ
     if(m.tagName==='VIDEO'){
       if(i===index){ m.play().catch(()=>{}); }
       else { m.pause(); }
@@ -845,7 +850,6 @@ function openLightbox(raffleId, index){
   box.classList.add('open');
   document.body.style.overflow = 'hidden';
   renderLightbox();
-  // Ascunde săgețile dacă e un singur media
   const showNav = _lightboxMedia.length > 1;
   document.querySelector('.lightbox-prev').style.display = showNav ? 'flex' : 'none';
   document.querySelector('.lightbox-next').style.display = showNav ? 'flex' : 'none';
@@ -879,7 +883,6 @@ function closeLightbox(e, force){
   }
 }
 
-// Navigare cu tastele săgeți
 document.addEventListener('keydown', e => {
   const box = document.getElementById('video-lightbox');
   if(!box || !box.classList.contains('open')) return;
@@ -897,7 +900,8 @@ function renderWinners(data){
 
 function updateHeroStats(data){
   document.getElementById('hero-winners-count').textContent=(data.winners||[]).length;
-  document.getElementById('hero-raffles-count').textContent=(data.raffles||[]).length;
+  // numără doar tombolele care nu au fost deja extrase
+  document.getElementById('hero-raffles-count').textContent=(data.raffles||[]).filter(r=>raffleState(r)!=='drawn').length;
 }
 
 // ── FAQ ─────────────────────────────────────────────────
@@ -914,25 +918,81 @@ function toggleFAQ(i){
 }
 
 // ── COUNTDOWN ───────────────────────────────────────────
+// Ținta se recalculează la fiecare secundă:
+//   1) dacă tombola nu s-a deschis  → numără până la OpensAt  ("Opens in")
+//   2) dacă e deschisă              → numără până la DrawDate ("Draw in")
+//   3) după extragere               → mesaj "Draw is happening now"
+// Trecerea 1→2 se face automat, fără reîncărcarea paginii.
 const cdIntervals={};
+
 function startCountdowns(raffles){
   Object.values(cdIntervals).forEach(clearInterval);
   Object.keys(cdIntervals).forEach(k=>delete cdIntervals[k]);
-  raffles.forEach(r=>{
-    if(!r.drawDate)return;
-    const dt=new Date(r.drawDate).getTime();
-    if(isNaN(dt))return;
+
+  (raffles||[]).forEach(r=>{
+    const opens = ts(r.opensAt);
+    const draws = ts(r.drawDate);
+    if(isNaN(opens) && isNaN(draws)) return;
+
+    const wrap = document.getElementById('cd-'+r.id);
+    if(!wrap) return;
+
+    let lastState = null;
+
     function tick(){
-      const diff=dt-Date.now();
+      const now = Date.now();
+      const state = raffleState(r);
+
+      // starea s-a schimbat → actualizează badge, etichetă, buton
+      if(state !== lastState){
+        lastState = state;
+        const badge = document.getElementById('badge-'+r.id);
+        if(badge){
+          badge.className = 'raffle-badge ' + (state==='upcoming'?'upcoming':state==='drawn'?'drawn':'');
+          badge.textContent = badgeText(state);
+        }
+        wrap.classList.toggle('upcoming', state==='upcoming');
+        const lbl = document.getElementById('cd-lbl-'+r.id);
+        if(lbl) lbl.textContent = state==='upcoming' ? t('cd_opens_in') : t('cd_draw_in');
+        const card = wrap.closest('.raffle-card');
+        const btn = card ? card.querySelector('.raffle-btn') : null;
+        if(btn){
+          btn.className = state==='upcoming' ? 'raffle-btn soon' : 'raffle-btn';
+          btn.textContent = state==='upcoming' ? t('btn_view') : t('btn_buy');
+        }
+      }
+
+      // extrasă → mesaj final, oprim ceasul
+      if(state === 'drawn'){
+        if(!isNaN(draws)){
+          wrap.innerHTML = '<div class="draw-done">'+t('cd_drawing_now')+'</div>';
+        } else {
+          wrap.style.display = 'none';   // deschisă, dar fără dată de extragere
+        }
+        clearInterval(cdIntervals[r.id]);
+        return;
+      }
+
+      const target = state==='upcoming' ? opens : draws;
+      if(isNaN(target)){ wrap.style.display='none'; clearInterval(cdIntervals[r.id]); return; }
+
+      const diff = Math.max(0, target - now);
       const dEl=document.getElementById('cd-d-'+r.id);
-      const wrap=document.getElementById('cd-'+r.id);
-      if(!dEl)return;
-      if(diff<=0){if(wrap)wrap.innerHTML='<div class="draw-done">🎉 Draw is happening now!</div>';clearInterval(cdIntervals[r.id]);return;}
-      document.getElementById('cd-d-'+r.id).textContent=String(Math.floor(diff/86400000)).padStart(2,'0');
-      document.getElementById('cd-h-'+r.id).textContent=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
-      document.getElementById('cd-m-'+r.id).textContent=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
-      document.getElementById('cd-s-'+r.id).textContent=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+      if(!dEl){ clearInterval(cdIntervals[r.id]); return; }
+
+      dEl.textContent                                        = String(Math.floor(diff/86400000)).padStart(2,'0');
+      document.getElementById('cd-h-'+r.id).textContent      = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+      document.getElementById('cd-m-'+r.id).textContent      = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+      document.getElementById('cd-s-'+r.id).textContent      = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+
+      // ora exactă, în fusul orar al vizitatorului
+      const when = document.getElementById('cd-when-'+r.id);
+      if(when){
+        const prefix = state==='upcoming' ? t('cd_opens_at') : t('cd_draws_at');
+        when.textContent = prefix + ' ' + fmtDateTimeLocal(state==='upcoming'?r.opensAt:r.drawDate);
+      }
     }
+
     tick();
     cdIntervals[r.id]=setInterval(tick,1000);
   });
@@ -952,22 +1012,17 @@ window.addEventListener('beforeinstallprompt', e => {
 });
 
 function initPWABanner() {
-  // Don't show if already installed as PWA
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   if (isStandalone) return;
-  // Don't show if dismissed
   if (localStorage.getItem('gw_pwa_dismissed')) return;
-  // Show after 3 seconds
   setTimeout(() => {
     document.getElementById('pwa-banner').classList.remove('hidden');
-    // Auto-detect OS for modal default tab
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     if (!isIOS) switchTab('android');
   }, 3000);
 }
 
 function showInstallModal() {
-  // On Android Chrome, try native prompt first
   if (deferredPrompt) {
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(choice => {
@@ -979,7 +1034,6 @@ function showInstallModal() {
     });
     return;
   }
-  // Otherwise show manual instructions
   document.getElementById('pwa-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1012,7 +1066,6 @@ function initNotifBanner(){
     getFCMToken().then(token => saveFCMToken(token));
     return;
   }
-  // În PWA standalone, arată întotdeauna bannerul dacă nu e granted
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   if(!isStandalone && localStorage.getItem('gw_notif_asked')) return;
 
