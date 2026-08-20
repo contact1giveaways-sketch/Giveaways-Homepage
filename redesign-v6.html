@@ -12,8 +12,16 @@
   const roFix = `<style>
     body.lang-ro .hero h1{font-size:clamp(46px,5vw,70px)!important;line-height:.98!important;letter-spacing:-.05em!important}
     body.lang-ro .hero h1 em{font-size:.78em!important;line-height:1.04!important;letter-spacing:-.025em!important;display:block;margin-top:5px}
-    @media(max-width:960px){body.lang-ro .hero h1{font-size:clamp(44px,7.5vw,62px)!important}}
-    @media(max-width:620px){body.lang-ro .hero h1{font-size:clamp(37px,9.5vw,41px)!important;line-height:1!important;letter-spacing:-.04em!important}body.lang-ro .hero h1 em{font-size:.86em!important;line-height:1.06!important;margin-top:5px}}
+    body.lang-ro .herocopy>.eyebrow{position:relative!important;top:-16px!important;margin-bottom:-6px!important;z-index:2}
+    @media(max-width:960px){
+      body.lang-ro .hero h1{font-size:clamp(44px,7.5vw,62px)!important}
+      body.lang-ro .herocopy>.eyebrow{top:-14px!important;margin-bottom:-5px!important}
+    }
+    @media(max-width:620px){
+      body.lang-ro .hero h1{font-size:clamp(37px,9.5vw,41px)!important;line-height:1!important;letter-spacing:-.04em!important}
+      body.lang-ro .hero h1 em{font-size:.86em!important;line-height:1.06!important;margin-top:5px}
+      body.lang-ro .herocopy>.eyebrow{top:-11px!important;margin-bottom:-3px!important}
+    }
   </style>`;
   document.open();
   document.write(html.replace('</head>', roFix + '</head>'));
