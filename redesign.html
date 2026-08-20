@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Giveaways Community — Redesign V2</title>
+<meta name="theme-color" content="#f7f4ed" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#101010; --muted:#6f6d67; --paper:#f7f4ed; --white:#fff;
+  --gold:#c9962d; --gold-2:#e2bf70; --line:#e8e1d5; --soft:#eee8dd;
+  --green:#16865a; --shadow:0 22px 70px rgba(43,32,13,.09);
+  --radius:28px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.shell{width:min(1240px,calc(100% - 40px));margin:auto}
+.eyebrow{font:700 11px/1 'Manrope';letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.nav{position:sticky;top:0;z-index:50;background:rgba(247,244,237,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(232,225,213,.8)}
+.nav-in{height:78px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:center;gap:12px;font:800 18px/1 'Manrope';letter-spacing:.12em}
+.brandmark{width:38px;height:38px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;position:relative}
+.brandmark:before,.brandmark:after{content:'';position:absolute;background:var(--gold);border-radius:10px}
+.brandmark:before{width:15px;height:3px;transform:rotate(45deg)}
+.brandmark:after{width:15px;height:3px;transform:rotate(-45deg)}
+.navlinks{display:flex;gap:28px;color:#4f4d47;font-size:13px;font-weight:600}
+.navright{display:flex;align-items:center;gap:12px}
+.langs{display:flex;padding:4px;border:1px solid var(--line);border-radius:99px;background:rgba(255,255,255,.55)}
+.langs button{border:0;background:transparent;padding:7px 10px;border-radius:99px;font-size:11px;font-weight:800;color:#77736c;cursor:pointer}
+.langs button.active{background:var(--ink);color:white}
+.pillbtn{border:1px solid var(--ink);border-radius:999px;padding:10px 17px;font-size:12px;font-weight:800;cursor:pointer;background:var(--ink);color:white}
+.hero{padding:68px 0 38px}
+.hero-grid{display:grid;grid-template-columns:1.03fr .97fr;gap:34px;align-items:stretch}
+.hero-copy{padding:44px 0 26px;display:flex;flex-direction:column;justify-content:center}
+.hero h1{font:800 clamp(58px,8vw,118px)/.86 'Manrope';letter-spacing:-.065em;max-width:760px}
+.hero h1 em{font-family:'Playfair Display';font-weight:500;color:var(--gold);letter-spacing:-.04em}
+.hero-lead{max-width:610px;margin:28px 0;color:var(--muted);font-size:18px;line-height:1.65}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:15px 21px;border-radius:999px;border:1px solid var(--ink);font-size:13px;font-weight:800}
+.cta.primary{background:var(--ink);color:white}
+.cta.ghost{background:transparent}
+.trustline{display:flex;gap:20px;flex-wrap:wrap;margin-top:30px;color:#7b776f;font-size:12px;font-weight:700}
+.trustline span:before{content:'•';color:var(--gold);margin-right:8px}
+.featured{background:var(--ink);color:white;border-radius:36px;padding:22px;min-height:610px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.featured:before{content:'';position:absolute;width:430px;height:430px;border-radius:50%;right:-130px;top:-110px;background:radial-gradient(circle,rgba(226,191,112,.38),rgba(226,191,112,0) 68%)}
+.featured-media{height:320px;border-radius:24px;background:linear-gradient(135deg,#27231b,#0f0f0f);overflow:hidden;position:relative}
+.featured-media img,.featured-media video{width:100%;height:100%;object-fit:cover}
+.livebadge{position:absolute;top:18px;left:18px;background:#fff;color:#111;padding:8px 12px;border-radius:99px;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.featured-body{padding:26px 8px 8px;position:relative}
+.featured-name{font:800 34px/1.02 'Manrope';letter-spacing:-.04em;margin-top:8px}
+.featured-desc{margin-top:10px;color:#c8c4bc;font-size:14px}
+.featured-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:24px 0}
+.meta{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:13px}
+.meta b{display:block;font:800 18px/1 'Manrope';color:#f0d08a}
+.meta span{display:block;color:#9f9a90;font-size:10px;margin-top:6px;text-transform:uppercase;letter-spacing:.1em}
+.featured .cta{width:100%;background:#f2d38f;color:#111;border:0}
+.value-strip{padding:20px 0 34px}
+.value-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.value-card{background:rgba(255,255,255,.62);border:1px solid var(--line);border-radius:22px;padding:22px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.value-num{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#f2d38f;font:800 13px 'Manrope'}
+.value-card h3{font:800 16px 'Manrope';margin-bottom:5px}.value-card p{color:var(--muted);font-size:13px;line-height:1.55}
+.section{padding:72px 0}.section.white{background:#fff}.section.dark{background:#101010;color:#fff}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:28px}
+.section-head h2{font:800 clamp(38px,5vw,72px)/.95 'Manrope';letter-spacing:-.055em;margin-top:10px}
+.section-head p{max-width:470px;color:var(--muted);font-size:14px;line-height:1.6}.dark .section-head p{color:#a8a39a}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.raffle{background:var(--paper);border:1px solid var(--line);border-radius:28px;overflow:hidden;display:flex;flex-direction:column;min-height:100%}
+.raffle-media{height:235px;background:#e8e1d5;position:relative;overflow:hidden}.raffle-media img,.raffle-media video{width:100%;height:100%;object-fit:cover}
+.raffle-badge{position:absolute;top:15px;left:15px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);padding:7px 10px;border-radius:99px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em}
+.raffle-body{padding:20px;display:flex;flex-direction:column;flex:1}.raffle h3{font:800 23px/1.05 'Manrope';letter-spacing:-.03em}.raffle .desc{color:var(--muted);font-size:13px;margin:7px 0 16px;min-height:20px}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}.price-row b{font:800 18px 'Manrope';color:var(--ink)}
+.progress{height:6px;background:#ddd6cb;border-radius:99px;overflow:hidden;margin:15px 0 7px}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-2));border-radius:99px}
+.progress-copy{font-size:10px;color:#88827a;display:flex;justify-content:space-between}
+.instant{margin:14px 0;padding:12px 13px;border-radius:15px;background:#fff8e9;border:1px solid #eeddb6;color:#6d541a;font-size:11px;font-weight:800}
+.raffle .cta{margin-top:auto;background:var(--ink);color:white;border:0;border-radius:14px}
+.empty{padding:38px;border:1px dashed var(--line);border-radius:24px;color:var(--muted);grid-column:1/-1;text-align:center}
+.winners{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.winner-wall{background:#181818;border:1px solid #262626;border-radius:28px;padding:12px}.winner{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:15px;border-bottom:1px solid #262626}.winner:last-child{border:0}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#29251e;color:#e7c774;font-weight:900}.winner b{font-size:13px}.winner small{display:block;color:#88847d;margin-top:3px}.winner-prize{color:#f0d08a;font:800 13px 'Manrope'}
+.cashback{border-radius:28px;padding:34px;background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c;display:flex;flex-direction:column;justify-content:space-between;min-height:370px}.cashback h3{font:800 42px/.95 'Manrope';letter-spacing:-.05em}.cashback p{font-size:14px;line-height:1.65;max-width:430px;margin-top:16px}.cashback .big{font:800 clamp(50px,6vw,86px)/1 'Manrope';letter-spacing:-.07em;margin-top:42px}
+.how{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.step{border-top:1px solid var(--line);padding-top:16px}.step b{font:800 12px 'Manrope';color:var(--gold)}.step h3{font:800 18px 'Manrope';margin:24px 0 8px}.step p{font-size:13px;color:var(--muted);line-height:1.55}
+.community{border-radius:34px;background:var(--ink);color:white;padding:48px;display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center}.community h2{font:800 clamp(38px,5vw,70px)/.95 'Manrope';letter-spacing:-.05em}.community p{color:#a8a39a;max-width:600px;margin:16px 0 24px}.community-links{display:grid;grid-template-columns:1fr 1fr;gap:12px}.community-links a{padding:19px;border:1px solid #2c2c2c;border-radius:18px;background:#161616;font-size:13px;font-weight:800}.community-links span{display:block;color:#77736c;font-size:10px;margin-top:5px;font-weight:500}
+footer{padding:28px 0 42px;color:#8b867d;font-size:11px}.footer-in{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.mobilebar{display:none}
+@media(max-width:960px){.navlinks{display:none}.hero-grid,.winners,.community{grid-template-columns:1fr}.featured{min-height:auto}.value-grid,.cards{grid-template-columns:1fr 1fr}.how{grid-template-columns:1fr 1fr}.hero-copy{padding-top:18px}.featured-media{height:360px}}
+@media(max-width:620px){.shell{width:min(100% - 24px,1240px)}.nav-in{height:67px}.brand{font-size:14px}.brandmark{width:32px;height:32px}.pillbtn{display:none}.hero{padding-top:38px}.hero h1{font-size:56px}.hero-lead{font-size:15px}.hero-actions .cta{flex:1}.featured{border-radius:28px;padding:14px;min-height:auto}.featured-media{height:250px}.featured-name{font-size:28px}.featured-meta{grid-template-columns:1fr 1fr 1fr}.meta{padding:10px}.meta b{font-size:15px}.value-grid,.cards,.how{grid-template-columns:1fr}.section{padding:52px 0}.section-head{display:block}.section-head p{margin-top:12px}.community{padding:28px}.community-links{grid-template-columns:1fr}.mobilebar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;bottom:12px;left:12px;right:12px;z-index:80;background:rgba(15,15,15,.94);backdrop-filter:blur(16px);border:1px solid #2b2b2b;border-radius:18px;padding:8px;color:#eee}.mobilebar a{text-align:center;font-size:9px;font-weight:800;padding:7px 2px}.mobilebar b{display:block;font-size:17px;margin-bottom:2px}body{padding-bottom:82px}}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="shell nav-in">
+  <a class="brand" href="#top"><span class="brandmark"></span><span>GIVEAWAYS</span></a>
+  <div class="navlinks"><a href="#raffles">Raffles</a><a href="#how">How it works</a><a href="#winners">Winners</a><a href="#community">Community</a></div>
+  <div class="navright"><div class="langs"><button class="active">EN</button><button>RO</button><button>IT</button></div><a class="pillbtn" href="#raffles">View raffles</a></div>
+</div></nav>
+
+<main id="top">
+<section class="hero"><div class="shell hero-grid">
+  <div class="hero-copy">
+    <div class="eyebrow">Giveaways Community · UK</div>
+    <h1>WIN MORE.<br><em>Even when</em><br>YOU DON'T.</h1>
+    <p class="hero-lead">One ticket gives you more than one way to win — the main draw, instant prizes and our community cashback pool.</p>
+    <div class="hero-actions"><a class="cta primary" href="#raffles">View live raffles ↗</a><a class="cta ghost" href="https://instant-scratch.vercel.app/" target="_blank">Instant prizes ⚡</a></div>
+    <div class="trustline"><span>Transparent draws</span><span>Real winners</span><span>Community cashback</span></div>
+  </div>
+  <article class="featured" id="featured-card">
+    <div class="featured-media" id="featured-media"><span class="livebadge">Live competition</span></div>
+    <div class="featured-body">
+      <div class="eyebrow">Featured now</div>
+      <div class="featured-name" id="featured-name">Loading competition…</div>
+      <div class="featured-desc" id="featured-desc">Live data from your existing Google Sheets backend.</div>
+      <div class="featured-meta">
+        <div class="meta"><b id="featured-price">—</b><span>per ticket</span></div>
+        <div class="meta"><b id="featured-sold">—</b><span>tickets sold</span></div>
+        <div class="meta"><b id="featured-instant">—</b><span>instant prizes</span></div>
+      </div>
+      <a class="cta" id="featured-link" href="#raffles">Enter competition →</a>
+    </div>
+  </article>
+</div></section>
+
+<section class="value-strip"><div class="shell value-grid">
+  <div class="value-card"><div class="value-num">01</div><div><h3>Main Draw</h3><p>Win the advertised headline prize through the official Raffall draw.</p></div></div>
+  <div class="value-card"><div class="value-num">02</div><div><h3>Instant Prizes</h3><p>Ticket holders get access to extra live instant prize draws at no extra cost.</p></div></div>
+  <div class="value-card"><div class="value-num">03</div><div><h3>Cashback Pool</h3><p>20% of gross profit is allocated to the community cashback pool.</p></div></div>
+</div></section>
+
+<section class="section white" id="raffles"><div class="shell">
+  <div class="section-head"><div><div class="eyebrow">Live now</div><h2>Choose your next win.</h2></div><p>Less noise, more useful information: prize, ticket price, availability and instant rewards are visible at a glance.</p></div>
+  <div class="cards" id="raffle-grid"><div class="empty">Loading live competitions…</div></div>
+</div></section>
+
+<section class="section dark" id="winners"><div class="shell">
+  <div class="section-head"><div><div class="eyebrow">Proof, not promises</div><h2>Real people.<br>Real winners.</h2></div><p>Recent winners are loaded from the same data source as the current site.</p></div>
+  <div class="winners">
+    <div class="winner-wall" id="winner-wall"><div class="winner"><div class="avatar">G</div><div><b>Loading winners…</b><small>Giveaways Community</small></div><div class="winner-prize">—</div></div></div>
+    <div class="cashback"><div><div class="eyebrow" style="color:#4f3c12">Community benefit</div><h3>Cashback<br>Pool</h3><p>Even when the main prize isn't yours, your participation still contributes to the shared pool.</p></div><div class="big">20%</div></div>
+  </div>
+</div></section>
+
+<section class="section" id="how"><div class="shell">
+  <div class="section-head"><div><div class="eyebrow">Simple by design</div><h2>Four steps.<br>That's it.</h2></div></div>
+  <div class="how">
+    <div class="step"><b>01</b><h3>Pick a raffle</h3><p>Choose an active competition and buy your Raffall tickets.</p></div>
+    <div class="step"><b>02</b><h3>Join the community</h3><p>Follow Telegram or WhatsApp so you never miss a live draw.</p></div>
+    <div class="step"><b>03</b><h3>Enter instant draws</h3><p>Use your Raffall username on the Instant Win platform.</p></div>
+    <div class="step"><b>04</b><h3>Watch & win</h3><p>Follow the transparent live draw and see the winner instantly.</p></div>
+  </div>
+</div></section>
+
+<section class="section" id="community"><div class="shell"><div class="community">
+  <div><div class="eyebrow">The community is the product</div><h2>Don't just buy a ticket.<br>Stay in the loop.</h2><p>New raffles, instant prize windows and winner announcements — exactly where your audience already spends time.</p></div>
+  <div class="community-links"><a href="https://telegram.me/GiveawaysEn" target="_blank">Telegram Channel<span>Draw alerts · Winners · Updates</span></a><a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank">WhatsApp Channel<span>Announcements · Community updates</span></a></div>
+</div></div></section>
+</main>
+
+<footer><div class="shell footer-in"><span>© 2026 Giveaways Community</span><span>Prototype V2 · Frontend redesign branch</span></div></footer>
+<div class="mobilebar"><a href="#top"><b>⌂</b>Home</a><a href="#raffles"><b>◫</b>Raffles</a><a href="https://instant-scratch.vercel.app/" target="_blank"><b>⚡</b>Instant</a><a href="#winners"><b>★</b>Winners</a></div>
+
+<script>
+const API_URL='https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const money=v=>{if(v===undefined||v===null||v==='')return '—';v=String(v);return /^[£€$]/.test(v)?v:/^\d/.test(v)?'£'+v:v};
+const initials=s=>String(s||'G').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+async function api(action){const r=await fetch(API_URL+'?'+new URLSearchParams({action}));return r.json()}
+function mediaHTML(r){const url=r.coverImage||(r.images&&r.images[0]);if(!url)return '';const vid=/\.(mp4|webm|mov|m4v)(\?|$)/i.test(url);return vid?`<video src="${esc(url)}" muted loop autoplay playsinline></video>`:`<img src="${esc(url)}" alt="${esc(r.name)}" loading="lazy">`}
+function raffleState(r){const now=Date.now(),o=r.opensAt?new Date(r.opensAt).getTime():NaN,d=r.drawDate?new Date(r.drawDate).getTime():NaN;if(!isNaN(o)&&now<o)return'Opens soon';if(!isNaN(d)&&now>=d)return'Drawn';return'Live'}
+function instants(r){return r.instants?String(r.instants).split(',').map(x=>x.trim()).filter(Boolean):[]}
+function renderFeatured(r){if(!r)return;document.getElementById('featured-media').insertAdjacentHTML('afterbegin',mediaHTML(r));document.getElementById('featured-name').textContent=r.name||'Featured raffle';document.getElementById('featured-desc').textContent=r.type==='pool'?'50% of the total cash pool goes to the winner':(r.fixedPrize||'Live competition');document.getElementById('featured-price').textContent=money(r.price);document.getElementById('featured-sold').textContent=r.sold??'—';document.getElementById('featured-instant').textContent=instants(r).length||'—';if(r.link){const a=document.getElementById('featured-link');a.href=r.link;a.target='_blank'}}
+function renderRaffles(list){const grid=document.getElementById('raffle-grid');if(!list.length){grid.innerHTML='<div class="empty">No active competitions right now.</div>';return}grid.innerHTML=list.map(r=>{const pct=r.total>0?Math.min(100,Math.round((Number(r.sold||0)/Number(r.total))*100)):0;const ins=instants(r);return `<article class="raffle"><div class="raffle-media">${mediaHTML(r)}<span class="raffle-badge">${esc(raffleState(r))}</span></div><div class="raffle-body"><h3>${esc(r.name||'Competition')}</h3><div class="desc">${esc(r.type==='pool'?'Cash pool competition':(r.fixedPrize||''))}</div><div class="price-row"><span>Ticket price</span><b>${esc(money(r.price))}</b></div>${r.total>0?`<div class="progress"><i style="width:${pct}%"></i></div><div class="progress-copy"><span>${esc(r.sold||0)} sold</span><span>${pct}%</span></div>`:''}${ins.length?`<div class="instant">⚡ ${ins.length} instant prize${ins.length===1?'':'s'} included</div>`:''}${r.link?`<a class="cta" href="${esc(r.link)}" target="_blank">Enter competition →</a>`:''}</div></article>`}).join('')}
+function renderWinners(list){const wall=document.getElementById('winner-wall');const w=list.slice().reverse().slice(0,7);if(!w.length){wall.innerHTML='<div class="winner"><div class="avatar">G</div><div><b>No winners loaded yet</b><small>Giveaways Community</small></div><div class="winner-prize">—</div></div>';return}wall.innerHTML=w.map(x=>`<div class="winner"><div class="avatar">${esc(initials(x.username))}</div><div><b>${esc(x.username||'Winner')}</b><small>${esc(x.raffle||'Giveaways Community')}</small></div><div class="winner-prize">${esc(money(x.prize))}</div></div>`).join('')}
+(async()=>{try{const [r,w]=await Promise.all([api('getHomeRaffles'),api('getHomeWinners')]);const raffles=(r.raffles||[]).sort((a,b)=>(a.order||999)-(b.order||999));renderFeatured(raffles.find(x=>raffleState(x)==='Live')||raffles[0]);renderRaffles(raffles);renderWinners(w.winners||[])}catch(e){console.error(e);document.getElementById('raffle-grid').innerHTML='<div class="empty">Could not load live data. The redesign itself is still available for review.</div>'}})();
+</script>
+</body>
+</html>
