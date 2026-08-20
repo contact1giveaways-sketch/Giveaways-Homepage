@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Giveaways Community — V6 Preview</title>
+</head>
+<body>
+<script>
+(async()=>{
+  const html = await fetch('/redesign-v5.html', {cache:'no-store'}).then(r=>r.text());
+  const roFix = `<style>
+    body.lang-ro .hero h1{font-size:clamp(46px,5vw,70px)!important;line-height:.98!important;letter-spacing:-.05em!important}
+    body.lang-ro .hero h1 em{font-size:.78em!important;line-height:1.04!important;letter-spacing:-.025em!important;display:block;margin-top:5px}
+    @media(max-width:960px){body.lang-ro .hero h1{font-size:clamp(44px,7.5vw,62px)!important}}
+    @media(max-width:620px){body.lang-ro .hero h1{font-size:clamp(37px,9.5vw,41px)!important;line-height:1!important;letter-spacing:-.04em!important}body.lang-ro .hero h1 em{font-size:.86em!important;line-height:1.06!important;margin-top:5px}}
+  </style>`;
+  document.open();
+  document.write(html.replace('</head>', roFix + '</head>'));
+  document.close();
+})().catch(()=>location.replace('/redesign-v5.html'));
+</script>
+</body>
+</html>
