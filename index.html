@@ -2,12 +2,984 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Giveaways Community — Redesign Preview</title>
-<meta http-equiv="refresh" content="0; url=/redesign-v6.html">
-<script>window.location.replace('/redesign-v6.html');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Giveaways Community — Win Real Prizes</title>
+<meta name="description" content="Transparent raffles, live draws, instant prizes and a community cashback pool. Every ticket counts.">
+<meta name="theme-color" content="#f7f4ed">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Giveaways">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://giveaways-homepage.vercel.app/">
+<meta property="og:title" content="Giveaways Community — Win Real Prizes">
+<meta property="og:description" content="Transparent raffles, live draws, instant prizes and a community cashback pool.">
+<meta property="og:image" content="https://giveaways-homepage.vercel.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://giveaways-homepage.vercel.app/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BSVJT515DF"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-BSVJT515DF');
+</script>
+<style>
+:root{--ink:#101010;--muted:#706d67;--paper:#f7f4ed;--white:#fff;--gold:#c9962d;--gold2:#efd48e;--line:#e7e0d5;--shadow:0 22px 70px rgba(43,32,13,.09)}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth;scroll-padding-top:82px}body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);overflow-x:hidden}a{color:inherit;text-decoration:none}.shell{width:min(1240px,calc(100% - 40px));margin:auto}.eyebrow{font:700 11px/1 'Manrope';letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.nav{position:sticky;top:0;z-index:50;background:rgba(247,244,237,.9);backdrop-filter:blur(18px);border-bottom:1px solid rgba(231,224,213,.85)}.navin{height:78px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:12px;font:800 18px/1 'Manrope';letter-spacing:.12em}.brand-logo{width:40px;height:40px;border-radius:12px;object-fit:cover;box-shadow:0 3px 14px rgba(201,150,45,.18)}.navlinks{display:flex;gap:26px;color:#4f4d47;font-size:13px;font-weight:600}.navright{display:flex;align-items:center;gap:12px}.langs{display:flex;padding:4px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.65)}.lang-btn{border:0;background:transparent;padding:7px 10px;border-radius:99px;font-size:11px;font-weight:800;color:#77736c;cursor:pointer}.lang-btn.active{background:var(--ink);color:white}.navcta{background:var(--ink);color:#fff;border-radius:999px;padding:10px 18px;font-size:12px;font-weight:800}
+.hero{padding:68px 0 42px}.herogrid{display:grid;grid-template-columns:minmax(0,1.03fr) minmax(0,.97fr);gap:34px;align-items:stretch}.herocopy{min-width:0;padding:42px 0;display:flex;flex-direction:column;justify-content:center}.hero h1{font:800 clamp(58px,7.6vw,112px)/.86 'Manrope';letter-spacing:-.065em;max-width:100%;overflow-wrap:normal}.hero h1 em{font-family:'Playfair Display';font-weight:500;color:var(--gold);letter-spacing:-.035em}.lang-ro .hero h1{font-size:clamp(54px,6.3vw,88px);line-height:.9}.lang-it .hero h1{font-size:clamp(56px,6.8vw,96px);line-height:.9}.lead{max-width:610px;margin:28px 0;color:var(--muted);font-size:18px;line-height:1.65}.actions{display:flex;gap:12px;flex-wrap:wrap}.cta{display:inline-flex;align-items:center;justify-content:center;padding:15px 21px;border-radius:999px;border:1px solid var(--ink);font-size:13px;font-weight:800}.cta.primary{background:var(--ink);color:#fff}.trust{display:flex;gap:20px;flex-wrap:wrap;margin-top:30px;color:#7c786f;font-size:12px;font-weight:700}.trust span:before{content:'•';color:var(--gold);margin-right:8px}
+.featured{background:var(--ink);color:white;border-radius:36px;padding:22px;min-height:650px;position:relative;overflow:hidden;box-shadow:var(--shadow)}.featured:before{content:'';position:absolute;width:430px;height:430px;border-radius:50%;right:-130px;top:-110px;background:radial-gradient(circle,rgba(226,191,112,.35),transparent 68%)}.featuredmedia{height:320px;border-radius:24px;background:linear-gradient(135deg,#27231b,#0f0f0f);overflow:hidden;position:relative}.featuredmedia img,.featuredmedia video{width:100%;height:100%;object-fit:cover}.statusbadge{position:absolute;top:18px;left:18px;background:#fff;color:#111;padding:8px 12px;border-radius:99px;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.statusbadge.live:before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#1f9d6d;margin-right:7px}.featuredbody{padding:24px 8px 8px;position:relative}.featuredname{font:800 34px/1.02 'Manrope';letter-spacing:-.04em;margin-top:8px}.featureddesc{margin-top:10px;color:#c8c4bc;font-size:14px}.featuredmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}.meta{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:13px}.meta b{display:block;font:800 18px/1 'Manrope';color:#f0d08a}.meta span{display:block;color:#9f9a90;font-size:10px;margin-top:6px;text-transform:uppercase;letter-spacing:.1em}.countbox{border:1px solid rgba(240,208,138,.25);background:rgba(240,208,138,.07);border-radius:16px;padding:13px 15px;margin:0 0 16px}.counttop{display:flex;justify-content:space-between;gap:12px;align-items:center}.countlabel{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:#c9b37e;font-weight:800}.counttime{font:800 16px/1 'Manrope';color:#f3d995;white-space:nowrap}.countdate{font-size:10px;color:#8f8a81;margin-top:7px}.featured .cta{width:100%;border:0;background:#f2d38f;color:#111}
+.value{padding:10px 0 34px}.valuegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.valuecard{background:rgba(255,255,255,.64);border:1px solid var(--line);border-radius:22px;padding:22px;display:grid;grid-template-columns:auto 1fr;gap:16px}.valuenum{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#f2d38f;font:800 13px 'Manrope'}.valuecard h3{font:800 16px 'Manrope';margin-bottom:5px}.valuecard p{color:var(--muted);font-size:13px;line-height:1.55}
+.section{padding:72px 0}.white{background:#fff}.dark{background:#101010;color:#fff}.sectionhead{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:28px}.sectionhead h2{font:800 clamp(38px,5vw,72px)/.95 'Manrope';letter-spacing:-.055em;margin-top:10px}.sectionhead p{max-width:500px;color:var(--muted);font-size:14px;line-height:1.65}.dark .sectionhead p{color:#a8a39a}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.raffle{background:var(--paper);border:1px solid var(--line);border-radius:28px;overflow:hidden;display:flex;flex-direction:column}.rafflemedia{height:235px;background:#e8e1d5;position:relative;overflow:hidden}.rafflemedia img,.rafflemedia video{width:100%;height:100%;object-fit:cover}.rbadge{position:absolute;top:15px;left:15px;background:rgba(255,255,255,.94);padding:7px 10px;border-radius:99px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em}.rbody{padding:20px;display:flex;flex-direction:column;flex:1}.raffle h3{font:800 23px/1.05 'Manrope';letter-spacing:-.03em}.desc{color:var(--muted);font-size:13px;margin:7px 0 16px}.rcount{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:14px}.rcount .countlabel{color:#8d6b26}.rcount .counttime{color:var(--ink);font-size:14px}.rcount .countdate{color:#908a81}.pricerow{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}.pricerow b{font:800 18px 'Manrope';color:var(--ink)}.progress{height:6px;background:#ddd6cb;border-radius:99px;overflow:hidden;margin:15px 0 7px}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px}.progresscopy{font-size:10px;color:#88827a;display:flex;justify-content:space-between}.instant{margin:14px 0;padding:12px 13px;border-radius:15px;background:#fff8e9;border:1px solid #eeddb6;color:#6d541a;font-size:11px;font-weight:800}.raffle .cta{margin-top:auto;background:var(--ink);color:white;border:0;border-radius:14px}.empty{padding:38px;border:1px dashed var(--line);border-radius:24px;color:var(--muted);grid-column:1/-1;text-align:center}
+.winners{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.winnerwall{background:#181818;border:1px solid #262626;border-radius:28px;padding:12px}.winner{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:15px;border-bottom:1px solid #262626}.winner:last-child{border:0}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#29251e;color:#e7c774;font-weight:900}.winner b{font-size:13px}.winner small{display:block;color:#88847d;margin-top:3px}.winnerprize{color:#f0d08a;font:800 13px 'Manrope'}
+.cashback{border-radius:28px;padding:34px;background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c;display:flex;flex-direction:column;justify-content:space-between;min-height:430px;transition:transform .2s,box-shadow .2s}.cashback:hover{transform:translateY(-3px);box-shadow:0 22px 55px rgba(201,150,45,.18)}.cashback h3{font:800 42px/.95 'Manrope';letter-spacing:-.05em}.cashback p{font-size:14px;line-height:1.7;margin-top:16px;max-width:500px}.cashbackbottom{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-top:32px}.cashback .big{font:800 clamp(50px,6vw,86px)/1 'Manrope';letter-spacing:-.07em}.cashbackcta{padding:12px 16px;background:rgba(16,16,16,.9);color:#fff;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
+.how{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.step{border-top:1px solid var(--line);padding-top:16px}.step b{font:800 12px 'Manrope';color:var(--gold)}.step h3{font:800 18px 'Manrope';margin:24px 0 8px}.step p{font-size:13px;color:var(--muted);line-height:1.55}
+.community{border-radius:34px;background:var(--ink);color:white;padding:48px;display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center}.community h2{font:800 clamp(38px,5vw,70px)/.95 'Manrope';letter-spacing:-.05em}.community p{color:#a8a39a;margin:16px 0;line-height:1.65}.communitylinks{display:grid;grid-template-columns:1fr 1fr;gap:12px}.communitylinks a{padding:19px;border:1px solid #2c2c2c;border-radius:18px;background:#161616;font-size:13px;font-weight:800}.communitylinks a:hover{border-color:#4a4335}.communitylinks span{display:block;color:#77736c;font-size:10px;margin-top:5px;font-weight:500}
+.faqwrap{max-width:900px}.faqitem{border-bottom:1px solid var(--line)}.faqq{width:100%;display:flex;justify-content:space-between;gap:18px;align-items:center;padding:22px 0;background:none;border:0;text-align:left;color:var(--ink);font:800 17px/1.35 'Manrope';cursor:pointer}.faqplus{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;font-size:18px;flex:none;transition:transform .2s}.faqitem.open .faqplus{transform:rotate(45deg)}.faqa{display:none;padding:0 48px 22px 0;color:var(--muted);font-size:14px;line-height:1.75}.faqitem.open .faqa{display:block}.faqa a{color:var(--gold);font-weight:700}
+footer{padding:28px 0 42px;color:#8b867d;font-size:11px}.footerin{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.mobilebar{display:none}
+@media(max-width:960px){.navlinks{display:none}.herogrid,.winners,.community{grid-template-columns:1fr}.featured{min-height:auto}.valuegrid,.cards{grid-template-columns:1fr 1fr}.how{grid-template-columns:1fr 1fr}.herocopy{padding-top:18px}.featuredmedia{height:360px}.lang-ro .hero h1,.lang-it .hero h1{font-size:clamp(54px,9vw,82px)}}
+@media(max-width:620px){.shell{width:min(100% - 24px,1240px)}.navin{height:67px}.brand{font-size:14px}.brand-logo{width:34px;height:34px;border-radius:10px}.navcta{display:none}.hero{padding-top:38px}.hero h1{font-size:56px}.lang-ro .hero h1{font-size:50px;line-height:.91}.lang-it .hero h1{font-size:52px;line-height:.91}.lead{font-size:15px}.actions .cta{flex:1}.featured{border-radius:28px;padding:14px}.featuredmedia{height:250px}.featuredname{font-size:28px}.featuredmeta{grid-template-columns:repeat(3,1fr)}.meta{padding:10px}.meta b{font-size:15px}.counttop{align-items:flex-start;flex-direction:column;gap:7px}.valuegrid,.cards,.how{grid-template-columns:1fr}.section{padding:52px 0}.sectionhead{display:block}.sectionhead p{margin-top:12px}.community{padding:28px}.communitylinks{grid-template-columns:1fr}.cashbackbottom{align-items:flex-start;flex-direction:column}.faqaq{}.faqq{font-size:15px}.faqa{padding-right:0}.mobilebar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;right:12px;z-index:80;background:rgba(15,15,15,.96);backdrop-filter:blur(16px);border:1px solid #2b2b2b;border-radius:18px;padding:8px;color:#eee;box-shadow:0 16px 45px rgba(0,0,0,.22)}.mobilebar a{text-align:center;font-size:9px;font-weight:800;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:3px}.mobilebar svg,.mobilebar img{width:20px;height:20px;display:block}.mobilebar .channel-icon{filter:none}.mobilebar .homeicon{font-size:18px;line-height:20px}body{padding-bottom:90px}}
+/* ═══ ADĂUGIRI PESTE DESIGNUL V5 ═══════════════════════════════ */
+
+/* Imaginile premiilor nu se mai taie — se încadrează întregi pe fundal alb */
+.featuredmedia{background:#fff}
+.featuredmedia img,.featuredmedia video{width:100%;height:100%;object-fit:contain;background:#fff}
+.rafflemedia{background:#fff}
+.rafflemedia img,.rafflemedia video{width:100%;height:100%;object-fit:contain;background:#fff}
+
+/* Badge-ul de stare mutat în dreapta ca să nu acopere textul din grafică */
+.statusbadge{left:auto;right:18px}
+.rbadge{left:auto;right:15px}
+.statusbadge.live:before,.rbadge.live:before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:6px;vertical-align:middle}
+.rbadge.upcoming,.statusbadge.upcoming{background:#efd48e;color:#2a1f06}
+.rbadge.drawn,.statusbadge.drawn{background:rgba(255,255,255,.9);color:#6b6b6b}
+
+/* Slider imagini pe carduri */
+.mediawrap{position:absolute;inset:0}
+.mslide{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;opacity:0;transition:opacity .4s ease;cursor:zoom-in}
+.mslide.active{opacity:1}
+.mnav{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,.45);color:#fff;font-size:19px;line-height:1;cursor:pointer;z-index:3;display:flex;align-items:center;justify-content:center}
+.mnav:hover{background:rgba(0,0,0,.72)}
+.mprev{left:10px}.mnext{right:10px}
+.mdots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3}
+.mdot{width:6px;height:6px;border-radius:50%;border:none;padding:0;background:rgba(0,0,0,.28);cursor:pointer}
+.mdot.active{background:#111}
+
+/* Coduri promo */
+.promos{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.promo{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(201,150,45,.32);background:rgba(201,150,45,.09);border-radius:10px;padding:5px 11px;font-size:11px}
+.promo b{font-weight:800;letter-spacing:.04em}
+.promo span{color:var(--muted)}
+.featured .promo{border-color:rgba(239,212,142,.28);background:rgba(239,212,142,.1)}
+.featured .promo span{color:rgba(255,255,255,.55)}
+.featured .promo b{color:var(--gold2)}
+
+/* Premii instant listate ca pastile */
+.inschips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.inschip{border:1px solid rgba(201,150,45,.3);background:rgba(201,150,45,.08);color:#8a6412;border-radius:9px;padding:4px 10px;font-size:11px;font-weight:700}
+
+/* Recent Draws — cardul câștigătorului */
+.drawncard .rbody{background:#fff}
+.winnerbox{margin-top:14px;border-radius:18px;padding:18px;background:linear-gradient(145deg,#141414,#232016);text-align:center;color:#fff}
+.winnerbox .wlabel{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:7px}
+.winnerbox .wname{font-family:'Manrope',sans-serif;font-weight:800;font-size:23px;letter-spacing:-.02em;color:var(--gold2);line-height:1.1;word-break:break-word}
+.winnerbox .wprize{font-size:15px;font-weight:700;margin-top:5px}
+.winnerbox .wdate{font-size:10px;color:rgba(255,255,255,.35);margin-top:8px}
+.cta.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.cta.ghost:hover{color:var(--ink);border-color:var(--gold)}
+
+/* Banner instalare PWA */
+#pwabanner{position:sticky;top:78px;z-index:45;display:none;align-items:center;gap:12px;justify-content:center;padding:10px 16px;background:linear-gradient(135deg,#1a1a1a,#2a2010);border-bottom:1px solid rgba(239,212,142,.25);color:rgba(255,255,255,.86);font-size:13px}
+#pwabanner.show{display:flex}
+#pwabanner b{color:var(--gold2)}
+#pwabanner .pbtn{background:var(--gold);color:#111;border:none;padding:7px 15px;border-radius:9px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+#pwabanner .pclose{background:none;border:none;color:rgba(255,255,255,.4);font-size:17px;cursor:pointer;line-height:1}
+#pwamodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:600;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+#pwamodal.open{display:flex}
+.pwabox{background:#fff;border-radius:26px 26px 0 0;padding:26px 22px 34px;width:100%;max-width:480px}
+.pwabox h3{font-family:'Manrope',sans-serif;font-size:20px;margin-bottom:4px}
+.pwabox>p{color:var(--muted);font-size:13px;margin-bottom:16px}
+.pwatabs{display:flex;gap:8px;margin-bottom:14px}
+.pwatab{flex:1;padding:9px;border:2px solid var(--line);border-radius:11px;background:var(--paper);font-size:13px;font-weight:700;cursor:pointer}
+.pwatab.active{border-color:var(--gold);background:#fdf6e3;color:#8a6412}
+.pwastep{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:7px;font-size:13.5px;line-height:1.5}
+.pwastep i{width:25px;height:25px;border-radius:50%;background:var(--gold);color:#fff;font-style:normal;font-weight:800;font-size:12px;display:grid;place-items:center;flex-shrink:0}
+.pwaclose{float:right;border:none;background:var(--line);width:27px;height:27px;border-radius:50%;cursor:pointer;color:var(--muted)}
+
+/* Lightbox */
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:900;align-items:center;justify-content:center;padding:20px}
+#lightbox.open{display:flex}
+#lightbox img,#lightbox video{max-width:100%;max-height:86vh;border-radius:14px}
+.lbx{position:absolute;border:none;background:rgba(255,255,255,.13);color:#fff;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lbclose{top:20px;right:22px;width:44px;height:44px;font-size:23px}
+.lbprev,.lbnext{top:50%;transform:translateY(-50%);width:50px;height:50px;font-size:30px}
+.lbprev{left:16px}.lbnext{right:16px}
+.lbcount{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.75);font-size:13px;background:rgba(0,0,0,.45);padding:6px 15px;border-radius:20px}
+
+/* Toast notificări */
+.gtoast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2d7d46;color:#fff;padding:12px 22px;border-radius:11px;font-size:14px;font-weight:600;z-index:950;box-shadow:0 10px 40px rgba(0,0,0,.3);max-width:90vw;text-align:center}
+.gtoast.err{background:#c0392b}
+
+/* Bara de notificări jos */
+#notifbar{position:fixed;bottom:0;left:0;right:0;background:#101010;border-top:2px solid rgba(239,212,142,.3);padding:15px 18px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;z-index:88;color:#fff;font-size:13.5px}
+#notifbar b{color:var(--gold2)}
+#notifbar .nbtn{background:var(--gold);color:#111;border:none;padding:9px 19px;border-radius:9px;font-weight:800;font-size:12.5px;cursor:pointer}
+#notifbar .nclose{background:none;border:none;color:#8b867d;font-size:20px;cursor:pointer}
+
+/* Cardul de cashback nu mai are gol mare pe desktop */
+.cashback{min-height:auto}
+.cashback>div:first-child{margin-bottom:26px}
+
+@media(max-width:620px){
+  .featuredmedia{height:230px}
+  .winnerbox .wname{font-size:21px}
+  #pwabanner{top:67px;font-size:12px}
+  /* bara fixă de jos nu mai acoperă conținutul */
+  body{padding-bottom:86px}
+}
+
+/* ═══ TYPOGRAFIE HERO ROMÂNĂ (preluat din V6) ══════════════════
+   Româna are cuvinte mai lungi și diacritice — are nevoie de reguli
+   proprii, altfel titlul se sparte urât. Afectează DOAR .lang-ro. */
+body.lang-ro .hero h1{font-size:clamp(46px,5vw,70px);line-height:.98;letter-spacing:-.05em}
+body.lang-ro .hero h1 .ro-title-line{display:block;line-height:.98}
+body.lang-ro .hero h1 .ro-title-second{margin-top:10px}
+body.lang-ro .hero h1 em{font-size:.78em;line-height:1.04;letter-spacing:-.025em;display:block;margin-top:5px}
+body.lang-ro .herocopy>.eyebrow{position:relative;top:-16px;margin-bottom:-6px;z-index:2}
+@media(max-width:960px){
+  body.lang-ro .hero h1{font-size:clamp(44px,7.5vw,62px)}
+  body.lang-ro .hero h1 .ro-title-second{margin-top:9px}
+  body.lang-ro .herocopy>.eyebrow{top:-14px;margin-bottom:-5px}
+}
+@media(max-width:620px){
+  body.lang-ro .hero h1{font-size:clamp(37px,9.5vw,41px);line-height:1;letter-spacing:-.04em}
+  body.lang-ro .hero h1 .ro-title-line{line-height:1}
+  body.lang-ro .hero h1 .ro-title-second{margin-top:7px}
+  body.lang-ro .hero h1 em{font-size:.86em;line-height:1.06;margin-top:5px}
+  body.lang-ro .herocopy>.eyebrow{top:-11px;margin-bottom:-3px}
+}
+</style>
 </head>
 <body>
-<p>Opening redesign preview… <a href="/redesign-v6.html">Continue</a></p>
+<nav class="nav"><div class="shell navin"><a class="brand" href="#top"><img class="brand-logo" src="/icon-192.png" alt="Giveaways logo"><span>GIVEAWAYS</span></a><div class="navlinks"><a href="#raffles" data-i18n="nav_raffles">Raffles</a><a href="#how" data-i18n="nav_how">How it works</a><a href="#winners" data-i18n="nav_winners">Winners</a><a href="#community" data-i18n="nav_community">Community</a><a href="#faq" data-i18n="nav_faq">FAQ</a></div><div class="navright"><div class="langs"><button class="lang-btn active" data-lang="en">EN</button><button class="lang-btn" data-lang="ro">RO</button><button class="lang-btn" data-lang="it">IT</button></div><a class="navcta" href="#raffles" data-i18n="nav_view">View raffles</a></div></div></nav>
+<div id="pwabanner"><span data-i18n-html="pwa_text"><b>Get the app</b> — install Giveaways on your home screen</span><button class="pbtn" onclick="showPWAModal()" data-i18n="pwa_install">Install</button><button class="pclose" onclick="dismissPWA()">✕</button></div>
+<main id="top">
+<section class="hero"><div class="shell herogrid"><div class="herocopy"><div class="eyebrow" data-i18n="hero_tag">Giveaways Community · UK</div><h1 data-i18n-html="hero_title">WIN<br><em>Real</em><br>PRIZES.</h1><p class="lead" data-i18n="hero_lead">At other raffles you either win or lose. With us, you win either way — transparent draws, instant prizes and a community cashback pool.</p><div class="actions"><a class="cta primary" href="#raffles" data-i18n="hero_raffles">🎟️ View active raffles</a><a class="cta" href="https://instant-scratch.vercel.app/" target="_blank" data-i18n="hero_instant">Instant prizes ⚡</a></div><div class="trust"><span data-i18n="trust_1">Transparent draws</span><span data-i18n="trust_2">Real winners</span><span data-i18n="trust_3">Community cashback</span></div></div>
+<article class="featured" id="featured"></article></div></section>
+<section class="value"><div class="shell valuegrid"><div class="valuecard"><div class="valuenum">01</div><div><h3 data-i18n="value1_title">Main Draw</h3><p data-i18n="value1_text">Your ticket enters the advertised competition on Raffall.</p></div></div><div class="valuecard"><div class="valuenum">02</div><div><h3 data-i18n="value2_title">Instant Prizes</h3><p data-i18n="value2_text">Every competition comes with extra instant prizes — free for any ticket holder.</p></div></div><div class="valuecard"><div class="valuenum">03</div><div><h3 data-i18n="value3_title">Cashback Pool</h3><p data-i18n="value3_text">20% of the gross profit from every raffle goes into a shared pool, paid back at Christmas.</p></div></div></div></section>
+<section class="section white" id="raffles"><div class="shell"><div class="sectionhead"><div><div class="eyebrow" data-i18n="raffles_tag">Active now</div><h2 data-i18n="raffles_title">Live raffles.</h2></div><p data-i18n="raffles_text">Every raffle is drawn transparently. Watch it happen live on our Instant Win platform.</p></div><div class="cards" id="rafflegrid"><div class="empty" data-i18n="loading_competitions">Loading live competitions…</div></div></div></section>
+<section class="section" id="recentdraws" style="display:none"><div class="shell"><div class="sectionhead"><div><div class="eyebrow" data-i18n="rd_tag">Proof, not promises</div><h2 data-i18n="rd_title">Recent draws.</h2></div><p data-i18n="rd_text">Every finished competition and the person who won it.</p></div><div class="cards" id="recentgrid"></div></div></section>
+<section class="section dark" id="winners"><div class="shell"><div class="sectionhead"><div><div class="eyebrow" data-i18n="winners_tag">Hall of fame</div><h2 data-i18n="winners_title">Recent winners.</h2></div><p data-i18n="winners_text">Every winner, every prize. Full transparency — always.</p></div><div class="winners"><div class="winnerwall" id="winnerwall"></div><a class="cashback" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vShJYg-6ogBou61TLOiC3MV78ZEgydS0d4XLbH23LNGpShEZj0VF3vzWBwu8_OrDCaM0Av8oXHmU2hI/pubhtml?gid=1728509083&single=true" target="_blank"><div><div class="eyebrow" style="color:#60470e" data-i18n="cashback_tag">Community benefit</div><h3>Cashback<br>Pool</h3><p data-i18n="cashback_text">20% of the gross profit from every raffle goes into a shared pool. At Christmas, that money comes back to players — proportionally to how many tickets each person bought. The more you play, the more you get back.</p></div><div class="cashbackbottom"><div class="big">20%</div><div class="cashbackcta" data-i18n="cashback_cta">View live leaderboard →</div></div></a></div></div></section>
+<section class="section" id="how"><div class="shell"><div class="sectionhead"><div><div class="eyebrow" data-i18n="how_tag">Simple process</div><h2 data-i18n="how_title">How it works.</h2></div></div><div class="how"><div class="step"><b>01</b><h3 data-i18n="how1_title">Buy tickets</h3><p data-i18n="how1_text">Buy tickets in any active raffle on Raffall.</p></div><div class="step"><b>02</b><h3 data-i18n="how2_title">Join the community</h3><p data-i18n="how2_text">Join us on Telegram or WhatsApp so you never miss a draw.</p></div><div class="step"><b>03</b><h3 data-i18n="how3_title">Enter instant draws</h3><p data-i18n="how3_text">If you have tickets, enter the instant prizes for free on our platform.</p></div><div class="step"><b>04</b><h3 data-i18n="how4_title">Watch live &amp; win</h3><p data-i18n="how4_text">Follow the transparent draw and see the winner announced.</p></div></div></div></section>
+<section class="section" id="community"><div class="shell"><div class="community"><div><div class="eyebrow" data-i18n="community_tag">Stay connected</div><h2 data-i18n-html="community_title">Join the community.</h2><p data-i18n="community_text">Get notified the moment a new draw opens. Don't miss your window.</p></div><div class="communitylinks"><a href="https://telegram.me/GiveawaysEn" target="_blank"><span style="display:block;color:#fff;font-size:13px;font-weight:800;margin:0" data-i18n="telegram_title">Telegram Channel</span><span data-i18n="telegram_text">Draw alerts · Winners · Updates</span></a><a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank"><span style="display:block;color:#fff;font-size:13px;font-weight:800;margin:0" data-i18n="whatsapp_title">WhatsApp Channel</span><span data-i18n="whatsapp_text">Announcements · Community updates</span></a></div></div></div></section>
+<section class="section white" id="faq"><div class="shell"><div class="sectionhead"><div><div class="eyebrow" data-i18n="faq_tag">Got questions?</div><h2 data-i18n="faq_title">FAQ</h2></div><p data-i18n="faq_intro">Everything you need to know before entering.</p></div><div class="faqwrap" id="faqwrap"></div></div></section>
+</main>
+<footer><div class="shell footerin"><span>© 2026 Giveaways Community</span><span data-i18n="footer_copy">UK Registered · All rights reserved</span></div></footer>
+<div class="mobilebar"><a href="#top"><span class="homeicon">⌂</span><span data-i18n="mobile_home">Home</span></a><a href="#raffles"><span class="homeicon">◫</span><span data-i18n="mobile_raffles">Raffles</span></a><a href="https://telegram.me/GiveawaysEn" target="_blank"><img class="channel-icon" src="https://cdn.simpleicons.org/telegram/FFFFFF" alt="Telegram"><span>Telegram</span></a><a href="https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f" target="_blank"><img class="channel-icon" src="https://cdn.simpleicons.org/whatsapp/FFFFFF" alt="WhatsApp"><span>WhatsApp</span></a></div>
+<div id="pwamodal"><div class="pwabox"><button class="pwaclose" onclick="closePWAModal()">✕</button><h3 data-i18n="pwa_title">Install the app</h3><p data-i18n="pwa_sub">Free, no App Store needed. Works like a native app.</p><div class="pwatabs"><button class="pwatab active" id="tab-ios" onclick="pwaTab('ios')">🍎 iPhone</button><button class="pwatab" id="tab-android" onclick="pwaTab('android')">🤖 Android</button></div><div id="pwa-ios"><div class="pwastep"><i>1</i><span data-i18n-html="pwa_ios1">Open this page in <b>Safari</b> (not Chrome)</span></div><div class="pwastep"><i>2</i><span data-i18n-html="pwa_ios2">Tap the <b>Share</b> button at the bottom of the screen</span></div><div class="pwastep"><i>3</i><span data-i18n-html="pwa_ios3">Scroll down and tap <b>Add to Home Screen</b></span></div><div class="pwastep"><i>4</i><span data-i18n-html="pwa_ios4">Tap <b>Add</b> — the Giveaways icon appears on your home screen</span></div></div><div id="pwa-android" style="display:none"><div class="pwastep"><i>1</i><span data-i18n-html="pwa_and1">Open this page in <b>Google Chrome</b> (not Samsung Browser)</span></div><div class="pwastep"><i>2</i><span data-i18n-html="pwa_and2">Tap the <b>three dots</b> menu in the top right corner</span></div><div class="pwastep"><i>3</i><span data-i18n-html="pwa_and3">Tap <b>Add to Home screen</b></span></div><div class="pwastep"><i>4</i><span data-i18n-html="pwa_and4">Tap <b>Add</b> — the Giveaways icon appears on your home screen</span></div></div></div></div>
+<div id="lightbox" onclick="closeLB(event)"><button class="lbx lbclose" onclick="closeLB(event,true)">✕</button><button class="lbx lbprev" onclick="navLB(event,-1)">‹</button><button class="lbx lbnext" onclick="navLB(event,1)">›</button><div id="lbcontent"></div><div class="lbcount"></div></div>
+<script>
+const API_URL='https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec';
+const LINKS={raffall:'https://raffall.com/giveaways_community',instant:'https://instant-scratch.vercel.app/',telegram:'https://telegram.me/GiveawaysEn',whatsapp:'https://whatsapp.com/channel/0029Vb8APJVBFLgQMkcBJJ3f',supportTelegram:'https://telegram.me/SuportGiveaways',supportWhatsApp:'https://wa.me/40756455748',email:'mailto:contact1.giveaways@gmail.com',telegramGroup:'https://telegram.me/+2vxJ82x8hh1iZWNk',whatsappGroup:'https://chat.whatsapp.com/DeddO55mXfvKhpCx1WkB2R'};
+/* ═══════════════════════════════════════════════════════════════
+   TRADUCERI — scrise pe baza textelor de pe site-ul care e online.
+   Acoperă toate cheile folosite în pagină (markup + JS).
+   ═══════════════════════════════════════════════════════════════ */
+const TR = {
+
+en: {
+  /* navigație */
+  nav_raffles:'Raffles', nav_how:'How it works', nav_winners:'Winners',
+  nav_community:'Community', nav_faq:'FAQ', nav_view:'View raffles',
+  mobile_home:'Home', mobile_raffles:'Raffles',
+
+  /* hero */
+  hero_tag:'Giveaways Community · UK',
+  hero_title:'WIN<br><em>Real</em><br>PRIZES.',
+  hero_lead:'At other raffles you either win or lose. With us, you win either way — transparent draws, instant prizes and a community cashback pool.',
+  hero_raffles:'🎟️ View active raffles',
+  hero_instant:'Instant prizes ⚡',
+  trust_1:'Transparent draws', trust_2:'Real winners', trust_3:'Community cashback',
+
+  /* cele trei moduri de câștig */
+  value1_title:'Main Draw',
+  value1_text:'Your ticket enters the advertised competition on Raffall.',
+  value2_title:'Instant Prizes',
+  value2_text:'Every competition comes with extra instant prizes — free for any ticket holder.',
+  value3_title:'Cashback Pool',
+  value3_text:'20% of the gross profit from every raffle goes into a shared pool, paid back at Christmas.',
+
+  /* secțiunea tombole */
+  raffles_tag:'Active now', raffles_title:'Live raffles.',
+  raffles_text:'Every raffle is drawn transparently. Watch it happen live on our Instant Win platform.',
+  loading_competitions:'Loading live competitions…',
+  no_comp:'No active raffles right now. Join our Telegram to be first to know when the next one launches.',
+
+  /* stări + countdown */
+  status_live:'Live', status_upcoming:'Opens soon', status_drawn:'Drawn',
+  featured_now:'Featured now', featured_next:'Opening next',
+  opens_in:'Opens in', draw_in:'Draw in', opens:'Opens', draw:'Draw',
+  local_time:'your local time', d:'d', h:'h', m:'m', s:'s',
+
+  /* detalii card */
+  competition:'Competition',
+  pool_desc:'50% of all ticket sales goes to one winner.',
+  ticket_price:'Ticket price', per_ticket:'per ticket',
+  tickets_sold:'tickets sold', sold_short:'sold', unlimited:'Unlimited entries',
+  instant_prizes:'instant prizes', uses_left:'left',
+  enter_comp:'Buy tickets', view_comp:'View on Raffall', view_result:'View result',
+
+  /* extrageri recente */
+  rd_tag:'Proof, not promises', rd_title:'Recent draws.',
+  rd_text:'Every finished competition and the person who won it.',
+  winner_lbl:'Winner', drawn_on:'Drawn',
+
+  /* câștigători + cashback */
+  winners_tag:'Hall of fame', winners_title:'Recent winners.',
+  winners_text:'Every winner, every prize. Full transparency — always.',
+  no_winners:'First winners coming soon',
+  cashback_tag:'Community benefit', cashback_cta:'View live leaderboard →',
+  cashback_text:'20% of the gross profit from every raffle goes into a shared pool. At Christmas, that money comes back to players — proportionally to how many tickets each person bought. The more you play, the more you get back.',
+
+  /* cum funcționează */
+  how_tag:'Simple process', how_title:'How it works.',
+  how1_title:'Buy tickets', how1_text:'Buy tickets in any active raffle on Raffall.',
+  how2_title:'Join the community', how2_text:'Join us on Telegram or WhatsApp so you never miss a draw.',
+  how3_title:'Enter instant draws', how3_text:'If you have tickets, enter the instant prizes for free on our platform.',
+  how4_title:'Watch live & win', how4_text:'Follow the transparent draw and see the winner announced.',
+
+  /* comunitate */
+  community_tag:'Stay connected', community_title:'Join the community.',
+  community_text:"Get notified the moment a new draw opens. Don't miss your window.",
+  telegram_title:'Telegram Channel', telegram_text:'Draw alerts · Winners · Updates',
+  whatsapp_title:'WhatsApp Channel', whatsapp_text:'Announcements · Community updates',
+
+  /* FAQ */
+  faq_tag:'Got questions?', faq_title:'FAQ',
+  faq_intro:'Everything you need to know before entering.',
+
+  /* PWA + notificări */
+  pwa_text:'<b>Get the app</b> — install Giveaways on your home screen',
+  pwa_install:'Install', pwa_title:'Install the app',
+  pwa_sub:'Free, no App Store needed. Works like a native app.',
+  pwa_ios1:'Open this page in <b>Safari</b> (not Chrome)',
+  pwa_ios2:'Tap the <b>Share</b> button at the bottom of the screen',
+  pwa_ios3:'Scroll down and tap <b>Add to Home Screen</b>',
+  pwa_ios4:'Tap <b>Add</b> — the Giveaways icon appears on your home screen',
+  pwa_and1:'Open this page in <b>Google Chrome</b> (not Samsung Browser)',
+  pwa_and2:'Tap the <b>three dots</b> menu in the top right corner',
+  pwa_and3:'Tap <b>Add to Home screen</b>',
+  pwa_and4:'Tap <b>Add</b> — the Giveaways icon appears on your home screen',
+  notif_text:'<b>Never miss a draw</b> — get instant push notifications',
+  notif_btn:'Enable notifications',
+  notif_on:"Notifications enabled! You'll hear from us first. 🦁",
+  notif_registering:'Registering…',
+  notif_fail:'Enabled, but registration failed — try reloading.',
+  notif_blocked:'Notifications blocked. Enable them in your browser settings.',
+  notif_unsupported:'Notifications are not supported in this browser.',
+
+  footer_copy:'UK Registered · All rights reserved',
+
+  faqs:[
+    {q:'How do I enter?',a:`Buy tickets at <a href="${LINKS.raffall}" target="_blank">raffall.com/giveaways_community</a>. To enter the instant prizes for free, register your Raffall username on <a href="${LINKS.instant}" target="_blank">our platform</a>. Then follow us on <a href="${LINKS.telegram}" target="_blank">Telegram</a> or <a href="${LINKS.whatsapp}" target="_blank">WhatsApp</a> and turn on notifications.`},
+    {q:'How do instant prizes work?',a:`Every competition includes instant prizes on top of the main Raffall draw — free for any ticket holder. When we announce a draw on our channels, head to <a href="${LINKS.instant}" target="_blank">our platform</a>, register your Raffall username and watch the live draw. One entry per person per competition.`},
+    {q:'How quickly are prizes paid?',a:'All prizes are paid within 24 hours by bank transfer. We contact you directly.'},
+    {q:'Can I win more than one instant prize?',a:"No. Each participant can win one instant prize per competition. If you win, you're automatically removed from the following draws."},
+    {q:"What if the minimum ticket threshold isn't reached?",a:'The draw still happens. The winner receives 50% of the total ticket sales. If you buy a ticket, a draw will always take place.'},
+    {q:'How do I know the draws are fair?',a:'Both draws are fully transparent. The main prize is drawn automatically by Raffall. The instant prizes are drawn live on our platform, where anyone can watch in real time.'},
+    {q:'How do I contact you?',a:`Telegram <a href="${LINKS.supportTelegram}" target="_blank">@SuportGiveaways</a>, WhatsApp <a href="${LINKS.supportWhatsApp}" target="_blank">+40756455748</a>, email <a href="${LINKS.email}">contact1.giveaways@gmail.com</a>. Open chats: <a href="${LINKS.telegramGroup}" target="_blank">Telegram Group</a> · <a href="${LINKS.whatsappGroup}" target="_blank">WhatsApp Group</a>`}
+  ]
+},
+
+ro: {
+  nav_raffles:'Tombole', nav_how:'Cum funcționează', nav_winners:'Câștigători',
+  nav_community:'Comunitate', nav_faq:'Întrebări', nav_view:'Vezi tombolele',
+  mobile_home:'Acasă', mobile_raffles:'Tombole',
+
+  hero_tag:'Giveaways Community · UK',
+  hero_title:'<span class="ro-title-line">CÂȘTIGĂ</span><span class="ro-title-line ro-title-second">PREMII</span><em>Reale.</em>',
+  hero_lead:'La alte tombole ori câștigi, ori pierzi. La noi câștigi oricum — extrageri transparente, premii instant și un pool de cashback pentru comunitate.',
+  hero_raffles:'🎟️ Vezi tombolele active',
+  hero_instant:'Premii instant ⚡',
+  trust_1:'Extrageri transparente', trust_2:'Câștigători reali', trust_3:'Cashback pentru comunitate',
+
+  value1_title:'Extragerea principală',
+  value1_text:'Biletul tău intră în competiția anunțată pe Raffall.',
+  value2_title:'Premii instant',
+  value2_text:'Fiecare competiție vine cu premii instant în plus — gratuit pentru oricine are bilet.',
+  value3_title:'Pool de cashback',
+  value3_text:'20% din profitul brut al fiecărei tombole merge într-un pool comun, împărțit de Crăciun.',
+
+  raffles_tag:'Active acum', raffles_title:'Tombole live.',
+  raffles_text:'Fiecare tombolă este extrasă transparent. Urmărește live pe platforma noastră Instant Win.',
+  loading_competitions:'Se încarcă competițiile…',
+  no_comp:'Nicio tombolă activă momentan. Intră pe Telegram ca să afli primul când se lansează următoarea.',
+
+  status_live:'Activă', status_upcoming:'Se deschide curând', status_drawn:'Extrasă',
+  featured_now:'În prim-plan', featured_next:'Următoarea',
+  opens_in:'Se deschide în', draw_in:'Extragere în', opens:'Se deschide', draw:'Extragere',
+  local_time:'ora ta locală', d:'z', h:'h', m:'m', s:'s',
+
+  competition:'Competiție',
+  pool_desc:'50% din totalul vânzărilor de bilete merge la un singur câștigător.',
+  ticket_price:'Preț bilet', per_ticket:'pe bilet',
+  tickets_sold:'bilete vândute', sold_short:'vândute', unlimited:'Intrări nelimitate',
+  instant_prizes:'premii instant', uses_left:'rămase',
+  enter_comp:'Cumpără bilete', view_comp:'Vezi pe Raffall', view_result:'Vezi rezultatul',
+
+  rd_tag:'Dovezi, nu promisiuni', rd_title:'Extrageri recente.',
+  rd_text:'Fiecare competiție încheiată și cine a câștigat-o.',
+  winner_lbl:'Câștigător', drawn_on:'Extrasă',
+
+  winners_tag:'Hall of fame', winners_title:'Câștigători recenți.',
+  winners_text:'Fiecare câștigător, fiecare premiu. Transparență totală — mereu.',
+  no_winners:'Primii câștigători apar în curând',
+  cashback_tag:'Beneficiu pentru comunitate', cashback_cta:'Vezi clasamentul live →',
+  cashback_text:'20% din profitul brut al fiecărei tombole merge într-un pool comun. De Crăciun, acei bani se întorc la jucători — proporțional cu câte bilete a cumpărat fiecare. Cu cât joci mai mult, cu atât primești mai mult înapoi.',
+
+  how_tag:'Proces simplu', how_title:'Cum funcționează.',
+  how1_title:'Cumpără bilete', how1_text:'Cumpără bilete la orice tombolă activă pe Raffall.',
+  how2_title:'Intră în comunitate', how2_text:'Intră pe Telegram sau WhatsApp ca să nu ratezi nicio extragere.',
+  how3_title:'Înscrie-te la instant', how3_text:'Dacă ai bilete, înscrie-te gratuit la premiile instant pe platforma noastră.',
+  how4_title:'Urmărește live și câștigă', how4_text:'Urmărește extragerea transparentă și vezi cine câștigă.',
+
+  community_tag:'Rămâi conectat', community_title:'Intră în comunitate.',
+  community_text:'Fii notificat imediat ce se deschide o nouă extragere. Nu rata nicio șansă.',
+  telegram_title:'Canal Telegram', telegram_text:'Anunțuri extrageri · Câștigători · Noutăți',
+  whatsapp_title:'Canal WhatsApp', whatsapp_text:'Anunțuri · Noutăți din comunitate',
+
+  faq_tag:'Ai întrebări?', faq_title:'Întrebări frecvente',
+  faq_intro:'Tot ce trebuie să știi înainte să participi.',
+
+  pwa_text:'<b>Ia aplicația</b> — instalează Giveaways pe ecranul principal',
+  pwa_install:'Instalează', pwa_title:'Instalează aplicația',
+  pwa_sub:'Gratuit, fără App Store. Funcționează ca o aplicație reală.',
+  pwa_ios1:'Deschide pagina în <b>Safari</b> (nu Chrome)',
+  pwa_ios2:'Apasă butonul <b>Share</b> din partea de jos a ecranului',
+  pwa_ios3:'Derulează și apasă <b>Add to Home Screen</b>',
+  pwa_ios4:'Apasă <b>Add</b> — iconița Giveaways apare pe ecranul principal',
+  pwa_and1:'Deschide pagina în <b>Google Chrome</b> (nu Samsung Browser)',
+  pwa_and2:'Apasă meniul cu <b>trei puncte</b> din colțul dreapta sus',
+  pwa_and3:'Apasă <b>Add to Home screen</b>',
+  pwa_and4:'Apasă <b>Add</b> — iconița Giveaways apare pe ecranul principal',
+  notif_text:'<b>Nu rata nicio extragere</b> — primești notificări instant',
+  notif_btn:'Activează notificările',
+  notif_on:'Notificări activate! Afli primul. 🦁',
+  notif_registering:'Se înregistrează…',
+  notif_fail:'Activate, dar înregistrarea a eșuat — reîncarcă pagina.',
+  notif_blocked:'Notificările sunt blocate. Activează-le din setările browserului.',
+  notif_unsupported:'Notificările nu sunt suportate în acest browser.',
+
+  footer_copy:'Înregistrat în UK · Toate drepturile rezervate',
+
+  faqs:[
+    {q:'Cum particip?',a:`Cumpără bilete pe <a href="${LINKS.raffall}" target="_blank">raffall.com/giveaways_community</a>. Pentru premiile instant, înregistrează-ți username-ul de Raffall pe <a href="${LINKS.instant}" target="_blank">platforma noastră</a>. Apoi urmărește-ne pe <a href="${LINKS.telegram}" target="_blank">Telegram</a> sau <a href="${LINKS.whatsapp}" target="_blank">WhatsApp</a> și activează notificările.`},
+    {q:'Cum funcționează premiile instant?',a:`Fiecare competiție include premii instant pe lângă extragerea principală de pe Raffall — gratuit pentru oricine are bilet. Când anunțăm o extragere pe canale, intri pe <a href="${LINKS.instant}" target="_blank">platforma noastră</a>, îți înregistrezi username-ul și urmărești extragerea live. O singură înscriere per persoană per competiție.`},
+    {q:'În cât timp sunt plătite premiile?',a:'Toate premiile sunt plătite în maximum 24 de ore prin transfer bancar. Te contactăm noi direct.'},
+    {q:'Pot câștiga mai mult de un premiu instant?',a:'Nu. Fiecare participant poate câștiga un singur premiu instant per competiție. Dacă ai câștigat, ești eliminat automat din extragerile următoare.'},
+    {q:'Ce se întâmplă dacă nu se atinge pragul minim de bilete?',a:'Extragerea are loc oricum. Câștigătorul primește 50% din totalul vânzărilor de bilete. Dacă ai cumpărat un bilet, extragerea se va face întotdeauna.'},
+    {q:'Cum știu că extragerile sunt corecte?',a:'Ambele extrageri sunt complet transparente. Premiul principal este extras automat de Raffall. Premiile instant sunt extrase live pe platforma noastră, unde oricine poate urmări în timp real.'},
+    {q:'Cum vă pot contacta?',a:`Telegram <a href="${LINKS.supportTelegram}" target="_blank">@SuportGiveaways</a>, WhatsApp <a href="${LINKS.supportWhatsApp}" target="_blank">+40756455748</a>, email <a href="${LINKS.email}">contact1.giveaways@gmail.com</a>. Chat-uri deschise: <a href="${LINKS.telegramGroup}" target="_blank">Grup Telegram</a> · <a href="${LINKS.whatsappGroup}" target="_blank">Grup WhatsApp</a>`}
+  ]
+},
+
+it: {
+  nav_raffles:'Lotterie', nav_how:'Come funziona', nav_winners:'Vincitori',
+  nav_community:'Comunità', nav_faq:'FAQ', nav_view:'Vedi le lotterie',
+  mobile_home:'Home', mobile_raffles:'Lotterie',
+
+  hero_tag:'Giveaways Community · UK',
+  hero_title:'VINCI<br><em>Premi</em><br>VERI.',
+  hero_lead:'Nelle altre lotterie o vinci o perdi. Da noi vinci comunque — estrazioni trasparenti, premi istantanei e un pool di cashback per la comunità.',
+  hero_raffles:'🎟️ Vedi le lotterie attive',
+  hero_instant:'Premi istantanei ⚡',
+  trust_1:'Estrazioni trasparenti', trust_2:'Vincitori reali', trust_3:'Cashback per la comunità',
+
+  value1_title:'Estrazione principale',
+  value1_text:'Il tuo biglietto partecipa alla competizione annunciata su Raffall.',
+  value2_title:'Premi istantanei',
+  value2_text:'Ogni competizione include premi istantanei extra — gratis per chi ha un biglietto.',
+  value3_title:'Pool di cashback',
+  value3_text:'Il 20% del profitto lordo di ogni lotteria va in un pool condiviso, distribuito a Natale.',
+
+  raffles_tag:'Attive ora', raffles_title:'Lotterie live.',
+  raffles_text:'Ogni lotteria viene estratta in modo trasparente. Guarda in diretta sulla nostra piattaforma Instant Win.',
+  loading_competitions:'Caricamento delle competizioni…',
+  no_comp:'Nessuna lotteria attiva al momento. Unisciti al nostro Telegram per essere il primo a saperlo.',
+
+  status_live:'Attiva', status_upcoming:'Apre presto', status_drawn:'Estratta',
+  featured_now:'In evidenza', featured_next:'La prossima',
+  opens_in:'Apre tra', draw_in:'Estrazione tra', opens:'Apre', draw:'Estrazione',
+  local_time:'ora locale', d:'g', h:'h', m:'m', s:'s',
+
+  competition:'Competizione',
+  pool_desc:'Il 50% di tutte le vendite di biglietti va a un solo vincitore.',
+  ticket_price:'Prezzo biglietto', per_ticket:'per biglietto',
+  tickets_sold:'biglietti venduti', sold_short:'venduti', unlimited:'Partecipazioni illimitate',
+  instant_prizes:'premi istantanei', uses_left:'rimasti',
+  enter_comp:'Acquista biglietti', view_comp:'Vedi su Raffall', view_result:'Vedi il risultato',
+
+  rd_tag:'Fatti, non promesse', rd_title:'Estrazioni recenti.',
+  rd_text:"Ogni competizione conclusa e chi l'ha vinta.",
+  winner_lbl:'Vincitore', drawn_on:'Estratta il',
+
+  winners_tag:'Hall of fame', winners_title:'Vincitori recenti.',
+  winners_text:'Ogni vincitore, ogni premio. Trasparenza totale — sempre.',
+  no_winners:'I primi vincitori arrivano presto',
+  cashback_tag:'Vantaggio per la comunità', cashback_cta:'Vedi la classifica live →',
+  cashback_text:'Il 20% del profitto lordo di ogni lotteria va in un pool condiviso. A Natale, quel denaro torna ai giocatori — in proporzione a quanti biglietti ha acquistato ciascuno. Più giochi, più ricevi indietro.',
+
+  how_tag:'Processo semplice', how_title:'Come funziona.',
+  how1_title:'Acquista biglietti', how1_text:'Acquista biglietti per qualsiasi lotteria attiva su Raffall.',
+  how2_title:'Unisciti alla comunità', how2_text:'Entra su Telegram o WhatsApp per non perdere nessuna estrazione.',
+  how3_title:'Partecipa agli instant', how3_text:'Se hai biglietti, partecipa gratis ai premi istantanei sulla nostra piattaforma.',
+  how4_title:'Guarda live e vinci', how4_text:"Segui l'estrazione trasparente e scopri il vincitore.",
+
+  community_tag:'Resta connesso', community_title:'Unisciti alla comunità.',
+  community_text:'Ricevi una notifica appena si apre una nuova estrazione. Non perdere la tua occasione.',
+  telegram_title:'Canale Telegram', telegram_text:'Avvisi estrazioni · Vincitori · Aggiornamenti',
+  whatsapp_title:'Canale WhatsApp', whatsapp_text:'Annunci · Aggiornamenti dalla comunità',
+
+  faq_tag:'Hai domande?', faq_title:'FAQ',
+  faq_intro:'Tutto quello che devi sapere prima di partecipare.',
+
+  pwa_text:"<b>Scarica l'app</b> — installa Giveaways sulla schermata Home",
+  pwa_install:'Installa', pwa_title:"Installa l'app",
+  pwa_sub:"Gratis, senza App Store. Funziona come un'app vera.",
+  pwa_ios1:'Apri questa pagina in <b>Safari</b> (non Chrome)',
+  pwa_ios2:'Tocca il pulsante <b>Condividi</b> in fondo allo schermo',
+  pwa_ios3:'Scorri e tocca <b>Aggiungi a Home</b>',
+  pwa_ios4:"Tocca <b>Aggiungi</b> — l'icona Giveaways appare sulla Home",
+  pwa_and1:'Apri questa pagina in <b>Google Chrome</b> (non Samsung Browser)',
+  pwa_and2:'Tocca il menu <b>tre puntini</b> in alto a destra',
+  pwa_and3:'Tocca <b>Aggiungi a schermata Home</b>',
+  pwa_and4:"Tocca <b>Aggiungi</b> — l'icona Giveaways appare sulla Home",
+  notif_text:'<b>Non perdere nessuna estrazione</b> — ricevi notifiche istantanee',
+  notif_btn:'Attiva le notifiche',
+  notif_on:'Notifiche attive! Sarai il primo a saperlo. 🦁',
+  notif_registering:'Registrazione…',
+  notif_fail:'Attive, ma la registrazione non è riuscita — ricarica la pagina.',
+  notif_blocked:'Notifiche bloccate. Attivale dalle impostazioni del browser.',
+  notif_unsupported:'Le notifiche non sono supportate in questo browser.',
+
+  footer_copy:'Registrato nel Regno Unito · Tutti i diritti riservati',
+
+  faqs:[
+    {q:'Come posso partecipare?',a:`Acquista i biglietti su <a href="${LINKS.raffall}" target="_blank">raffall.com/giveaways_community</a>. Per i premi istantanei, registra il tuo username Raffall sulla <a href="${LINKS.instant}" target="_blank">nostra piattaforma</a>. Poi seguici su <a href="${LINKS.telegram}" target="_blank">Telegram</a> o <a href="${LINKS.whatsapp}" target="_blank">WhatsApp</a> e attiva le notifiche.`},
+    {q:'Come funzionano i premi istantanei?',a:`Ogni competizione include premi istantanei oltre all'estrazione principale su Raffall — gratis per chi ha un biglietto. Quando annunciamo un'estrazione sui nostri canali, vai sulla <a href="${LINKS.instant}" target="_blank">nostra piattaforma</a>, registra il tuo username e guarda l'estrazione in diretta. Una partecipazione per persona per competizione.`},
+    {q:'Quanto tempo serve per ricevere un premio?',a:'Tutti i premi vengono pagati entro 24 ore tramite bonifico bancario. Ti contattiamo direttamente.'},
+    {q:'Posso vincere più di un premio istantaneo?',a:'No. Ogni partecipante può vincere un solo premio istantaneo per competizione. Se vinci, vieni rimosso automaticamente dalle estrazioni successive.'},
+    {q:'Cosa succede se non viene raggiunta la soglia minima di biglietti?',a:"L'estrazione si svolge comunque. Il vincitore riceve il 50% del totale delle vendite. Se acquisti un biglietto, un'estrazione ci sarà sempre."},
+    {q:'Come faccio a sapere che le estrazioni sono corrette?',a:"Entrambe le estrazioni sono completamente trasparenti. Il premio principale viene estratto automaticamente da Raffall. I premi istantanei vengono estratti in diretta sulla nostra piattaforma, dove chiunque può assistere in tempo reale."},
+    {q:'Come posso contattarvi?',a:`Telegram <a href="${LINKS.supportTelegram}" target="_blank">@SuportGiveaways</a>, WhatsApp <a href="${LINKS.supportWhatsApp}" target="_blank">+40756455748</a>, email <a href="${LINKS.email}">contact1.giveaways@gmail.com</a>. Chat aperte: <a href="${LINKS.telegramGroup}" target="_blank">Gruppo Telegram</a> · <a href="${LINKS.whatsappGroup}" target="_blank">Gruppo WhatsApp</a>`}
+  ]
+}
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   GIVEAWAYS COMMUNITY — logica homepage
+   Design: V5. Funcționalitate: producție + Recent Draws.
+   Backend neschimbat (Google Apps Script).
+   ═══════════════════════════════════════════════════════════════ */
+
+const MAX_RECENT_DRAWS = 6;   // câte tombole extrase rămân pe pagină
+const MIN_SOLD_SHOWN   = 25;  // sub atâtea bilete nu afișăm numărul (arată slab)
+
+let currentLang = localStorage.getItem('gw_lang') || 'en';
+let homeData = { raffles: [], winners: [] };
+
+const t    = k => (TR[currentLang] && TR[currentLang][k]) || TR.en[k] || k;
+const esc  = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials = s => String(s || 'G').trim().split(/\s+/).slice(0,2).map(x => x[0]).join('').toUpperCase();
+
+/* Bani: 0.5 → £0.50, dar lasă în pace textele libere ("FREE", "£1,000 CASH") */
+function money(v){
+  if(v === undefined || v === null || v === '') return '—';
+  v = String(v).trim();
+  if(/^free$/i.test(v)) return 'FREE';
+  const bare = v.replace(/^[£€$]\s*/, '');
+  if(/^\d+(\.\d+)?$/.test(bare)){
+    const sym = /^[£€$]/.test(v) ? v[0] : '£';
+    const n = Number(bare);
+    // zecimale doar dacă suma le are: 0.5 → £0.50, dar 50 → £50
+    return sym + (Number.isInteger(n) ? String(n) : n.toFixed(2));
+  }
+  return /^[£€$]/.test(v) ? v : (/^\d/.test(v) ? '£' + v : v);
+}
+
+async function api(action){
+  const r = await fetch(API_URL + '?' + new URLSearchParams({ action }));
+  return r.json();
+}
+
+/* ── LIMBĂ ───────────────────────────────────────────────────── */
+function applyTranslations(){
+  document.documentElement.lang = currentLang;
+  document.body.classList.remove('lang-en','lang-ro','lang-it');
+  document.body.classList.add('lang-' + currentLang);
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el => el.innerHTML = t(el.dataset.i18nHtml));
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
+  renderFAQ();
+  if(homeData.raffles.length || homeData.winners.length) renderAll();
+}
+document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => {
+  currentLang = b.dataset.lang;
+  localStorage.setItem('gw_lang', currentLang);
+  applyTranslations();
+}));
+
+/* ── FAQ ─────────────────────────────────────────────────────── */
+function renderFAQ(){
+  const wrap = document.getElementById('faqwrap');
+  if(!wrap) return;
+  wrap.innerHTML = TR[currentLang].faqs.map(f =>
+    `<div class="faqitem"><button class="faqq" type="button" onclick="toggleFAQ(this)"><span>${esc(f.q)}</span><span class="faqplus">+</span></button><div class="faqa">${f.a}</div></div>`
+  ).join('');
+}
+function toggleFAQ(btn){
+  const item = btn.closest('.faqitem'), was = item.classList.contains('open');
+  document.querySelectorAll('.faqitem.open').forEach(x => x.classList.remove('open'));
+  if(!was) item.classList.add('open');
+}
+
+/* ── STARE TOMBOLĂ ───────────────────────────────────────────── */
+function ts(v){ if(!v) return NaN; const d = new Date(v); return isNaN(d) ? NaN : d.getTime(); }
+
+function stateKey(r){
+  const now = Date.now(), o = ts(r.opensAt), d = ts(r.drawDate);
+  if(!isNaN(o) && now < o) return 'upcoming';
+  if(!isNaN(d) && now >= d) return 'drawn';
+  return 'live';
+}
+function stateLabel(r){
+  const s = stateKey(r);
+  return s === 'upcoming' ? t('status_upcoming') : s === 'drawn' ? t('status_drawn') : t('status_live');
+}
+
+/* Descriere card: premiul fix dacă există, altfel o propoziție reală
+   despre cash pool — nu eticheta din admin. */
+function raffleDescription(r){
+  if(r.fixedPrize && String(r.fixedPrize).trim()) return String(r.fixedPrize).trim();
+  if(r.type === 'pool') return t('pool_desc');
+  return t('competition');
+}
+
+function instants(r){
+  return r.instants ? String(r.instants).split(',').map(x => x.trim()).filter(Boolean) : [];
+}
+function promos(r){
+  return (r.promos || []).filter(p => p && Number(p.uses) > 0);
+}
+
+/* Găsește câștigătorul după numele exact al tombolei */
+function findWinner(r){
+  const key = String(r.name || '').trim().toLowerCase();
+  if(!key) return null;
+  const m = (homeData.winners || []).filter(w => String(w.raffle || '').trim().toLowerCase() === key);
+  return m.length ? m[m.length - 1] : null;
+}
+
+/* ── MEDIA + SLIDER ──────────────────────────────────────────── */
+const isVideo = u => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u);
+window._media = {};
+
+function mediaList(r){
+  const out = [];
+  if(r.coverImage) out.push(r.coverImage);
+  (Array.isArray(r.images) ? r.images : []).forEach(u => { if(u && !out.includes(u)) out.push(u); });
+  return out.filter(Boolean);
+}
+
+function mediaHTML(r, key){
+  const list = mediaList(r);
+  window._media[key] = list;
+  if(!list.length) return '';
+  const slides = list.map((u,i) => isVideo(u)
+    ? `<video class="mslide${i===0?' active':''}" src="${esc(u)}" muted loop autoplay playsinline onclick="openLB('${key}',${i})"></video>`
+    : `<img class="mslide${i===0?' active':''}" src="${esc(u)}" alt="${esc(r.name)}" loading="lazy" onclick="openLB('${key}',${i})">`
+  ).join('');
+  const extra = list.length > 1 ? `
+    <button class="mnav mprev" type="button" onclick="slide('${key}',-1)">‹</button>
+    <button class="mnav mnext" type="button" onclick="slide('${key}',1)">›</button>
+    <div class="mdots">${list.map((_,i)=>`<button class="mdot${i===0?' active':''}" type="button" onclick="goSlide('${key}',${i})"></button>`).join('')}</div>` : '';
+  return `<div class="mediawrap" id="mw-${key}" data-i="0">${slides}${extra}</div>`;
+}
+
+function goSlide(key, idx){
+  const wrap = document.getElementById('mw-' + key);
+  if(!wrap) return;
+  wrap.dataset.i = idx;
+  wrap.querySelectorAll('.mslide').forEach((el,i) => {
+    el.classList.toggle('active', i === idx);
+    if(el.tagName === 'VIDEO'){ i === idx ? el.play().catch(()=>{}) : el.pause(); }
+  });
+  wrap.querySelectorAll('.mdot').forEach((el,i) => el.classList.toggle('active', i === idx));
+}
+function slide(key, dir){
+  const wrap = document.getElementById('mw-' + key);
+  if(!wrap) return;
+  const n = wrap.querySelectorAll('.mslide').length;
+  goSlide(key, ((Number(wrap.dataset.i) || 0) + dir + n) % n);
+}
+
+/* ── LIGHTBOX ────────────────────────────────────────────────── */
+let _lb = [], _lbi = 0;
+function openLB(key, i){
+  _lb = window._media[key] || [];
+  if(!_lb.length) return;
+  _lbi = i;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  drawLB();
+  const multi = _lb.length > 1;
+  document.querySelector('.lbprev').style.display = multi ? 'flex' : 'none';
+  document.querySelector('.lbnext').style.display = multi ? 'flex' : 'none';
+  document.querySelector('.lbcount').style.display = multi ? 'block' : 'none';
+}
+function drawLB(){
+  const u = _lb[_lbi];
+  document.getElementById('lbcontent').innerHTML = isVideo(u)
+    ? `<video src="${esc(u)}" controls autoplay playsinline></video>`
+    : `<img src="${esc(u)}" alt="">`;
+  document.querySelector('.lbcount').textContent = (_lbi + 1) + ' / ' + _lb.length;
+}
+function navLB(e, d){ if(e) e.stopPropagation(); _lbi = (_lbi + d + _lb.length) % _lb.length; drawLB(); }
+function closeLB(e, force){
+  const box = document.getElementById('lightbox');
+  if(force || (e && e.target === box)){
+    box.classList.remove('open');
+    document.getElementById('lbcontent').innerHTML = '';
+    document.body.style.overflow = '';
+  }
+}
+document.addEventListener('keydown', e => {
+  const box = document.getElementById('lightbox');
+  if(!box.classList.contains('open')) return;
+  if(e.key === 'ArrowLeft') navLB(null, -1);
+  else if(e.key === 'ArrowRight') navLB(null, 1);
+  else if(e.key === 'Escape') closeLB(null, true);
+});
+
+/* ── COUNTDOWN ───────────────────────────────────────────────── */
+function targetInfo(r){
+  const s = stateKey(r);
+  if(s === 'upcoming' && r.opensAt) return { label:t('opens_in'), kind:'open', target:ts(r.opensAt), date:r.opensAt };
+  if(s === 'live' && r.drawDate)    return { label:t('draw_in'),  kind:'draw', target:ts(r.drawDate), date:r.drawDate };
+  return null;
+}
+function localDate(v){
+  if(!v) return '';
+  const d = new Date(v);
+  if(isNaN(d)) return '';
+  const loc = { en:'en-GB', ro:'ro-RO', it:'it-IT' };
+  return d.toLocaleString(loc[currentLang] || 'en-GB', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+function cd(ms){
+  if(ms <= 0) ms = 0;
+  let s = Math.floor(ms/1000), d = Math.floor(s/86400); s %= 86400;
+  let h = Math.floor(s/3600); s %= 3600;
+  let m = Math.floor(s/60); s %= 60;
+  return `${String(d).padStart(2,'0')}${t('d')} ${String(h).padStart(2,'0')}${t('h')} ${String(m).padStart(2,'0')}${t('m')} ${String(s).padStart(2,'0')}${t('s')}`;
+}
+function countdownHTML(r, featured){
+  const x = targetInfo(r), cls = featured ? 'countbox' : 'rcount';
+  if(!x) return '';
+  const when = x.kind === 'open' ? t('opens') : t('draw');
+  return `<div class="${cls} countdown" data-target="${x.target}" data-id="${esc(r.id)}"><div class="counttop"><span class="countlabel">${x.label}</span><span class="counttime">${cd(x.target - Date.now())}</span></div><div class="countdate">${when} ${esc(localDate(x.date))} · ${t('local_time')}</div></div>`;
+}
+
+/* Ticăie o dată pe secundă. Când o tombolă trece de la "se deschide" la
+   "live" sau la "extrasă", re-randăm secțiunile — fără reîncărcarea paginii. */
+let _lastStates = {};
+function tick(){
+  document.querySelectorAll('.countdown[data-target]').forEach(el => {
+    const time = el.querySelector('.counttime');
+    if(time) time.textContent = cd(Number(el.dataset.target) - Date.now());
+  });
+  let changed = false;
+  (homeData.raffles || []).forEach(r => {
+    const s = stateKey(r);
+    if(_lastStates[r.id] !== undefined && _lastStates[r.id] !== s) changed = true;
+    _lastStates[r.id] = s;
+  });
+  if(changed) renderAll();
+}
+
+/* ── CARDURI ─────────────────────────────────────────────────── */
+function featuredMetaHTML(r){
+  const ins = instants(r).length;
+  const showSold = r.total > 0 || Number(r.sold) >= MIN_SOLD_SHOWN;
+  const cells = [`<div class="meta"><b>${esc(money(r.price))}</b><span>${t('per_ticket')}</span></div>`];
+  if(showSold){
+    const val = r.total > 0 ? `${r.sold||0}/${r.total}` : String(r.sold||0);
+    cells.push(`<div class="meta"><b>${esc(val)}</b><span>${t('tickets_sold')}</span></div>`);
+  }
+  if(ins) cells.push(`<div class="meta"><b>${ins}</b><span>${t('instant_prizes')}</span></div>`);
+  return `<div class="featuredmeta" style="grid-template-columns:repeat(${cells.length},1fr)">${cells.join('')}</div>`;
+}
+
+function renderFeatured(r){
+  const art = document.getElementById('featured');
+  if(!r){ art.style.display = 'none'; return; }
+  art.style.display = '';
+  const s = stateKey(r), ins = instants(r), pr = promos(r);
+  art.innerHTML = `
+    <div class="featuredmedia">${mediaHTML(r,'f'+r.id)}<span class="statusbadge ${s}">${esc(stateLabel(r))}</span></div>
+    <div class="featuredbody">
+      <div class="eyebrow">${s === 'upcoming' ? t('featured_next') : t('featured_now')}</div>
+      <div class="featuredname">${esc(r.name || t('competition'))}</div>
+      <div class="featureddesc">${esc(raffleDescription(r))}</div>
+      ${featuredMetaHTML(r)}
+      ${countdownHTML(r, true)}
+      ${ins.length ? `<div class="inschips">${ins.map(p => `<span class="inschip">${esc(money(p))}</span>`).join('')}</div>` : ''}
+      ${pr.length ? `<div class="promos">${pr.map(p => `<span class="promo"><b>${esc(p.code)}</b><span>${p.uses} ${t('uses_left')}</span></span>`).join('')}</div>` : ''}
+      ${r.link ? `<a class="cta" href="${esc(r.link)}" target="_blank" rel="noopener">${s === 'upcoming' ? t('view_comp') : t('enter_comp')} →</a>` : ''}
+    </div>`;
+}
+
+function liveCardHTML(r){
+  const s = stateKey(r);
+  const pct = r.total > 0 ? Math.min(100, Math.round((Number(r.sold||0) / Number(r.total)) * 100)) : 0;
+  const ins = instants(r), pr = promos(r);
+  let soldRow = '';
+  if(r.total > 0){
+    soldRow = `<div class="progress"><i style="width:${pct}%"></i></div><div class="progresscopy"><span>${esc(r.sold||0)} / ${esc(r.total)} ${t('sold_short')}</span><span>${pct}%</span></div>`;
+  } else if(Number(r.sold) >= MIN_SOLD_SHOWN){
+    soldRow = `<div class="progresscopy" style="margin-top:12px"><span>${esc(r.sold)} ${t('tickets_sold')}</span><span>${t('unlimited')}</span></div>`;
+  }
+  return `<article class="raffle">
+    <div class="rafflemedia">${mediaHTML(r,'c'+r.id)}<span class="rbadge ${s}">${esc(stateLabel(r))}</span></div>
+    <div class="rbody">
+      <h3>${esc(r.name || t('competition'))}</h3>
+      <div class="desc">${esc(raffleDescription(r))}</div>
+      ${countdownHTML(r, false)}
+      <div class="pricerow"><span>${t('ticket_price')}</span><b>${esc(money(r.price))}</b></div>
+      ${soldRow}
+      ${ins.length ? `<div class="inschips">${ins.map(p => `<span class="inschip">${esc(money(p))}</span>`).join('')}</div>` : ''}
+      ${pr.length ? `<div class="promos">${pr.map(p => `<span class="promo"><b>${esc(p.code)}</b><span>${p.uses} ${t('uses_left')}</span></span>`).join('')}</div>` : ''}
+      ${r.link ? `<a class="cta" href="${esc(r.link)}" target="_blank" rel="noopener">${s === 'upcoming' ? t('view_comp') : t('enter_comp')} →</a>` : ''}
+    </div></article>`;
+}
+
+function drawnCardHTML(r, w){
+  return `<article class="raffle drawncard">
+    <div class="rafflemedia">${mediaHTML(r,'d'+r.id)}<span class="rbadge drawn">${esc(t('status_drawn'))}</span></div>
+    <div class="rbody">
+      <h3>${esc(r.name || t('competition'))}</h3>
+      <div class="winnerbox">
+        <div class="wlabel">🏆 ${esc(t('winner_lbl'))}</div>
+        <div class="wname">${esc(w.username)}</div>
+        <div class="wprize">${esc(money(w.prize))}</div>
+        ${r.drawDate ? `<div class="wdate">${esc(t('drawn_on'))} ${esc(localDate(r.drawDate))}</div>` : ''}
+      </div>
+      ${r.link ? `<a class="cta ghost" href="${esc(r.link)}" target="_blank" rel="noopener">${t('view_result')} →</a>` : ''}
+    </div></article>`;
+}
+
+/* ── RANDARE ─────────────────────────────────────────────────── */
+function renderRaffles(){
+  const grid = document.getElementById('rafflegrid');
+  const rdGrid = document.getElementById('recentgrid');
+  const rdSec = document.getElementById('recentdraws');
+  const active = [], drawn = [];
+
+  (homeData.raffles || []).forEach(r => {
+    if(stateKey(r) === 'drawn'){
+      const w = findWinner(r);
+      if(w) drawn.push({ r, w });          // fără câștigător → nu se afișează
+    } else {
+      active.push(r);
+    }
+  });
+
+  grid.innerHTML = active.length
+    ? active.map(liveCardHTML).join('')
+    : `<div class="empty">${t('no_comp')}</div>`;
+
+  drawn.sort((a,b) => (ts(b.r.drawDate)||0) - (ts(a.r.drawDate)||0));
+  const vis = drawn.slice(0, MAX_RECENT_DRAWS);
+  if(vis.length){
+    rdGrid.innerHTML = vis.map(x => drawnCardHTML(x.r, x.w)).join('');
+    rdSec.style.display = '';
+  } else {
+    rdGrid.innerHTML = '';
+    rdSec.style.display = 'none';
+  }
+  return active;
+}
+
+function renderWinners(list){
+  const wall = document.getElementById('winnerwall');
+  const w = (list || []).slice().reverse().slice(0, 7);
+  if(!w.length){
+    wall.innerHTML = `<div class="winner"><div class="avatar">G</div><div><b>${t('no_winners')}</b><small>Giveaways Community</small></div><div class="winnerprize">—</div></div>`;
+    return;
+  }
+  wall.innerHTML = w.map(x => `<div class="winner"><div class="avatar">${esc(initials(x.username))}</div><div><b>${esc(x.username || 'Winner')}</b><small>${esc(x.raffle || 'Giveaways Community')}</small></div><div class="winnerprize">${esc(money(x.prize))}</div></div>`).join('');
+}
+
+function renderAll(){
+  const active = renderRaffles();
+  renderFeatured(active[0] || null);
+  renderWinners(homeData.winners);
+  (homeData.raffles || []).forEach(r => { _lastStates[r.id] = stateKey(r); });
+}
+
+/* ── PORNIRE ─────────────────────────────────────────────────── */
+applyTranslations();
+(async () => {
+  try{
+    const [r, w] = await Promise.all([ api('getHomeRaffles'), api('getHomeWinners') ]);
+    homeData.raffles = (r.raffles || []).sort((a,b) => (Number(a.order)||999) - (Number(b.order)||999));
+    homeData.winners = w.winners || [];
+    renderAll();
+  }catch(e){
+    console.error('Load error:', e);
+    document.getElementById('rafflegrid').innerHTML = `<div class="empty">${t('no_comp')}</div>`;
+  }
+  setInterval(tick, 1000);
+})();
+
+/* ═══ FIREBASE CLOUD MESSAGING (identic cu producția) ═══════════ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDGv3TtfD2XgA-PWjImMgyY_5CLOFawMSI",
+  authDomain: "giveaways-community.firebaseapp.com",
+  projectId: "giveaways-community",
+  storageBucket: "giveaways-community.firebasestorage.app",
+  messagingSenderId: "335882371621",
+  appId: "1:335882371621:web:2ab7ceb418b1524b1e75cc"
+};
+const VAPID_KEY = "BNfB_MPBOLh3eFn60Xvadi5B_sRtqpU1wLqHps-fz_9Js5BaI8B95IdPrzfnlaOupqW4iJ1cfOUQ9bxbBGLE23I";
+let _messaging = null;
+
+function initFCM(){
+  try{
+    if(typeof firebase === 'undefined') return;
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    _messaging = firebase.messaging();
+    _messaging.onMessage(p => {
+      const n = p.notification || {};
+      toast('🔔 ' + (n.title || 'Giveaways') + (n.body ? ' — ' + n.body : ''));
+    });
+  }catch(e){ console.warn('Firebase init:', e); }
+}
+async function getFCMToken(){
+  try{
+    if(!_messaging) initFCM();
+    if(!_messaging) return null;
+    const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    return await _messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+  }catch(e){ console.warn('getToken:', e); return null; }
+}
+async function saveFCMToken(token){
+  if(!token) return;
+  if(localStorage.getItem('gw_fcm_token') === token) return;
+  localStorage.setItem('gw_fcm_token', token);
+  try{
+    await fetch(API_URL + '?' + new URLSearchParams({
+      action: 'saveFCMToken',
+      body: JSON.stringify({ action:'saveFCMToken', token })
+    }));
+  }catch(e){ console.warn('saveFCMToken:', e); }
+}
+function toast(msg, isErr){
+  const el = document.createElement('div');
+  el.className = 'gtoast' + (isErr ? ' err' : '');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.transition = 'opacity .4s'; el.style.opacity = '0'; }, 3500);
+  setTimeout(() => el.remove(), 4000);
+}
+
+function initNotifBar(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'granted'){ getFCMToken().then(saveFCMToken); return; }
+  const standalone = isStandalone();
+  if(!standalone && localStorage.getItem('gw_notif_asked')) return;
+  const bar = document.createElement('div');
+  bar.id = 'notifbar';
+  bar.innerHTML = `<span style="flex:1;min-width:200px">🔔 ${t('notif_text')}</span><button class="nbtn" onclick="enableNotifs()">${t('notif_btn')}</button><button class="nclose" onclick="dismissNotifBar()">✕</button>`;
+  document.body.appendChild(bar);
+}
+async function enableNotifs(){
+  localStorage.setItem('gw_notif_asked','1');
+  document.getElementById('notifbar')?.remove();
+  if(!('Notification' in window)) return toast(t('notif_unsupported'), true);
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted') return toast(t('notif_blocked'), true);
+    toast('⏳ ' + t('notif_registering'));
+    const token = await getFCMToken();
+    if(token){ await saveFCMToken(token); toast('🔔 ' + t('notif_on')); }
+    else toast(t('notif_fail'), true);
+  }catch(e){ console.error(e); toast(t('notif_fail'), true); }
+}
+function dismissNotifBar(){
+  localStorage.setItem('gw_notif_asked','1');
+  document.getElementById('notifbar')?.remove();
+}
+
+function isStandalone(){
+  try{ return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone || false; }
+  catch(e){ return false; }
+}
+
+/* ═══ INSTALARE PWA ════════════════════════════════════════════ */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
+
+function initPWABanner(){
+  const standalone = isStandalone();
+  if(standalone || localStorage.getItem('gw_pwa_dismissed')) return;
+  setTimeout(() => {
+    document.getElementById('pwabanner').classList.add('show');
+    if(!/iPad|iPhone|iPod/.test(navigator.userAgent)) pwaTab('android');
+  }, 3000);
+}
+function showPWAModal(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(c => {
+      if(c.outcome === 'accepted'){ dismissPWA(); }
+      deferredPrompt = null;
+    });
+    return;
+  }
+  document.getElementById('pwamodal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePWAModal(){
+  document.getElementById('pwamodal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function dismissPWA(){
+  document.getElementById('pwabanner').classList.remove('show');
+  localStorage.setItem('gw_pwa_dismissed','1');
+}
+function pwaTab(os){
+  document.getElementById('pwa-ios').style.display = os === 'ios' ? 'block' : 'none';
+  document.getElementById('pwa-android').style.display = os === 'android' ? 'block' : 'none';
+  document.getElementById('tab-ios').classList.toggle('active', os === 'ios');
+  document.getElementById('tab-android').classList.toggle('active', os === 'android');
+}
+document.getElementById('pwamodal').addEventListener('click', function(e){ if(e.target === this) closePWAModal(); });
+
+/* ═══ SERVICE WORKER ═══════════════════════════════════════════ */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
+}
+setTimeout(initNotifBar, 500);
+initPWABanner();
+
+</script>
 </body>
 </html>
