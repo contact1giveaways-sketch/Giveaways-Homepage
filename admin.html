@@ -93,7 +93,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 
 <nav>
   <div class="nav-logo">🦁 Giveaways Admin</div>
-  <a href="https://giveaways-homepage.vercel.app" class="nav-back">← Back to site</a>
+  <div style="display:flex;gap:14px;align-items:center"><a href="#" id="logout-link" onclick="doLogout();return false" style="font-size:13px;color:rgba(255,255,255,0.5);cursor:pointer;display:none">🔓 Ieși din cont</a><a href="https://giveaways-homepage.vercel.app" class="nav-back">← Back to site</a></div>
 </nav>
 
 <div class="container">
@@ -314,7 +314,10 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 
 <script>
 const API_URL  = "https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec";
-const ADMIN_PASS = "giveaways2024";
+// ── PAROLA ──────────────────────────────────────────────
+// Nu mai există în cod. O tastezi la login și rămâne doar în
+// memoria tab-ului (sessionStorage) — se șterge când închizi tab-ul.
+let ADMIN_PASS = sessionStorage.getItem('gw_admin_pw') || '';
 
 async function apiFetch(params) {
   const r = await fetch(API_URL + "?" + new URLSearchParams(params));
@@ -432,10 +435,22 @@ async function loadHomeData() {
   } catch(e) { console.error("Load error:", e); }
 }
 
-async function doAdminLogin() {
-  const pass = document.getElementById("admin-password").value;
+async function doAdminLogin(silent) {
+  const pass = silent ? ADMIN_PASS : document.getElementById("admin-password").value;
+  if (!pass) return;
   const d = await apiPost({ action: "checkAdmin", password: pass });
-  if (!d.ok) return showAlert("login-alert", "error", "Incorrect password.");
+  if (d.error) {
+    if (!silent) showAlert("login-alert", "error", d.error);
+    return;
+  }
+  if (!d.ok) {
+    sessionStorage.removeItem('gw_admin_pw');
+    ADMIN_PASS = '';
+    if (!silent) showAlert("login-alert", "error", "Parolă greșită. După 15 încercări greșite accesul se blochează 15 minute.");
+    return;
+  }
+  ADMIN_PASS = pass;
+  sessionStorage.setItem('gw_admin_pw', pass);
   adminLoggedIn = true;
   document.getElementById("admin-login-view").style.display = "none";
   document.getElementById("admin-main-view").style.display = "block";
@@ -446,6 +461,7 @@ async function doAdminLogin() {
   populatePoolSelect();
   populateWinnerRaffleSelect();
   loadFCMStats();
+  document.getElementById("logout-link").style.display = "inline";
 }
 
 function togglePoolField() {
@@ -846,7 +862,18 @@ function showAlert(id, type, msg) {
 }
 function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-document.addEventListener("keydown", e => { if(e.key==="Enter" && document.getElementById("admin-login-view").style.display!=="none") doAdminLogin(); });
+function doLogout(){
+  sessionStorage.removeItem('gw_admin_pw');
+  ADMIN_PASS = '';
+  location.reload();
+}
+
+document.addEventListener("keydown", e => {
+  if(e.key==="Enter" && document.getElementById("admin-login-view").style.display!=="none") doAdminLogin();
+});
+
+// Dacă parola e deja în tab (ai dat refresh), reintrăm automat.
+if (ADMIN_PASS) doAdminLogin(true);
 </script>
 </body>
 </html>
