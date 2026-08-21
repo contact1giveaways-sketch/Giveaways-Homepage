@@ -166,13 +166,37 @@ body.lang-ro .herocopy>.eyebrow{position:relative;top:-16px;margin-bottom:-6px;z
   body.lang-ro .hero h1 em{font-size:.86em;line-height:1.06;margin-top:5px}
   body.lang-ro .herocopy>.eyebrow{top:-11px;margin-bottom:-3px}
 }
+
+/* ═══ CURRENT POOL + BARA DE BILETE (revenite de pe site-ul live) ═══ */
+.poolbox{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:#fdf6e3;border:1px solid rgba(201,150,45,.28);border-radius:14px;
+  padding:13px 16px;margin:14px 0}
+.poolbox .plabel{font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#8a6412}
+.poolbox .pval{font-family:'Manrope',sans-serif;font-weight:800;font-size:23px;letter-spacing:-.02em;color:var(--gold)}
+.featured .poolbox{background:rgba(239,212,142,.1);border-color:rgba(239,212,142,.3)}
+.featured .poolbox .plabel{color:rgba(239,212,142,.75)}
+.featured .poolbox .pval{color:var(--gold2)}
+
+/* bară animată pentru tombolele fără plafon de bilete */
+.ubar{height:8px;border-radius:99px;overflow:hidden;position:relative;margin:14px 0 7px;background:#e4ddd1}
+.ubar:after{content:'';position:absolute;inset:0;border-radius:99px;
+  background:repeating-linear-gradient(90deg,var(--gold) 0,var(--gold2) 9px,var(--gold) 18px);
+  background-size:200px 100%;animation:ubarmove 2s linear infinite}
+.featured .ubar{background:rgba(255,255,255,.12)}
+@keyframes ubarmove{0%{background-position:0 0}100%{background-position:200px 0}}
+.ubarcopy{font-size:11.5px;color:var(--muted);text-align:center}
+.featured .ubarcopy{color:rgba(255,255,255,.5)}
+
+/* codurile promo nu se mai lipesc de butonul de cumpărare */
+.promos{margin-bottom:18px}
+.inschips{margin-bottom:16px}
 </style>
 </head>
 <body>
 <nav class="nav"><div class="shell navin"><a class="brand" href="#top"><img class="brand-logo" src="/icon-192.png" alt="Giveaways logo"><span>GIVEAWAYS</span></a><div class="navlinks"><a href="#raffles" data-i18n="nav_raffles">Raffles</a><a href="#how" data-i18n="nav_how">How it works</a><a href="#winners" data-i18n="nav_winners">Winners</a><a href="#community" data-i18n="nav_community">Community</a><a href="#faq" data-i18n="nav_faq">FAQ</a></div><div class="navright"><div class="langs"><button class="lang-btn active" data-lang="en">EN</button><button class="lang-btn" data-lang="ro">RO</button><button class="lang-btn" data-lang="it">IT</button></div><a class="navcta" href="#raffles" data-i18n="nav_view">View raffles</a></div></div></nav>
 <div id="pwabanner"><span data-i18n-html="pwa_text"><b>Get the app</b> — install Giveaways on your home screen</span><button class="pbtn" onclick="showPWAModal()" data-i18n="pwa_install">Install</button><button class="pclose" onclick="dismissPWA()">✕</button></div>
 <main id="top">
-<section class="hero"><div class="shell herogrid"><div class="herocopy"><div class="eyebrow" data-i18n="hero_tag">Giveaways Community · UK</div><h1 data-i18n-html="hero_title">WIN<br><em>Real</em><br>PRIZES.</h1><p class="lead" data-i18n="hero_lead">At other raffles you either win or lose. With us, you win either way — transparent draws, instant prizes and a community cashback pool.</p><div class="actions"><a class="cta primary" href="#raffles" data-i18n="hero_raffles">🎟️ View active raffles</a><a class="cta" href="https://instant-scratch.vercel.app/" target="_blank" data-i18n="hero_instant">Instant prizes ⚡</a></div><div class="trust"><span data-i18n="trust_1">Transparent draws</span><span data-i18n="trust_2">Real winners</span><span data-i18n="trust_3">Community cashback</span></div></div>
+<section class="hero"><div class="shell herogrid"><div class="herocopy"><div class="eyebrow" data-i18n="hero_tag">Giveaways Community · UK</div><h1 data-i18n-html="hero_title">WIN MORE.<br><em>Even when</em><br>YOU DON'T.</h1><p class="lead" data-i18n="hero_lead">At other raffles you either win or lose. With us, you win either way — transparent draws, instant prizes and a community cashback pool.</p><div class="actions"><a class="cta primary" href="#raffles" data-i18n="hero_raffles">🎟️ View active raffles</a><a class="cta" href="https://instant-scratch.vercel.app/" target="_blank" data-i18n="hero_instant">Instant prizes ⚡</a></div><div class="trust"><span data-i18n="trust_1">Transparent draws</span><span data-i18n="trust_2">Real winners</span><span data-i18n="trust_3">Community cashback</span></div></div>
 <article class="featured" id="featured"></article></div></section>
 <section class="value"><div class="shell valuegrid"><div class="valuecard"><div class="valuenum">01</div><div><h3 data-i18n="value1_title">Main Draw</h3><p data-i18n="value1_text">Your ticket enters the advertised competition on Raffall.</p></div></div><div class="valuecard"><div class="valuenum">02</div><div><h3 data-i18n="value2_title">Instant Prizes</h3><p data-i18n="value2_text">Every competition comes with extra instant prizes — free for any ticket holder.</p></div></div><div class="valuecard"><div class="valuenum">03</div><div><h3 data-i18n="value3_title">Cashback Pool</h3><p data-i18n="value3_text">20% of the gross profit from every raffle goes into a shared pool, paid back at Christmas.</p></div></div></div></section>
 <section class="section white" id="raffles"><div class="shell"><div class="sectionhead"><div><div class="eyebrow" data-i18n="raffles_tag">Active now</div><h2 data-i18n="raffles_title">Live raffles.</h2></div><p data-i18n="raffles_text">Every raffle is drawn transparently. Watch it happen live on our Instant Win platform.</p></div><div class="cards" id="rafflegrid"><div class="empty" data-i18n="loading_competitions">Loading live competitions…</div></div></div></section>
@@ -203,7 +227,7 @@ en: {
 
   /* hero */
   hero_tag:'Giveaways Community · UK',
-  hero_title:'WIN<br><em>Real</em><br>PRIZES.',
+  hero_title:'WIN MORE.<br><em>Even when</em><br>YOU DON\'T.',
   hero_lead:'At other raffles you either win or lose. With us, you win either way — transparent draws, instant prizes and a community cashback pool.',
   hero_raffles:'🎟️ View active raffles',
   hero_instant:'Instant prizes ⚡',
@@ -233,6 +257,7 @@ en: {
   competition:'Competition',
   pool_desc:'50% of all ticket sales goes to one winner.',
   ticket_price:'Ticket price', per_ticket:'per ticket',
+  current_pool:'Current pool', tickets_sold_label:'Tickets sold',
   tickets_sold:'tickets sold', sold_short:'sold', unlimited:'Unlimited entries',
   instant_prizes:'instant prizes', uses_left:'left',
   enter_comp:'Buy tickets', view_comp:'View on Raffall', view_result:'View result',
@@ -305,7 +330,7 @@ ro: {
   mobile_home:'Acasă', mobile_raffles:'Tombole',
 
   hero_tag:'Giveaways Community · UK',
-  hero_title:'<span class="ro-title-line">CÂȘTIGĂ</span><span class="ro-title-line ro-title-second">PREMII</span><em>Reale.</em>',
+  hero_title:'<span class="ro-title-line">CÂȘTIGĂ</span><span class="ro-title-line ro-title-second">MAI MULT.</span><em>Chiar și când pierzi.</em>',
   hero_lead:'La alte tombole ori câștigi, ori pierzi. La noi câștigi oricum — extrageri transparente, premii instant și un pool de cashback pentru comunitate.',
   hero_raffles:'🎟️ Vezi tombolele active',
   hero_instant:'Premii instant ⚡',
@@ -331,6 +356,7 @@ ro: {
   competition:'Competiție',
   pool_desc:'50% din totalul vânzărilor de bilete merge la un singur câștigător.',
   ticket_price:'Preț bilet', per_ticket:'pe bilet',
+  current_pool:'Pool curent', tickets_sold_label:'Bilete vândute',
   tickets_sold:'bilete vândute', sold_short:'vândute', unlimited:'Intrări nelimitate',
   instant_prizes:'premii instant', uses_left:'rămase',
   enter_comp:'Cumpără bilete', view_comp:'Vezi pe Raffall', view_result:'Vezi rezultatul',
@@ -397,7 +423,7 @@ it: {
   mobile_home:'Home', mobile_raffles:'Lotterie',
 
   hero_tag:'Giveaways Community · UK',
-  hero_title:'VINCI<br><em>Premi</em><br>VERI.',
+  hero_title:'VINCI DI PIÙ.<br><em>Anche quando</em><br>PERDI.',
   hero_lead:'Nelle altre lotterie o vinci o perdi. Da noi vinci comunque — estrazioni trasparenti, premi istantanei e un pool di cashback per la comunità.',
   hero_raffles:'🎟️ Vedi le lotterie attive',
   hero_instant:'Premi istantanei ⚡',
@@ -423,6 +449,7 @@ it: {
   competition:'Competizione',
   pool_desc:'Il 50% di tutte le vendite di biglietti va a un solo vincitore.',
   ticket_price:'Prezzo biglietto', per_ticket:'per biglietto',
+  current_pool:'Pool attuale', tickets_sold_label:'Biglietti venduti',
   tickets_sold:'biglietti venduti', sold_short:'venduti', unlimited:'Partecipazioni illimitate',
   instant_prizes:'premi istantanei', uses_left:'rimasti',
   enter_comp:'Acquista biglietti', view_comp:'Vedi su Raffall', view_result:'Vedi il risultato',
@@ -491,7 +518,7 @@ it: {
    ═══════════════════════════════════════════════════════════════ */
 
 const MAX_RECENT_DRAWS = 6;   // câte tombole extrase rămân pe pagină
-const MIN_SOLD_SHOWN   = 25;  // sub atâtea bilete nu afișăm numărul (arată slab)
+const MIN_SOLD_SHOWN   = 0;   // 0 = afișăm mereu nr. de bilete (ca pe site-ul live)
 
 let currentLang = localStorage.getItem('gw_lang') || 'en';
 let homeData = { raffles: [], winners: [] };
@@ -714,15 +741,38 @@ function tick(){
   if(changed) renderAll();
 }
 
+
+/* Caseta "Current Pool" — doar la tombolele de tip cash pool */
+function poolHTML(r){
+  if(r.type !== 'pool') return '';
+  return `<div class="poolbox"><span class="plabel">💰 ${t('current_pool')}</span><span class="pval">£${(parseFloat(r.pool)||0).toFixed(2)}</span></div>`;
+}
+
+/* Progresul biletelor.
+   Cu plafon (Total > 0)  → bară procentuală.
+   Fără plafon            → bară animată + numărul vândut (procentul n-ar însemna nimic). */
+function progressHTML(r){
+  const sold = Number(r.sold||0), total = Number(r.total||0);
+  if(total > 0){
+    const pct = Math.min(100, Math.round((sold/total)*100));
+    return `<div class="progresscopy" style="margin-bottom:6px"><span>${t('tickets_sold_label')}</span><b>${sold} / ${total}</b></div>`
+         + `<div class="progress"><i style="width:${pct}%"></i></div>`
+         + `<div class="progresscopy"><span>0</span><span>${pct}% ${t('sold_short')}</span><span>${total}</span></div>`;
+  }
+  if(sold > MIN_SOLD_SHOWN || (MIN_SOLD_SHOWN === 0 && sold > 0)){
+    return `<div class="progresscopy" style="margin-bottom:2px"><span>${t('tickets_sold_label')}</span><b>${sold}</b></div>`
+         + `<div class="ubar"></div>`
+         + `<div class="ubarcopy">🎟️ ${sold} ${t('tickets_sold')} · ${t('unlimited')}</div>`;
+  }
+  return '';
+}
+
 /* ── CARDURI ─────────────────────────────────────────────────── */
 function featuredMetaHTML(r){
   const ins = instants(r).length;
-  const showSold = r.total > 0 || Number(r.sold) >= MIN_SOLD_SHOWN;
   const cells = [`<div class="meta"><b>${esc(money(r.price))}</b><span>${t('per_ticket')}</span></div>`];
-  if(showSold){
-    const val = r.total > 0 ? `${r.sold||0}/${r.total}` : String(r.sold||0);
-    cells.push(`<div class="meta"><b>${esc(val)}</b><span>${t('tickets_sold')}</span></div>`);
-  }
+  const val = r.total > 0 ? `${r.sold||0}/${r.total}` : String(r.sold||0);
+  cells.push(`<div class="meta"><b>${esc(val)}</b><span>${t('tickets_sold')}</span></div>`);
   if(ins) cells.push(`<div class="meta"><b>${ins}</b><span>${t('instant_prizes')}</span></div>`);
   return `<div class="featuredmeta" style="grid-template-columns:repeat(${cells.length},1fr)">${cells.join('')}</div>`;
 }
@@ -738,7 +788,9 @@ function renderFeatured(r){
       <div class="eyebrow">${s === 'upcoming' ? t('featured_next') : t('featured_now')}</div>
       <div class="featuredname">${esc(r.name || t('competition'))}</div>
       <div class="featureddesc">${esc(raffleDescription(r))}</div>
+      ${poolHTML(r)}
       ${featuredMetaHTML(r)}
+      ${progressHTML(r)}
       ${countdownHTML(r, true)}
       ${ins.length ? `<div class="inschips">${ins.map(p => `<span class="inschip">${esc(money(p))}</span>`).join('')}</div>` : ''}
       ${pr.length ? `<div class="promos">${pr.map(p => `<span class="promo"><b>${esc(p.code)}</b><span>${p.uses} ${t('uses_left')}</span></span>`).join('')}</div>` : ''}
@@ -748,22 +800,16 @@ function renderFeatured(r){
 
 function liveCardHTML(r){
   const s = stateKey(r);
-  const pct = r.total > 0 ? Math.min(100, Math.round((Number(r.sold||0) / Number(r.total)) * 100)) : 0;
   const ins = instants(r), pr = promos(r);
-  let soldRow = '';
-  if(r.total > 0){
-    soldRow = `<div class="progress"><i style="width:${pct}%"></i></div><div class="progresscopy"><span>${esc(r.sold||0)} / ${esc(r.total)} ${t('sold_short')}</span><span>${pct}%</span></div>`;
-  } else if(Number(r.sold) >= MIN_SOLD_SHOWN){
-    soldRow = `<div class="progresscopy" style="margin-top:12px"><span>${esc(r.sold)} ${t('tickets_sold')}</span><span>${t('unlimited')}</span></div>`;
-  }
   return `<article class="raffle">
     <div class="rafflemedia">${mediaHTML(r,'c'+r.id)}<span class="rbadge ${s}">${esc(stateLabel(r))}</span></div>
     <div class="rbody">
       <h3>${esc(r.name || t('competition'))}</h3>
       <div class="desc">${esc(raffleDescription(r))}</div>
+      ${poolHTML(r)}
       ${countdownHTML(r, false)}
       <div class="pricerow"><span>${t('ticket_price')}</span><b>${esc(money(r.price))}</b></div>
-      ${soldRow}
+      ${progressHTML(r)}
       ${ins.length ? `<div class="inschips">${ins.map(p => `<span class="inschip">${esc(money(p))}</span>`).join('')}</div>` : ''}
       ${pr.length ? `<div class="promos">${pr.map(p => `<span class="promo"><b>${esc(p.code)}</b><span>${p.uses} ${t('uses_left')}</span></span>`).join('')}</div>` : ''}
       ${r.link ? `<a class="cta" href="${esc(r.link)}" target="_blank" rel="noopener">${s === 'upcoming' ? t('view_comp') : t('enter_comp')} →</a>` : ''}
