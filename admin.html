@@ -53,6 +53,8 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 .progress-preview{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px}
 .progress-preview-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--gold-light));transition:width .5s ease}
 .tickets-info{font-size:11px;color:var(--gray);margin-top:4px;text-align:right}
+.field-note{font-size:11px;color:var(--gray);margin-top:5px;line-height:1.5}
+.field-note.warn{color:#e67e22;font-weight:600}
 
 /* ── TIMEZONE ── */
 .tz-bar{background:linear-gradient(135deg,#1a1a1a,#2a2010);border:1px solid rgba(245,200,66,0.25);border-radius:12px;padding:14px 18px;margin-bottom:20px}
@@ -119,7 +121,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
       <!-- ── TIMEZONE SELECTOR ── -->
       <div class="tz-bar">
         <div class="tz-bar-title">🕐 Orele pe care le introduci sunt în:</div>
-        <div class="tz-bar-sub">Raffall afișează countdown-ul în ora locală a fiecărui vizitator. Alege aici în ce fus scrii tu orele — restul se calculează automat.</div>
+        <div class="tz-bar-sub">Countdown-ul de pe homepage se afișează în ora locală a fiecărui vizitator. Alege aici în ce fus scrii tu orele — restul se calculează automat.</div>
         <div class="tz-toggle">
           <button class="tz-opt" id="tz-uk" onclick="setTZ('uk')">🇬🇧 Ora UK (London)</button>
           <button class="tz-opt" id="tz-local" onclick="setTZ('local')">🇷🇴 Ora mea locală</button>
@@ -155,7 +157,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
           <div class="time-hint" id="r-drawdate-hint"></div>
         </div>
       </div>
-      <div style="font-size:11px;color:var(--gray);margin:-6px 0 16px;line-height:1.5">
+      <div class="field-note" style="margin:-6px 0 16px">
         💡 Lasă <strong>Opens At</strong> gol dacă tombola e deja deschisă — atunci homepage-ul arată direct „Draw in".
         <button onclick="fillDailyCashPot()" style="margin-left:6px;padding:3px 10px;border:1px solid var(--gold-line);border-radius:6px;background:var(--gold-pale);color:var(--gold);font-size:11px;font-weight:600;cursor:pointer">⚡ Daily Cash Pot (10:00 → mâine 12:00)</button>
       </div>
@@ -179,7 +181,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 
       <!-- ── ACTIVE RAFFLES ── -->
       <div class="admin-section">
-        <div class="admin-section-title">🎟️ Active Raffles</div>
+        <div class="admin-section-title">🎟️ All Raffles</div>
         <div id="admin-raffles-list"></div>
       </div>
 
@@ -190,10 +192,13 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
           <div class="form-group"><label>Username</label><input type="text" id="w-username" placeholder="Raffall username"/></div>
           <div class="form-group"><label>Prize</label><input type="text" id="w-prize" placeholder="e.g. 200"/></div>
         </div>
-        <div class="form-row">
-          <div class="form-group"><label>Raffle</label><input type="text" id="w-raffle" placeholder="Raffle name"/></div>
-          <div class="form-group"><label>Date</label><input type="date" id="w-date"/></div>
+        <div class="form-group">
+          <label>Raffle</label>
+          <select id="w-raffle-select" onchange="toggleRaffleCustom()"></select>
+          <input type="text" id="w-raffle-custom" placeholder="Scrie numele tombolei" style="display:none;margin-top:8px"/>
+          <div class="field-note">Alege tombola din listă — numele trebuie să se potrivească exact, altfel câștigătorul nu apare pe cardul din „Recent Draws".</div>
         </div>
+        <div class="form-group"><label>Date</label><input type="date" id="w-date"/></div>
         <button class="admin-btn" onclick="addWinner()">🏆 Add Winner</button>
       </div>
 
@@ -325,9 +330,7 @@ let homeData = { raffles: [], winners: [] };
 let adminLoggedIn = false;
 
 // ════════════════════════════════════════════════════════
-//  TIMEZONE
-//  Toate datele se salvează ca UTC ISO (ex: 2026-08-21T09:00:00.000Z).
-//  Aici doar traducem între ceea ce scrii tu și UTC.
+//  TIMEZONE — totul se salvează ca UTC ISO
 // ════════════════════════════════════════════════════════
 let tzMode = localStorage.getItem('gw_tz_mode') || 'uk';   // 'uk' | 'local'
 const UK_TZ = 'Europe/London';
@@ -337,13 +340,11 @@ function setTZ(mode){
   localStorage.setItem('gw_tz_mode', mode);
   document.getElementById('tz-uk').classList.toggle('active', mode==='uk');
   document.getElementById('tz-local').classList.toggle('active', mode==='local');
-  // recalculează toate câmpurile deja completate
   ['r-opensat','r-drawdate','update-opensat','update-drawdate'].forEach(id=>{
     renderTimeHint(id, id+'-hint');
   });
 }
 
-// Câte minute e fusul `tz` față de UTC la momentul `date`
 function tzOffsetMinutes(date, tz){
   const dtf = new Intl.DateTimeFormat('en-US', {
     timeZone: tz, hour12: false,
@@ -358,25 +359,22 @@ function tzOffsetMinutes(date, tz){
   return (asUTC - date.getTime()) / 60000;
 }
 
-// "2026-08-21T10:00" (ora scrisă în fusul ales) → UTC ISO
 function inputToISO(localStr){
   if(!localStr) return "";
   if(tzMode === 'local'){
     const d = new Date(localStr);
     return isNaN(d) ? "" : d.toISOString();
   }
-  // interpretăm string-ul ca oră de perete în UK
   const naiveUTC = new Date(localStr + ':00Z').getTime();
   if(isNaN(naiveUTC)) return "";
   let ts = naiveUTC;
-  for(let i=0;i<3;i++){                     // 3 iterații acoperă saltul DST
+  for(let i=0;i<3;i++){
     const off = tzOffsetMinutes(new Date(ts), UK_TZ);
     ts = naiveUTC - off*60000;
   }
   return new Date(ts).toISOString();
 }
 
-// UTC ISO → "2026-08-21T10:00" pentru <input type="datetime-local">
 function isoToInput(iso){
   if(!iso) return "";
   const d = new Date(iso);
@@ -388,7 +386,6 @@ function isoToInput(iso){
   return new Date(d.getTime() + off*60000).toISOString().slice(0,16);
 }
 
-// Afișează sub câmp ora în UK ȘI ora locală, ca verificare
 function renderTimeHint(inputId, hintId){
   const inp  = document.getElementById(inputId);
   const hint = document.getElementById(hintId);
@@ -403,19 +400,16 @@ function renderTimeHint(inputId, hintId){
   hint.innerHTML = '🇬🇧 <strong>' + uk + '</strong> &nbsp;·&nbsp; 🇷🇴 ' + ro;
 }
 
-// Preumple programul Daily Cash Pot: azi 10:00 → mâine 12:00 (în fusul ales)
 function fillDailyCashPot(){
   const now = new Date();
-  const base = tzMode === 'uk'
-    ? new Date(now.getTime() + tzOffsetMinutes(now, UK_TZ)*60000)   // "acum" în ora UK
-    : now;
-  const y = base.getUTCFullYear ? null : null; // (folosim componente locale mai jos)
   const pad = n => String(n).padStart(2,'0');
-  // ziua curentă în fusul ales
-  const parts = tzMode === 'uk'
-    ? base.toISOString().slice(0,10)
-    : `${base.getFullYear()}-${pad(base.getMonth()+1)}-${pad(base.getDate())}`;
-  const today = parts;
+  let today;
+  if(tzMode === 'uk'){
+    const shifted = new Date(now.getTime() + tzOffsetMinutes(now, UK_TZ)*60000);
+    today = shifted.toISOString().slice(0,10);
+  } else {
+    today = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  }
   const tomorrow = (() => {
     const d = new Date(today + 'T00:00:00Z');
     d.setUTCDate(d.getUTCDate() + 1);
@@ -450,6 +444,7 @@ async function doAdminLogin() {
   renderAdminRaffles();
   renderAdminWinners();
   populatePoolSelect();
+  populateWinnerRaffleSelect();
   loadFCMStats();
 }
 
@@ -551,7 +546,7 @@ async function addRaffle() {
   });
   if (d.error) return showAlert("create-alert", "error", d.error);
   showAlert("create-alert", "success", "✅ Raffle added!");
-  await loadHomeData(); renderAdminRaffles(); populatePoolSelect();
+  await loadHomeData(); renderAdminRaffles(); populatePoolSelect(); populateWinnerRaffleSelect();
   ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants","r-drawdate","r-opensat","r-cover","r-order"].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = "";
   });
@@ -561,13 +556,30 @@ async function addRaffle() {
   previewCover("r-cover-preview", "");
 }
 
-// Etichetă de stare pentru lista din admin
-function raffleStateLabel(r){
+// ── STARE + POTRIVIRE CÂȘTIGĂTOR ──
+function raffleState(r){
   const now = Date.now();
   const o = r.opensAt ? new Date(r.opensAt).getTime() : NaN;
   const d = r.drawDate ? new Date(r.drawDate).getTime() : NaN;
-  if(!isNaN(o) && now < o) return '<span style="color:var(--gold);font-weight:600">🔜 Opens soon</span>';
-  if(!isNaN(d) && now >= d) return '<span style="color:var(--gray);font-weight:600">🏁 Drawn</span>';
+  if(!isNaN(o) && now < o) return 'upcoming';
+  if(!isNaN(d) && now >= d) return 'drawn';
+  return 'live';
+}
+
+function hasWinner(r){
+  const key = String(r.name||'').trim().toLowerCase();
+  if(!key) return false;
+  return (homeData.winners||[]).some(w => String(w.raffle||'').trim().toLowerCase() === key);
+}
+
+function raffleStateLabel(r){
+  const s = raffleState(r);
+  if(s === 'upcoming') return '<span style="color:var(--gold);font-weight:600">🔜 Opens soon</span>';
+  if(s === 'drawn'){
+    return hasWinner(r)
+      ? '<span style="color:var(--gray);font-weight:600">🏁 În Recent Draws</span>'
+      : '<span style="color:#e67e22;font-weight:600">⚠️ Extrasă — lipsește câștigătorul</span>';
+  }
   return '<span style="color:var(--green);font-weight:600">🟢 Live</span>';
 }
 
@@ -583,7 +595,7 @@ function renderAdminRaffles() {
           ${allImgs.length ? `<img src="${allImgs[0]}" style="width:48px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--border)" alt=""/>` : '<div style="width:48px;height:36px;background:var(--bg);border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px">🖼️</div>'}
           <div>
             <div style="font-weight:600">${esc(r.name)}</div>
-            <div style="font-size:11px;color:var(--gray)">${raffleStateLabel(r)} · ${r.type==="pool"?"Pool: £"+(r.pool||0).toFixed(2):esc(r.fixedPrize||"")} · ${r.sold} sold${r.total>0?" / "+r.total+" ("+pct+"%)":""} · ${allImgs.length} foto</div>
+            <div style="font-size:11px;color:var(--gray)">${raffleStateLabel(r)} · ${r.type==="pool"?"Pool: £"+(r.pool||0).toFixed(2):esc(r.fixedPrize||"")} · ${r.sold} sold${r.total>0?" / "+r.total+" ("+pct+"%)":""}</div>
           </div>
         </div>
         <button class="del-btn" onclick="deleteRaffle(${r.id})">Delete</button>
@@ -596,37 +608,83 @@ function renderAdminRaffles() {
 async function deleteRaffle(id) {
   if (!confirm("Delete this raffle?")) return;
   await apiPost({ action: "deleteHomeRaffle", password: ADMIN_PASS, id });
-  await loadHomeData(); renderAdminRaffles(); populatePoolSelect();
+  await loadHomeData(); renderAdminRaffles(); populatePoolSelect(); populateWinnerRaffleSelect();
+}
+
+// ── ADD WINNER (cu dropdown de tombole) ──
+function populateWinnerRaffleSelect(){
+  const sel = document.getElementById("w-raffle-select");
+  if(!sel) return;
+  const prev = sel.value;
+  // tombolele extrase, cele mai recente primele — apoi restul
+  const sorted = homeData.raffles.slice().sort((a,b)=>{
+    const sa = raffleState(a)==='drawn' ? 0 : 1;
+    const sb = raffleState(b)==='drawn' ? 0 : 1;
+    if(sa!==sb) return sa-sb;
+    return (new Date(b.drawDate||0)) - (new Date(a.drawDate||0));
+  });
+  const opts = sorted.map(r=>{
+    const mark = raffleState(r)==='drawn' && !hasWinner(r) ? '⚠️ ' : '';
+    return `<option value="${esc(r.name)}">${mark}${esc(r.name)}</option>`;
+  }).join("");
+  sel.innerHTML = (opts || '<option value="">No raffles</option>')
+    + '<option value="__custom__">✏️ Altă tombolă (scriu manual)</option>';
+  if(prev) sel.value = prev;
+  toggleRaffleCustom();
+}
+
+function toggleRaffleCustom(){
+  const sel = document.getElementById("w-raffle-select");
+  const inp = document.getElementById("w-raffle-custom");
+  if(!sel || !inp) return;
+  inp.style.display = sel.value === "__custom__" ? "block" : "none";
+}
+
+function getSelectedWinnerRaffle(){
+  const sel = document.getElementById("w-raffle-select");
+  if(!sel) return "";
+  if(sel.value === "__custom__") return document.getElementById("w-raffle-custom").value.trim();
+  return sel.value;
 }
 
 async function addWinner() {
   const username = document.getElementById("w-username").value.trim();
   const prize    = document.getElementById("w-prize").value.trim();
-  const raffle   = document.getElementById("w-raffle").value.trim();
+  const raffle   = getSelectedWinnerRaffle();
   const dateVal  = document.getElementById("w-date").value;
   if (!username || !prize) return showAlert("create-alert", "error", "Fill in username and prize.");
+  if (!raffle) return showAlert("create-alert", "error", "Alege sau scrie numele tombolei.");
   const date = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
   showAlert("create-alert", "info", "Saving...");
   const d = await apiPost({ action: "addHomeWinner", password: ADMIN_PASS, username, prize, raffle, date });
   if (d.error) return showAlert("create-alert", "error", d.error);
   showAlert("create-alert", "success", "🏆 Winner added!");
-  await loadHomeData(); renderAdminWinners();
-  ["w-username","w-prize","w-raffle","w-date"].forEach(id => { document.getElementById(id).value = ""; });
+  await loadHomeData(); renderAdminWinners(); renderAdminRaffles(); populateWinnerRaffleSelect();
+  ["w-username","w-prize","w-raffle-custom","w-date"].forEach(id => { const el=document.getElementById(id); if(el) el.value = ""; });
+}
+
+function winnerMatchesRaffle(w){
+  const key = String(w.raffle||'').trim().toLowerCase();
+  if(!key) return false;
+  return homeData.raffles.some(r => String(r.name||'').trim().toLowerCase() === key);
 }
 
 function renderAdminWinners() {
   const el = document.getElementById("admin-winners-list");
   if (!el) return;
   if (!homeData.winners.length) { el.innerHTML = '<p style="font-size:13px;color:var(--gray)">No winners yet.</p>'; return; }
-  el.innerHTML = homeData.winners.slice().reverse().map(w => `
+  el.innerHTML = homeData.winners.slice().reverse().map(w => {
+    const matched = winnerMatchesRaffle(w);
+    return `
     <div class="admin-raffle-item" style="flex-wrap:wrap;gap:8px">
       <div style="flex:1;min-width:0">
         <div style="font-weight:600;font-size:13px">${esc(w.username)} — <span style="color:var(--gold)">${esc(w.prize)}</span></div>
-        <div style="font-size:11px;color:var(--gray);margin-top:2px">${esc(w.raffle)}</div>
+        <div style="font-size:11px;color:${matched?'var(--gray)':'#e67e22'};margin-top:2px">${matched?'':'⚠️ nu se potrivește cu nicio tombolă · '}${esc(w.raffle)}</div>
         <input type="date" value="${w.date?w.date.slice(0,10):""}" onchange="updateWinnerDate(${w.id},this.value)" style="margin-top:6px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--bg);color:var(--black);outline:none"/>
       </div>
       <button class="del-btn" onclick="deleteWinner(${w.id})">Delete</button>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
 async function updateWinnerDate(id, dateVal) {
@@ -639,7 +697,7 @@ async function updateWinnerDate(id, dateVal) {
 async function deleteWinner(id) {
   if (!confirm("Delete this winner?")) return;
   await apiPost({ action: "deleteHomeWinner", password: ADMIN_PASS, id });
-  await loadHomeData(); renderAdminWinners();
+  await loadHomeData(); renderAdminWinners(); renderAdminRaffles();
 }
 
 function populatePoolSelect() {
