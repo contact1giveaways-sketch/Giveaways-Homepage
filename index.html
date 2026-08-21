@@ -190,6 +190,12 @@ body.lang-ro .herocopy>.eyebrow{position:relative;top:-16px;margin-bottom:-6px;z
 /* codurile promo nu se mai lipesc de butonul de cumpărare */
 .promos{margin-bottom:18px}
 .inschips{margin-bottom:16px}
+
+/* Etichetă deasupra listelor de coduri promo / premii instant */
+.blocklabel{font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);margin:16px 0 8px}
+.featured .blocklabel{color:rgba(255,255,255,.5)}
+.promos,.inschips{margin-top:0}
 </style>
 </head>
 <body>
@@ -260,6 +266,7 @@ en: {
   current_pool:'Current pool', tickets_sold_label:'Tickets sold',
   tickets_sold:'tickets sold', sold_short:'sold', unlimited:'Unlimited entries',
   instant_prizes:'instant prizes', uses_left:'left',
+  promo_codes:'Promo codes', instant_prizes_label:'Instant prizes',
   enter_comp:'Buy tickets', view_comp:'View on Raffall', view_result:'View result',
 
   /* extrageri recente */
@@ -359,6 +366,7 @@ ro: {
   current_pool:'Pool curent', tickets_sold_label:'Bilete vândute',
   tickets_sold:'bilete vândute', sold_short:'vândute', unlimited:'Intrări nelimitate',
   instant_prizes:'premii instant', uses_left:'rămase',
+  promo_codes:'Coduri promo', instant_prizes_label:'Premii instant',
   enter_comp:'Cumpără bilete', view_comp:'Vezi pe Raffall', view_result:'Vezi rezultatul',
 
   rd_tag:'Dovezi, nu promisiuni', rd_title:'Extrageri recente.',
@@ -452,6 +460,7 @@ it: {
   current_pool:'Pool attuale', tickets_sold_label:'Biglietti venduti',
   tickets_sold:'biglietti venduti', sold_short:'venduti', unlimited:'Partecipazioni illimitate',
   instant_prizes:'premi istantanei', uses_left:'rimasti',
+  promo_codes:'Codici promo', instant_prizes_label:'Premi istantanei',
   enter_comp:'Acquista biglietti', view_comp:'Vedi su Raffall', view_result:'Vedi il risultato',
 
   rd_tag:'Fatti, non promesse', rd_title:'Estrazioni recenti.',
@@ -767,6 +776,26 @@ function progressHTML(r){
   return '';
 }
 
+
+/* Etichetă mică deasupra unei liste (Promo codes / Instant prizes) */
+function blockLabel(txt){ return `<div class="blocklabel">${txt}</div>`; }
+
+/* Codurile promo, cu titlu — altfel omul nu știe ce e codul ăla */
+function promosHTML(r){
+  const p = promos(r);
+  if(!p.length) return '';
+  return blockLabel('🎟️ ' + t('promo_codes'))
+    + `<div class="promos">${p.map(x=>`<span class="promo"><b>${esc(x.code)}</b><span>${x.uses} ${t('uses_left')}</span></span>`).join('')}</div>`;
+}
+
+/* Premiile instant, tot cu titlu */
+function instantsHTML(r){
+  const ins = instants(r);
+  if(!ins.length) return '';
+  return blockLabel('⚡ ' + t('instant_prizes_label'))
+    + `<div class="inschips">${ins.map(x=>`<span class="inschip">${esc(money(x))}</span>`).join('')}</div>`;
+}
+
 /* ── CARDURI ─────────────────────────────────────────────────── */
 function featuredMetaHTML(r){
   const ins = instants(r).length;
@@ -781,7 +810,7 @@ function renderFeatured(r){
   const art = document.getElementById('featured');
   if(!r){ art.style.display = 'none'; return; }
   art.style.display = '';
-  const s = stateKey(r), ins = instants(r), pr = promos(r);
+  const s = stateKey(r);
   art.innerHTML = `
     <div class="featuredmedia">${mediaHTML(r,'f'+r.id)}<span class="statusbadge ${s}">${esc(stateLabel(r))}</span></div>
     <div class="featuredbody">
@@ -792,15 +821,14 @@ function renderFeatured(r){
       ${featuredMetaHTML(r)}
       ${progressHTML(r)}
       ${countdownHTML(r, true)}
-      ${ins.length ? `<div class="inschips">${ins.map(p => `<span class="inschip">${esc(money(p))}</span>`).join('')}</div>` : ''}
-      ${pr.length ? `<div class="promos">${pr.map(p => `<span class="promo"><b>${esc(p.code)}</b><span>${p.uses} ${t('uses_left')}</span></span>`).join('')}</div>` : ''}
+      ${instantsHTML(r)}
+      ${promosHTML(r)}
       ${r.link ? `<a class="cta" href="${esc(r.link)}" target="_blank" rel="noopener">${s === 'upcoming' ? t('view_comp') : t('enter_comp')} →</a>` : ''}
     </div>`;
 }
 
 function liveCardHTML(r){
   const s = stateKey(r);
-  const ins = instants(r), pr = promos(r);
   return `<article class="raffle">
     <div class="rafflemedia">${mediaHTML(r,'c'+r.id)}<span class="rbadge ${s}">${esc(stateLabel(r))}</span></div>
     <div class="rbody">
@@ -810,8 +838,8 @@ function liveCardHTML(r){
       ${countdownHTML(r, false)}
       <div class="pricerow"><span>${t('ticket_price')}</span><b>${esc(money(r.price))}</b></div>
       ${progressHTML(r)}
-      ${ins.length ? `<div class="inschips">${ins.map(p => `<span class="inschip">${esc(money(p))}</span>`).join('')}</div>` : ''}
-      ${pr.length ? `<div class="promos">${pr.map(p => `<span class="promo"><b>${esc(p.code)}</b><span>${p.uses} ${t('uses_left')}</span></span>`).join('')}</div>` : ''}
+      ${instantsHTML(r)}
+      ${promosHTML(r)}
       ${r.link ? `<a class="cta" href="${esc(r.link)}" target="_blank" rel="noopener">${s === 'upcoming' ? t('view_comp') : t('enter_comp')} →</a>` : ''}
     </div></article>`;
 }
