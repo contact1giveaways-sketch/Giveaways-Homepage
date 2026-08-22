@@ -137,7 +137,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
       </div>
       <div class="form-group"><label>Type</label><select id="r-type" onchange="togglePoolField()"><option value="pool">50% Cash Pool</option><option value="fixed">Fixed Prize</option></select></div>
       <div class="form-group" id="pool-field"><label>Current Pool (£)</label><input type="number" id="r-pool" placeholder="0.00" step="0.01"/></div>
-      <div class="form-group" id="fixed-field" style="display:none"><label>Prize Description</label><input type="text" id="r-fixed-prize" placeholder="e.g. FREE MacBook Air"/></div>
+      <div class="form-group" id="fixed-field"><label>📝 Descriere pe card</label><input type="text" id="r-fixed-prize" placeholder="ex: 50% din vânzări merge la câștigător / Winner takes the whole pot"/><div class="field-note">Textul de sub titlu, pe card. Scrie tu procentul dacă vrei să apară (50%, 60%, 70%...). Dacă lași gol, apare un text neutru, fără cifre.</div></div>
       <div class="form-row">
         <div class="form-group"><label>Tickets Sold</label><input type="number" id="r-sold" placeholder="0"/></div>
         <div class="form-group"><label>Total Tickets (0 = unlimited)</label><input type="number" id="r-total" placeholder="500"/></div>
@@ -241,7 +241,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
             <div class="time-hint" id="update-drawdate-hint"></div>
           </div>
         </div>
-        <div class="form-group"><label>📍 Display Order</label><input type="number" id="update-order" placeholder="1"/></div>
+        <div class="form-group"><label>📝 Descriere pe card</label><input type="text" id="u-fixed-prize" placeholder="lasă gol pentru textul neutru"/><div class="field-note">Se aplică și la tombolele de tip cash pool.</div></div><div class="form-group"><label>📍 Display Order</label><input type="number" id="update-order" placeholder="1"/></div>
 
         <!-- IMAGES - Update Raffle -->
         <div class="form-group">
@@ -466,8 +466,10 @@ async function doAdminLogin(silent) {
 
 function togglePoolField() {
   const type = document.getElementById("r-type").value;
+  // Caseta "Current Pool" are sens doar la cash pool.
   document.getElementById("pool-field").style.display = type === "pool" ? "block" : "none";
-  document.getElementById("fixed-field").style.display = type === "fixed" ? "block" : "none";
+  // Descrierea se poate scrie la orice tip de tombolă.
+  document.getElementById("fixed-field").style.display = "block";
 }
 
 // ── IMAGE HELPERS ──
@@ -743,6 +745,7 @@ function loadRaffleForEdit() {
   previewCover("u-cover-preview", coverUrl);
   clearImageFields("u-images-list");
   (r.images||[]).forEach(url => addImageField("u-images-list", "u-img", url));
+  document.getElementById("u-fixed-prize").value = r.fixedPrize || "";
   document.getElementById("update-order").value = (r.order && r.order !== 999) ? r.order : "";
 
   updateProgressPreview();
@@ -793,6 +796,7 @@ async function updateRaffle() {
     promos,
     drawDate:    drawDateISO,
     opensAt:     opensAtISO,
+    fixedPrize:  document.getElementById("u-fixed-prize").value.trim(),
     coverImage:  document.getElementById("u-cover").value.trim(),
     images:      getImageUrls("u-images-list"),
     order:       parseInt(document.getElementById("update-order").value) || 999
