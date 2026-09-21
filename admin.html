@@ -184,7 +184,16 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 .tpl{padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)}
 .tpl:hover{border-color:var(--gold)}
 
+.group.draftgrp{border-color:#c8c2f0;background:#faf9ff}
+.group.draftgrp>summary{color:#5b4bb7}
+.publish-box{display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:12px;padding:12px 14px;margin:6px 0 10px;font-size:13px;line-height:1.5}
+.publish-box span{font-size:12px;color:var(--gray)}
+.publish-box .admin-btn{width:auto;margin:0;padding:10px 18px;white-space:nowrap}
+.publish-box.is-draft{background:#f4f2ff;border:1px solid #c8c2f0}
+.publish-box.is-live{background:rgba(45,125,70,.06);border:1px solid rgba(45,125,70,.2)}
 @media(max-width:600px){
+  .publish-box{flex-direction:column;align-items:stretch}
+  .publish-box .admin-btn{width:100%}
   .admin-box{padding:14px}
   .tab{padding:9px 8px;font-size:12px}
   .rmeta{white-space:normal}
@@ -310,6 +319,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
             </div>
           </details>
 
+          <div class="publish-box" id="publish-box"></div>
           <div class="form-row" style="margin-top:6px">
             <button class="admin-btn" onclick="updateRaffle()">💾 Salvează</button>
             <button class="admin-btn secondary" onclick="cloneRaffle(document.getElementById('edit-id').value)">📋 Clonează</button>
@@ -385,8 +395,12 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
         </details>
 
         <div class="form-row" style="margin-top:6px">
-          <button class="admin-btn" onclick="addRaffle()">✅ Adaugă tombola</button>
-          <button class="admin-btn secondary" onclick="resetAddForm()">↺ Golește formularul</button>
+          <button class="admin-btn secondary" onclick="addRaffle(true)">📝 Salvează ca ciornă</button>
+          <button class="admin-btn" onclick="addRaffle(false)">🚀 Publică pe site</button>
+        </div>
+        <div class="field-note" style="text-align:center;margin-top:8px">
+          Ciorna nu apare pe site. O publici din ✏️ Editează, după ce Raffall o aprobă și ai link-ul.
+          <a href="#" onclick="resetAddForm();return false" style="margin-left:6px;color:var(--gray)">↺ golește formularul</a>
         </div>
       </section>
 
@@ -601,7 +615,10 @@ function doLogout(){
 
 async function loadHomeData(){
   try{
-    const [r1, r2] = await Promise.all([ apiFetch({ action:"getHomeRaffles" }), apiFetch({ action:"getHomeWinners" }) ]);
+    const [r1, r2] = await Promise.all([
+      apiFetch({ action:"getHomeRaffles", body: JSON.stringify({ password: ADMIN_PASS }) }),
+      apiFetch({ action:"getHomeWinners" })
+    ]);
     homeData.raffles = r1.raffles || [];
     homeData.winners = r2.winners || [];
   }catch(e){ console.error(e); showAlert("create-alert","error","Nu am putut încărca datele."); }
@@ -641,7 +658,8 @@ function raffleRow(r){
   const sold = r.total > 0 ? `${r.sold||0}/${r.total}` : `${r.sold||0}`;
   parts.push(`${sold} bilete`);
   if(r.order && r.order !== 999) parts.push(`#${r.order}`);
-  const w = s === 'drawn' ? winnerOf(r) : null;
+  if(r.draft) parts.unshift(r.link ? '<b style="color:#2D7D46">✓ are link — gata de publicat</b>' : '<b style="color:#c2610c">fără link Raffall</b>');
+  const w = (s === 'drawn' && !r.draft) ? winnerOf(r) : null;
   const editing = $('edit-id').value === String(r.id) ? ' editing' : '';
   return `<div class="rrow${editing}" id="row-${esc(r.id)}">
     ${img}
@@ -661,7 +679,7 @@ function raffleRow(r){
 function group(id, title, items, opts){
   opts = opts || {};
   const open = opts.open ? ' open' : '';
-  const cls = opts.warn ? ' warn' : '';
+  const cls = opts.warn ? ' warn' : opts.draft ? ' draftgrp' : '';
   let body = items.length ? items.map(raffleRow).join('') : `<div class="group-empty">${opts.empty || 'Nimic aici.'}</div>`;
   if(opts.more) body += opts.more;
   return `<details class="group${cls}" id="grp-${id}"${open}><summary><span>${title}</span><span class="gcount">${items.length}</span></summary><div class="group-body">${body}</div></details>`;
@@ -676,8 +694,9 @@ function renderAdminRaffles(){
 
   const q = nkey($('raffle-search')?.value);
   const list = homeData.raffles.filter(r => !q || nkey(r.name).includes(q));
-  const live = [], upcoming = [], missing = [], drawn = [];
+  const drafts = [], live = [], upcoming = [], missing = [], drawn = [];
   list.forEach(r => {
+    if(r.draft){ drafts.push(r); return; }
     const s = raffleState(r);
     if(s === 'live') live.push(r);
     else if(s === 'upcoming') upcoming.push(r);
@@ -694,9 +713,11 @@ function renderAdminRaffles(){
   const more = drawn.length > drawnShown.length
     ? `<button class="showmore" onclick="showAllDrawn=true;renderAdminRaffles()">Arată toate (${drawn.length})</button>` : '';
 
+  drafts.sort((a,b) => new Date(a.opensAt||a.drawDate||0) - new Date(b.opensAt||b.drawDate||0));
   const st = (id, def) => openState['grp-' + id] !== undefined ? openState['grp-' + id] : def;
   wrap.innerHTML =
-      (missing.length ? group('missing', '⚠️ Extrase — lipsește câștigătorul', missing, { open: st('missing', true), warn: true }) : '')
+      (drafts.length ? group('drafts', '📝 Ciorne — nu apar pe site', drafts, { open: st('drafts', true), draft: true }) : '')
+    + (missing.length ? group('missing', '⚠️ Extrase — lipsește câștigătorul', missing, { open: st('missing', true), warn: true }) : '')
     + group('live', '🟢 Live acum', live, { open: st('live', true), empty: 'Nicio tombolă activă.' })
     + group('upcoming', '🔜 Programate', upcoming, { open: st('upcoming', true), empty: 'Nimic programat.' })
     + group('drawn', '🏁 Încheiate', drawnShown, { open: st('drawn', !!q), more });
@@ -726,6 +747,7 @@ function openEditor(id){
   clearImageFields('u-images-list');
   (r.images||[]).forEach(u => addImageField('u-images-list','u-img',u));
   updateProgressPreview();
+  renderPublishBox(r);
   $('editor').style.display = 'block';
   showTab('raffles');
   renderAdminRaffles();
@@ -748,7 +770,7 @@ function updateProgressPreview(){
     wrap.style.display = 'none';
   }
 }
-async function updateRaffle(){
+async function updateRaffle(draftState){
   const id = $('edit-id').value;
   if(!id) return;
   const raw = $('update-promos').value.trim();
@@ -766,11 +788,42 @@ async function updateRaffle(){
     fixedPrize: $('u-fixed-prize').value.trim(),
     coverImage: $('u-cover').value.trim(),
     images: getImageUrls('u-images-list'),
-    order: parseInt($('update-order').value) || 999
+    order: parseInt($('update-order').value) || 999,
+    ...(draftState !== undefined ? { draft: !!draftState } : {})
   });
   if(d.error) return showAlert('create-alert','error', d.error);
-  showAlert('create-alert','success','✅ Salvat!');
+  showAlert('create-alert','success',
+    draftState === false ? '🚀 Publicată! Apare acum pe site.' :
+    draftState === true  ? '📝 Mutată în ciorne — nu mai apare pe site.' : '✅ Salvat!');
   await reloadAll();
+  const r = homeData.raffles.find(x => String(x.id) === String(id));
+  if(r){ $('editor-title').textContent = r.name; renderPublishBox(r); }
+}
+
+
+/* ═══ CIORNĂ ↔ PUBLICAT ════════════════════════════════════ */
+function renderPublishBox(r){
+  const box = $('publish-box');
+  if(r.draft){
+    box.className = 'publish-box is-draft';
+    box.innerHTML = `<div><b>📝 Ciornă</b> — nu apare pe site.<br><span>Când Raffall o aprobă: pune link-ul mai sus și apasă Publică.</span></div>
+      <button class="admin-btn" onclick="setPublished(true)">🚀 Publică pe site</button>`;
+  } else {
+    box.className = 'publish-box is-live';
+    box.innerHTML = `<div><b>🟢 Publicată</b> — vizibilă pe site.</div>
+      <button class="ghost-btn" onclick="setPublished(false)">📝 Mută în ciorne</button>`;
+  }
+}
+async function setPublished(publish){
+  const id = $('edit-id').value;
+  if(!id) return;
+  if(publish && !$('u-link').value.trim()){
+    $('u-link').classList.add('need');
+    $('u-link').focus();
+    return showAlert('create-alert','error','Pune întâi link-ul Raffall — altfel butonul „Buy tickets" nu duce nicăieri.');
+  }
+  if(!publish && !confirm('Ascunzi tombola de pe site?')) return;
+  await updateRaffle(!publish);
 }
 
 /* ═══ CLONARE ═══════════════════════════════════════════════
@@ -833,7 +886,7 @@ function cloneRaffle(id){
     notes.unshift('<b>schimbă numele</b> — nu poate fi identic cu originalul');
   }
   $('r-link').classList.add('need');
-  notes.unshift('pune <b>link-ul Raffall</b> al noii tombole (l-am golit intenționat)');
+  notes.unshift('<b>link-ul Raffall</b> e gol intenționat — salvează ca <b>ciornă</b> și pune link-ul după ce Raffall o aprobă');
 
   const b = $('clone-banner');
   b.innerHTML = `📋 <b>Clonat din:</b> ${esc(r.name)}<br>Verifică înainte să salvezi:<ul>${notes.map(n => `<li>${n}</li>`).join('')}</ul>`;
@@ -857,7 +910,7 @@ function resetAddForm(keepBanner){
 function togglePoolField(){
   $('pool-field').style.visibility = $('r-type').value === 'pool' ? 'visible' : 'hidden';
 }
-async function addRaffle(){
+async function addRaffle(draft){
   const name = $('r-name').value.trim();
   if(!name) return showAlert('create-alert','error','Scrie numele tombolei.');
   if(homeData.raffles.some(r => nkey(r.name) === nkey(name))){
@@ -866,9 +919,13 @@ async function addRaffle(){
   }
   const opensAt = inputToISO($('r-opensat').value), drawDate = inputToISO($('r-drawdate').value);
   if(opensAt && drawDate && new Date(opensAt) >= new Date(drawDate)) return showAlert('create-alert','error','Deschiderea trebuie să fie înainte de extragere.');
+  if(!draft && !$('r-link').value.trim()){
+    $('r-link').classList.add('need');
+    return showAlert('create-alert','error','Ca să publici, pune link-ul Raffall. Dacă tombola nu e aprobată încă, salveaz-o ca ciornă.');
+  }
   showAlert('create-alert','info','Se salvează…');
   const d = await apiPost({
-    action:'addHomeRaffle', password: ADMIN_PASS, name,
+    action:'addHomeRaffle', password: ADMIN_PASS, name, draft: !!draft,
     type: $('r-type').value,
     price: $('r-price').value.trim(),
     link: $('r-link').value.trim(),
@@ -883,7 +940,7 @@ async function addRaffle(){
     order: parseInt($('r-order').value) || 999
   });
   if(d.error) return showAlert('create-alert','error', d.error);
-  showAlert('create-alert','success','✅ Tombola a fost adăugată!');
+  showAlert('create-alert','success', draft ? '📝 Salvată ca ciornă — nu apare pe site.' : '🚀 Publicată pe site!');
   resetAddForm();
   await reloadAll();
   showTab('raffles');
@@ -925,9 +982,10 @@ const clearImageFields = listId => { $(listId).innerHTML = ''; };
 function populateWinnerRaffleSelect(){
   const sel = $('w-raffle-select'); if(!sel) return;
   const prev = sel.value;
-  const missing = homeData.raffles.filter(r => raffleState(r) === 'drawn' && !hasWinner(r))
+  const pubs = homeData.raffles.filter(r => !r.draft);
+  const missing = pubs.filter(r => raffleState(r) === 'drawn' && !hasWinner(r))
     .sort((a,b) => new Date(b.drawDate) - new Date(a.drawDate));
-  const rest = homeData.raffles.filter(r => !missing.includes(r))
+  const rest = pubs.filter(r => !missing.includes(r))
     .sort((a,b) => new Date(b.drawDate||0) - new Date(a.drawDate||0));
   const opt = (r, mark) => `<option value="${esc(r.name)}">${mark}${esc(r.name)}</option>`;
   sel.innerHTML =
@@ -983,7 +1041,7 @@ function renderAdminWinners(){
          '<div class="group-empty">Corectează numele în Sheet (coloana Raffle din HomeWinners) ca să apară pe cardul tombolei.</div>') : '')
     + sec('good', '🏆 Câștigători', shown, true, false, more);
 
-  const pending = homeData.raffles.filter(r => raffleState(r) === 'drawn' && !hasWinner(r)).length;
+  const pending = homeData.raffles.filter(r => !r.draft && raffleState(r) === 'drawn' && !hasWinner(r)).length;
   $('tb-winners').textContent = pending || '';
 }
 async function updateWinnerDate(id, v){
