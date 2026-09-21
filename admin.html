@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Giveaways Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--gold:#C9952A;--gold-light:#F5C842;--gold-pale:#FDF6E3;--gold-line:rgba(201,149,42,0.2);--black:#0F0F0F;--gray-dark:#2A2A2A;--gray:#666;--gray-light:#999;--border:#E8E0D0;--bg:#FAFAF8;--white:#FFFFFF;--green:#2D7D46;--radius:16px}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -87,799 +88,969 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 .add-img-btn:hover{background:#f0e8c8}
 
 @media(max-width:600px){.form-row{grid-template-columns:1fr}.form-row-3{grid-template-columns:1fr 1fr}.admin-box{padding:20px}.notif-stats-bar{flex-direction:column;gap:16px}}
+
+
+/* ═══ LAYOUT NOU: TABURI + GRUPURI ═══════════════════════════ */
+.container{max-width:760px}
+.admin-box{padding:24px}
+
+.tz-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 14px;margin-bottom:14px}
+.tz-bar-title{margin:0;font-size:11px}
+.tz-toggle{flex:0 0 auto}
+.tz-opt{flex:0 0 auto;padding:6px 14px;font-size:12px}
+
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:4px;background:var(--white);padding:6px;border:1px solid var(--border);border-radius:14px;margin-bottom:16px;box-shadow:0 4px 18px rgba(0,0,0,.05);overflow-x:auto}
+.tab{flex:1;white-space:nowrap;padding:10px 12px;border:none;background:transparent;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--gray);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.tab:hover{color:var(--black);background:var(--bg)}
+.tab.active{background:var(--black);color:var(--gold-light)}
+.tbadge{font-size:10px;font-weight:700;background:rgba(0,0,0,.08);color:inherit;border-radius:20px;padding:1px 7px;min-width:18px}
+.tbadge:empty{display:none}
+.tab.active .tbadge{background:rgba(245,200,66,.2)}
+.tbadge.warn{background:#fdebd6;color:#c2610c}
+
+.tabpane{display:none}
+.tabpane.active{display:block}
+
+.sticky-alert{position:sticky;top:66px;z-index:19}
+
+.search{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);outline:none;margin-bottom:14px}
+.search:focus{border-color:var(--gold)}
+
+/* grupuri pliabile */
+.group{border:1px solid var(--border);border-radius:14px;margin-bottom:12px;background:var(--white);overflow:hidden}
+.group>summary{list-style:none;cursor:pointer;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;font-weight:700;color:var(--black);user-select:none}
+.group>summary::-webkit-details-marker{display:none}
+.group>summary:after{content:'▾';font-size:12px;color:var(--gray-light);transition:transform .2s}
+.group:not([open])>summary:after{transform:rotate(-90deg)}
+.group>summary .gcount{margin-left:auto;font-size:11px;font-weight:700;color:var(--gray);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 9px}
+.group.warn{border-color:#f3c89b;background:#fffaf4}
+.group.warn>summary{color:#b8570b}
+.group-body{padding:4px 12px 12px}
+.group-empty{font-size:12.5px;color:var(--gray-light);padding:8px 6px}
+.showmore{width:100%;margin-top:6px;padding:9px;border:1px dashed var(--border);background:transparent;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--gray);cursor:pointer}
+.showmore:hover{border-color:var(--gold);color:var(--gold)}
+
+/* rând compact de tombolă */
+.rrow{display:flex;align-items:center;gap:11px;padding:9px 8px;border-radius:10px;transition:background .15s}
+.rrow+.rrow{border-top:1px solid var(--border)}
+.rrow:hover{background:var(--bg)}
+.rrow.editing{background:#fdf6e3;outline:1px solid var(--gold-line)}
+.rthumb{width:52px;height:38px;border-radius:7px;object-fit:cover;border:1px solid var(--border);background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
+.rinfo{flex:1;min-width:0}
+.rname{font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmeta{font-size:11px;color:var(--gray);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmeta b{color:var(--gray-dark);font-weight:600}
+.rwin{font-size:11px;color:var(--green);font-weight:700;margin-top:2px}
+.ractions{display:flex;gap:4px;flex-shrink:0}
+.icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:14px;display:grid;place-items:center;transition:all .15s}
+.icon-btn:hover{border-color:var(--gold);background:#fdf6e3}
+.icon-btn.del:hover{border-color:#fca5a5;background:#fef2f2}
+
+/* rând compact de câștigător */
+.wrow{display:flex;align-items:center;gap:10px;padding:9px 8px}
+.wrow+.wrow{border-top:1px solid var(--border)}
+.wavatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;font-weight:800;font-size:12px;display:grid;place-items:center;flex-shrink:0}
+.winfo{flex:1;min-width:0}
+.wname{font-size:13px;font-weight:700;color:var(--black)}
+.wname span{color:var(--gold)}
+.wraffle{font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wraffle.bad{color:#c2610c}
+.wdate{padding:4px 7px;border:1px solid var(--border);border-radius:7px;font-size:11.5px;background:var(--bg);flex-shrink:0}
+
+/* editor */
+.editor{border:2px solid var(--gold);border-radius:16px;padding:18px;margin-bottom:18px;background:#fffdf7;box-shadow:0 8px 30px rgba(201,149,42,.12)}
+.editor-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.editor-kicker{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.editor-title{font-size:15px;font-weight:700;color:var(--black);margin-top:2px}
+.ghost-btn{border:1px solid var(--border);background:var(--white);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--gray);white-space:nowrap}
+.ghost-btn:hover{color:var(--black);border-color:var(--gray-light)}
+
+.subgroup{border:1px solid var(--border);border-radius:11px;padding:10px 14px;margin-bottom:12px;background:var(--white)}
+.subgroup>summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--gray);letter-spacing:.06em;text-transform:uppercase}
+
+.admin-btn.secondary{background:var(--white);color:var(--gray-dark);border:1px solid var(--border)}
+.admin-btn.secondary:hover{background:var(--bg);border-color:var(--gold)}
+
+.mini-btn{margin-left:6px;padding:3px 10px;border:1px solid var(--gold-line);border-radius:6px;background:var(--gold-pale);color:var(--gold);font-size:11px;font-weight:600;cursor:pointer}
+
+/* banner clonare */
+.clone-banner{border:1px solid var(--gold-line);background:#fdf6e3;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12.5px;line-height:1.55;color:var(--gray-dark)}
+.clone-banner b{color:var(--black)}
+.clone-banner ul{margin:6px 0 0 18px}
+.need{border-color:#e67e22!important;background:#fff8f1!important;box-shadow:0 0 0 3px rgba(230,126,34,.12)}
+
+.refresh-btn{background:rgba(245,200,66,.15);border:1px solid rgba(245,200,66,.3);color:var(--gold-light);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600}
+.tpl-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tpl{padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)}
+.tpl:hover{border-color:var(--gold)}
+
+@media(max-width:600px){
+  .admin-box{padding:14px}
+  .tab{padding:9px 8px;font-size:12px}
+  .rmeta{white-space:normal}
+  .sticky-alert{top:60px}
+  .wdate{display:none}
+}
 </style>
 </head>
 <body>
-
 <nav>
   <div class="nav-logo">🦁 Giveaways Admin</div>
-  <div style="display:flex;gap:14px;align-items:center"><a href="#" id="logout-link" onclick="doLogout();return false" style="font-size:13px;color:rgba(255,255,255,0.5);cursor:pointer;display:none">🔓 Ieși din cont</a><a href="https://giveaways-homepage.vercel.app" class="nav-back">← Back to site</a></div>
+  <div style="display:flex;gap:14px;align-items:center">
+    <a href="#" id="logout-link" onclick="doLogout();return false" style="font-size:13px;color:rgba(255,255,255,0.5);display:none">🔓 Ieși din cont</a>
+    <a href="https://giveaways-homepage.vercel.app" class="nav-back">← Site</a>
+  </div>
 </nav>
 
 <div class="container">
   <div class="admin-box">
 
-    <!-- LOGIN -->
+    <!-- ═══ LOGIN ═══ -->
     <div id="admin-login-view">
       <h2>Admin Access</h2>
       <div class="admin-login-wrap">
-        <p>Enter your password to manage raffles and winners.</p>
+        <p>Introdu parola ca să administrezi tombolele și câștigătorii.</p>
         <div id="login-alert" class="alert"></div>
         <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="admin-password" placeholder="Admin password" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
+          <label>Parolă</label>
+          <input type="password" id="admin-password" placeholder="Parola admin"/>
         </div>
-        <button class="admin-btn" onclick="doAdminLogin()">🔐 Login</button>
+        <button class="admin-btn" onclick="doAdminLogin()">🔐 Intră</button>
       </div>
     </div>
 
-    <!-- MAIN -->
+    <!-- ═══ PANOU PRINCIPAL ═══ -->
     <div id="admin-main-view" style="display:none">
-      <h2>Manage Raffles &amp; Winners</h2>
-      <div id="create-alert" class="alert"></div>
 
-      <!-- ── TIMEZONE SELECTOR ── -->
+      <!-- fus orar — compact, se aplică peste tot -->
       <div class="tz-bar">
-        <div class="tz-bar-title">🕐 Orele pe care le introduci sunt în:</div>
-        <div class="tz-bar-sub">Countdown-ul de pe homepage se afișează în ora locală a fiecărui vizitator. Alege aici în ce fus scrii tu orele — restul se calculează automat.</div>
+        <span class="tz-bar-title">🕐 Orele le scriu în:</span>
         <div class="tz-toggle">
-          <button class="tz-opt" id="tz-uk" onclick="setTZ('uk')">🇬🇧 Ora UK (London)</button>
-          <button class="tz-opt" id="tz-local" onclick="setTZ('local')">🇷🇴 Ora mea locală</button>
+          <button class="tz-opt" id="tz-uk" onclick="setTZ('uk')">🇬🇧 UK</button>
+          <button class="tz-opt" id="tz-local" onclick="setTZ('local')">🇷🇴 Ora mea</button>
         </div>
       </div>
 
-      <!-- ── ADD RAFFLE ── -->
-      <div class="admin-section-title">➕ Add New Raffle</div>
-      <div class="form-group"><label>Raffle Name</label><input type="text" id="r-name" placeholder="e.g. WIN £10,000 THIS SUMMER"/></div>
-      <div class="form-row">
-        <div class="form-group"><label>Price per Ticket</label><input type="text" id="r-price" placeholder="0.50"/></div>
-        <div class="form-group"><label>Raffall Link</label><input type="text" id="r-link" placeholder="https://raffall.com/..."/></div>
-      </div>
-      <div class="form-group"><label>Type</label><select id="r-type" onchange="togglePoolField()"><option value="pool">50% Cash Pool</option><option value="fixed">Fixed Prize</option></select></div>
-      <div class="form-group" id="pool-field"><label>Current Pool (£)</label><input type="number" id="r-pool" placeholder="0.00" step="0.01"/></div>
-      <div class="form-group" id="fixed-field"><label>📝 Descriere pe card</label><input type="text" id="r-fixed-prize" placeholder="ex: 50% din vânzări merge la câștigător / Winner takes the whole pot"/><div class="field-note">Textul de sub titlu, pe card. Scrie tu procentul dacă vrei să apară (50%, 60%, 70%...). Dacă lași gol, apare un text neutru, fără cifre.</div></div>
-      <div class="form-row">
-        <div class="form-group"><label>Tickets Sold</label><input type="number" id="r-sold" placeholder="0"/></div>
-        <div class="form-group"><label>Total Tickets (0 = unlimited)</label><input type="number" id="r-total" placeholder="500"/></div>
-      </div>
-      <div class="form-group"><label>📍 Display Order (1 = prima pe site)</label><input type="number" id="r-order" placeholder="1"/></div>
-      <div class="form-group"><label>Instant Prizes (comma separated)</label><input type="text" id="r-instants" placeholder="50, 75, 100, 200"/></div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>⏳ Opens At (deschidere)</label>
-          <input type="datetime-local" id="r-opensat" oninput="renderTimeHint('r-opensat','r-opensat-hint')"/>
-          <div class="time-hint" id="r-opensat-hint"></div>
-        </div>
-        <div class="form-group">
-          <label>🎰 Draw Date &amp; Time</label>
-          <input type="datetime-local" id="r-drawdate" oninput="renderTimeHint('r-drawdate','r-drawdate-hint')"/>
-          <div class="time-hint" id="r-drawdate-hint"></div>
-        </div>
-      </div>
-      <div class="field-note" style="margin:-6px 0 16px">
-        💡 Lasă <strong>Opens At</strong> gol dacă tombola e deja deschisă — atunci homepage-ul arată direct „Draw in".
-        <button onclick="fillDailyCashPot()" style="margin-left:6px;padding:3px 10px;border:1px solid var(--gold-line);border-radius:6px;background:var(--gold-pale);color:var(--gold);font-size:11px;font-weight:600;cursor:pointer">⚡ Daily Cash Pot (10:00 → mâine 12:00)</button>
+      <!-- taburi -->
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="raffles"  onclick="showTab('raffles')">🎟️ Tombole <span class="tbadge" id="tb-raffles"></span></button>
+        <button class="tab"        data-tab="add"      onclick="showTab('add')">➕ Adaugă</button>
+        <button class="tab"        data-tab="winners"  onclick="showTab('winners')">🏆 Câștigători <span class="tbadge warn" id="tb-winners"></span></button>
+        <button class="tab"        data-tab="notif"    onclick="showTab('notif')">🔔 Notificări</button>
       </div>
 
-      <!-- IMAGES - Add Raffle -->
-      <div class="form-group">
-        <label>🖼️ Cover Image (URL Cloudinary)</label>
-        <input type="text" id="r-cover" placeholder="https://res.cloudinary.com/..." oninput="previewCover('r-cover-preview', this.value)"/>
-        <div class="img-preview-box" id="r-cover-preview">
-          <img src="" alt="Cover preview"/>
-          <div class="placeholder">📷 Paste URL to preview</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>🖼️ Extra Images (slider)</label>
-        <div id="r-images-list"></div>
-        <button class="add-img-btn" onclick="addImageField('r-images-list', 'r-img')">+ Add Image</button>
-      </div>
+      <div id="create-alert" class="alert sticky-alert"></div>
 
-      <button class="admin-btn" onclick="addRaffle()">✅ Add Raffle</button>
+      <!-- ─────────────── TAB: TOMBOLE ─────────────── -->
+      <section class="tabpane active" id="tab-raffles">
 
-      <!-- ── ACTIVE RAFFLES ── -->
-      <div class="admin-section">
-        <div class="admin-section-title">🎟️ All Raffles</div>
-        <div id="admin-raffles-list"></div>
-      </div>
-
-      <!-- ── ADD WINNER ── -->
-      <div class="admin-section">
-        <div class="admin-section-title">🏆 Add Winner</div>
-        <div class="form-row">
-          <div class="form-group"><label>Username</label><input type="text" id="w-username" placeholder="Raffall username"/></div>
-          <div class="form-group"><label>Prize</label><input type="text" id="w-prize" placeholder="e.g. 200"/></div>
-        </div>
-        <div class="form-group">
-          <label>Raffle</label>
-          <select id="w-raffle-select" onchange="toggleRaffleCustom()"></select>
-          <input type="text" id="w-raffle-custom" placeholder="Scrie numele tombolei" style="display:none;margin-top:8px"/>
-          <div class="field-note">Alege tombola din listă — numele trebuie să se potrivească exact, altfel câștigătorul nu apare pe cardul din „Recent Draws".</div>
-        </div>
-        <div class="form-group"><label>Date</label><input type="date" id="w-date"/></div>
-        <button class="admin-btn" onclick="addWinner()">🏆 Add Winner</button>
-      </div>
-
-      <!-- ── MANAGE WINNERS ── -->
-      <div class="admin-section">
-        <div class="admin-section-title">✏️ Manage Winners</div>
-        <div id="admin-winners-list"></div>
-      </div>
-
-      <!-- ── UPDATE RAFFLE ── -->
-      <div class="admin-section">
-        <div class="admin-section-title">💰 Update Raffle</div>
-        <div class="form-group"><label>Select Raffle</label><select id="pool-raffle-select" onchange="loadRaffleForEdit()"></select></div><div class="form-group"><label>🔗 Raffall Link</label><input type="text" id="u-link" placeholder="https://raffall.com/..."/><div class="field-note">Butonul „Buy tickets” de pe card duce aici. Dacă e gol, butonul nu apare deloc pe site.</div></div>
-
-        <div id="progress-preview-wrap" style="display:none;margin-bottom:16px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray);margin-bottom:6px">
-            <span>Ticket progress</span>
-            <strong id="progress-label-text" style="color:var(--black)">—</strong>
+        <!-- editor (apare doar când apeși ✏️) -->
+        <div class="editor" id="editor" style="display:none">
+          <div class="editor-head">
+            <div>
+              <div class="editor-kicker">✏️ Editezi</div>
+              <div class="editor-title" id="editor-title">—</div>
+            </div>
+            <button class="ghost-btn" onclick="closeEditor()">✕ Închide</button>
           </div>
-          <div class="progress-preview"><div class="progress-preview-fill" id="progress-preview-fill" style="width:0%"></div></div>
-          <div class="tickets-info" id="tickets-info-text"></div>
+          <input type="hidden" id="edit-id"/>
+
+          <div class="form-group"><label>🔗 Raffall Link</label>
+            <input type="text" id="u-link" placeholder="https://raffall.com/..."/>
+            <div class="field-note">Butonul „Buy tickets" de pe card duce aici. Gol = butonul nu apare.</div>
+          </div>
+
+          <div id="progress-preview-wrap" style="display:none;margin-bottom:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray);margin-bottom:6px">
+              <span>Progres bilete</span><strong id="progress-label-text" style="color:var(--black)">—</strong>
+            </div>
+            <div class="progress-preview"><div class="progress-preview-fill" id="progress-preview-fill" style="width:0%"></div></div>
+            <div class="tickets-info" id="tickets-info-text"></div>
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group"><label>Pool (£)</label><input type="number" id="pool-amount" step="0.01" placeholder="0.00"/></div>
+            <div class="form-group"><label>Bilete vândute</label><input type="number" id="update-sold" placeholder="0" oninput="updateProgressPreview()"/></div>
+            <div class="form-group"><label>Total bilete</label><input type="number" id="update-total" placeholder="0 = nelimitat" oninput="updateProgressPreview()"/></div>
+          </div>
+
+          <div class="form-group"><label>Coduri promo (unul pe linie: COD | utilizări rămase)</label>
+            <textarea id="update-promos" rows="3" placeholder="X5 | 5&#10;FIRST10 | 10"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group"><label>⏳ Deschidere</label>
+              <input type="datetime-local" id="update-opensat" oninput="renderTimeHint('update-opensat','update-opensat-hint')"/>
+              <div class="time-hint" id="update-opensat-hint"></div>
+            </div>
+            <div class="form-group"><label>🎰 Extragere</label>
+              <input type="datetime-local" id="update-drawdate" oninput="renderTimeHint('update-drawdate','update-drawdate-hint')"/>
+              <div class="time-hint" id="update-drawdate-hint"></div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group"><label>📝 Descriere pe card</label>
+              <input type="text" id="u-fixed-prize" placeholder="gol = text neutru"/>
+            </div>
+            <div class="form-group"><label>📍 Ordine afișare</label>
+              <input type="number" id="update-order" placeholder="1 = featured"/>
+            </div>
+          </div>
+
+          <details class="subgroup">
+            <summary>🖼️ Imagini</summary>
+            <div class="form-group" style="margin-top:12px"><label>Copertă (URL Cloudinary)</label>
+              <input type="text" id="u-cover" placeholder="https://res.cloudinary.com/..." oninput="previewCover('u-cover-preview', this.value)"/>
+              <div class="img-preview-box" id="u-cover-preview"><img src="" alt=""/><div class="placeholder">📷 Lipește URL-ul</div></div>
+            </div>
+            <div class="form-group"><label>Imagini extra (slider)</label>
+              <div id="u-images-list"></div>
+              <button class="add-img-btn" onclick="addImageField('u-images-list','u-img')">+ Imagine</button>
+            </div>
+          </details>
+
+          <div class="form-row" style="margin-top:6px">
+            <button class="admin-btn" onclick="updateRaffle()">💾 Salvează</button>
+            <button class="admin-btn secondary" onclick="cloneRaffle(document.getElementById('edit-id').value)">📋 Clonează</button>
+          </div>
+        </div>
+
+        <!-- căutare -->
+        <input type="search" class="search" id="raffle-search" placeholder="🔍 Caută tombolă…" oninput="renderAdminRaffles()"/>
+
+        <!-- grupuri (le umple JS) -->
+        <div id="raffle-groups"></div>
+      </section>
+
+      <!-- ─────────────── TAB: ADAUGĂ ─────────────── -->
+      <section class="tabpane" id="tab-add">
+        <div class="clone-banner" id="clone-banner" style="display:none"></div>
+
+        <div class="form-group"><label>Nume tombolă</label>
+          <input type="text" id="r-name" placeholder="ex: THE DAILY CASH POT - Monday(22.09.2026)"/>
+          <div class="field-note">Fiecare tombolă trebuie să aibă nume unic — câștigătorul se leagă de card prin nume.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group"><label>Preț bilet</label><input type="text" id="r-price" placeholder="0.50"/></div>
+          <div class="form-group"><label>🔗 Raffall Link</label><input type="text" id="r-link" placeholder="https://raffall.com/..."/></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group"><label>Tip</label>
+            <select id="r-type" onchange="togglePoolField()"><option value="pool">Cash Pool</option><option value="fixed">Premiu fix</option></select>
+          </div>
+          <div class="form-group" id="pool-field"><label>Pool curent (£)</label><input type="number" id="r-pool" step="0.01" placeholder="0.00"/></div>
+        </div>
+
+        <div class="form-group"><label>📝 Descriere pe card</label>
+          <input type="text" id="r-fixed-prize" placeholder="ex: One winner takes the entire pot / FREE MacBook Air"/>
+          <div class="field-note">Scrie procentul dacă vrei să apară. Gol = text neutru, fără cifre.</div>
         </div>
 
         <div class="form-row-3">
-          <div class="form-group"><label>Pool (£)</label><input type="number" id="pool-amount" placeholder="0.00" step="0.01"/></div>
-          <div class="form-group"><label>Tickets Sold</label><input type="number" id="update-sold" placeholder="0" oninput="updateProgressPreview()"/></div>
-          <div class="form-group"><label>Total Tickets</label><input type="number" id="update-total" placeholder="500" oninput="updateProgressPreview()"/></div>
+          <div class="form-group"><label>Bilete vândute</label><input type="number" id="r-sold" placeholder="0"/></div>
+          <div class="form-group"><label>Total bilete</label><input type="number" id="r-total" placeholder="0 = nelimitat"/></div>
+          <div class="form-group"><label>📍 Ordine</label><input type="number" id="r-order" placeholder="1 = featured"/></div>
         </div>
-        <div class="form-group"><label>Promo Codes (one per line: CODE | uses left)</label><textarea id="update-promos" placeholder="GIVE | 50&#10;START | 10&#10;VIP | 5" rows="4"></textarea></div>
+
+        <div class="form-group"><label>Premii instant (separate prin virgulă)</label><input type="text" id="r-instants" placeholder="50, 75, 100"/></div>
 
         <div class="form-row">
-          <div class="form-group">
-            <label>⏳ Opens At (deschidere)</label>
-            <input type="datetime-local" id="update-opensat" oninput="renderTimeHint('update-opensat','update-opensat-hint')"/>
-            <div class="time-hint" id="update-opensat-hint"></div>
+          <div class="form-group"><label>⏳ Deschidere</label>
+            <input type="datetime-local" id="r-opensat" oninput="renderTimeHint('r-opensat','r-opensat-hint')"/>
+            <div class="time-hint" id="r-opensat-hint"></div>
           </div>
-          <div class="form-group">
-            <label>🎰 Draw Date &amp; Time</label>
-            <input type="datetime-local" id="update-drawdate" oninput="renderTimeHint('update-drawdate','update-drawdate-hint')"/>
-            <div class="time-hint" id="update-drawdate-hint"></div>
+          <div class="form-group"><label>🎰 Extragere</label>
+            <input type="datetime-local" id="r-drawdate" oninput="renderTimeHint('r-drawdate','r-drawdate-hint')"/>
+            <div class="time-hint" id="r-drawdate-hint"></div>
           </div>
         </div>
-        <div class="form-group"><label>📝 Descriere pe card</label><input type="text" id="u-fixed-prize" placeholder="lasă gol pentru textul neutru"/><div class="field-note">Se aplică și la tombolele de tip cash pool.</div></div><div class="form-group"><label>📍 Display Order</label><input type="number" id="update-order" placeholder="1"/></div>
+        <div class="field-note" style="margin:-6px 0 16px">
+          Deschidere goală = tombola e deja deschisă.
+          <button class="mini-btn" onclick="fillDailyCashPot()">⚡ Azi 10:00 → mâine 12:00</button>
+        </div>
 
-        <!-- IMAGES - Update Raffle -->
-        <div class="form-group">
-          <label>🖼️ Cover Image (URL Cloudinary)</label>
-          <input type="text" id="u-cover" placeholder="https://res.cloudinary.com/..." oninput="previewCover('u-cover-preview', this.value)"/>
-          <div class="img-preview-box" id="u-cover-preview">
-            <img src="" alt="Cover preview"/>
-            <div class="placeholder">📷 Paste URL to preview</div>
+        <details class="subgroup" open>
+          <summary>🖼️ Imagini</summary>
+          <div class="form-group" style="margin-top:12px"><label>Copertă (URL Cloudinary)</label>
+            <input type="text" id="r-cover" placeholder="https://res.cloudinary.com/..." oninput="previewCover('r-cover-preview', this.value)"/>
+            <div class="img-preview-box" id="r-cover-preview"><img src="" alt=""/><div class="placeholder">📷 Lipește URL-ul</div></div>
           </div>
-        </div>
-        <div class="form-group">
-          <label>🖼️ Extra Images (slider)</label>
-          <div id="u-images-list"></div>
-          <button class="add-img-btn" onclick="addImageField('u-images-list', 'u-img')">+ Add Image</button>
-        </div>
+          <div class="form-group"><label>Imagini extra (slider)</label>
+            <div id="r-images-list"></div>
+            <button class="add-img-btn" onclick="addImageField('r-images-list','r-img')">+ Imagine</button>
+          </div>
+        </details>
 
-        <button class="admin-btn" onclick="updateRaffle()">💰 Update Raffle</button>
-      </div>
+        <div class="form-row" style="margin-top:6px">
+          <button class="admin-btn" onclick="addRaffle()">✅ Adaugă tombola</button>
+          <button class="admin-btn secondary" onclick="resetAddForm()">↺ Golește formularul</button>
+        </div>
+      </section>
 
-      <!-- ── PUSH NOTIFICATIONS ── -->
-      <div class="admin-section">
-        <div class="admin-section-title">🔔 Push Notifications</div>
-        <p style="font-size:12px;color:var(--gray);margin-bottom:16px">Trimite notificare instant la toți abonații PWA.</p>
+      <!-- ─────────────── TAB: CÂȘTIGĂTORI ─────────────── -->
+      <section class="tabpane" id="tab-winners">
+        <details class="group" open>
+          <summary><span>🏆 Adaugă câștigător</span></summary>
+          <div class="group-body">
+            <div class="form-row">
+              <div class="form-group"><label>Username</label><input type="text" id="w-username" placeholder="Username Raffall"/></div>
+              <div class="form-group"><label>Premiu</label><input type="text" id="w-prize" placeholder="ex: 18"/></div>
+            </div>
+            <div class="form-group"><label>Tombola</label>
+              <select id="w-raffle-select" onchange="toggleRaffleCustom()"></select>
+              <input type="text" id="w-raffle-custom" placeholder="Scrie numele tombolei" style="display:none;margin-top:8px"/>
+              <div class="field-note">⚠️ = extrase care încă n-au câștigător. Alege din listă ca numele să se potrivească exact.</div>
+            </div>
+            <div class="form-group"><label>Data</label><input type="date" id="w-date"/></div>
+            <button class="admin-btn" onclick="addWinner()">🏆 Adaugă câștigătorul</button>
+          </div>
+        </details>
+
+        <input type="search" class="search" id="winner-search" placeholder="🔍 Caută câștigător sau tombolă…" oninput="renderAdminWinners()"/>
+        <div id="winner-groups"></div>
+      </section>
+
+      <!-- ─────────────── TAB: NOTIFICĂRI ─────────────── -->
+      <section class="tabpane" id="tab-notif">
         <div class="notif-stats-bar">
-          <div class="notif-stat">
-            <div class="notif-stat-val" id="notif-subscriber-count">—</div>
-            <div class="notif-stat-lbl">Abonați</div>
-          </div>
-          <div class="notif-stat">
-            <div class="notif-stat-val" id="notif-last-sent">—</div>
-            <div class="notif-stat-lbl">Ultimul trimis</div>
-          </div>
-          <button onclick="loadFCMStats()" style="background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.3);color:var(--gold-light);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600">↻ Refresh</button>
+          <div class="notif-stat"><div class="notif-stat-val" id="notif-subscriber-count">—</div><div class="notif-stat-lbl">Abonați</div></div>
+          <div class="notif-stat"><div class="notif-stat-val" id="notif-last-sent">—</div><div class="notif-stat-lbl">Ultimul trimis</div></div>
+          <button class="refresh-btn" onclick="loadFCMStats()">↻ Refresh</button>
         </div>
         <div id="notif-alert" class="alert"></div>
-        <div class="form-group">
-          <label>Titlu</label>
-          <input type="text" id="notif-title" placeholder="🎟️ New Draw — £10,000 This Summer!" maxlength="65"/>
-          <div style="font-size:11px;color:var(--gray-light);margin-top:4px">Max 65 caractere</div>
+        <div class="form-group"><label>Titlu</label>
+          <input type="text" id="notif-title" maxlength="65" placeholder="🎰 The Daily Cash Pot is OPEN!"/>
+          <div class="field-note">Max 65 caractere</div>
         </div>
-        <div class="form-group">
-          <label>Mesaj</label>
-          <textarea id="notif-body" rows="3" placeholder="Draw goes live in 2 hours. Buy your ticket now!" maxlength="140"></textarea>
-          <div style="font-size:11px;color:var(--gray-light);margin-top:4px">Max 140 caractere</div>
+        <div class="form-group"><label>Mesaj</label>
+          <textarea id="notif-body" rows="3" maxlength="140" placeholder="Today's pot is live…"></textarea>
+          <div class="field-note">Max 140 caractere</div>
         </div>
-        <div class="form-group">
-          <label>URL la click</label>
-          <input type="text" id="notif-url" value="https://giveaways-homepage.vercel.app"/>
-        </div>
-        <div style="margin-bottom:14px">
-          <div style="font-size:11px;font-weight:600;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Template-uri rapide</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px">
-            <button onclick="fillNotifTemplate('new_draw')" style="padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)">🎰 New Draw</button>
-            <button onclick="fillNotifTemplate('winner')" style="padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)">🏆 Winner</button>
-            <button onclick="fillNotifTemplate('instant')" style="padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)">⚡ Instant Prize</button>
-            <button onclick="fillNotifTemplate('reminder')" style="padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)">⏰ Reminder</button>
-            <button onclick="fillNotifTemplate('pot_open')" style="padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--gray-dark)">💰 Daily Pot Open</button>
-          </div>
+        <div class="form-group"><label>URL la click</label><input type="text" id="notif-url" value="https://giveaways-homepage.vercel.app"/></div>
+        <div class="tpl-row">
+          <button class="tpl" onclick="fillNotifTemplate('new_draw')">🎰 New Draw</button>
+          <button class="tpl" onclick="fillNotifTemplate('winner')">🏆 Winner</button>
+          <button class="tpl" onclick="fillNotifTemplate('instant')">⚡ Instant Prize</button>
+          <button class="tpl" onclick="fillNotifTemplate('reminder')">⏰ Reminder</button>
+          <button class="tpl" onclick="fillNotifTemplate('pot_open')">💰 Daily Pot Open</button>
         </div>
         <button class="notif-send-btn" id="notif-send-btn" onclick="sendPushNotification()">🔔 SEND TO ALL SUBSCRIBERS</button>
         <div class="notif-result" id="notif-result">
           <div class="notif-result-num" id="notif-result-num">0</div>
           <div class="notif-result-lbl" id="notif-result-lbl">notifications sent</div>
         </div>
-      </div>
+      </section>
 
     </div>
   </div>
 </div>
 
 <script>
-const API_URL  = "https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec";
-// ── PAROLA ──────────────────────────────────────────────
-// Nu mai există în cod. O tastezi la login și rămâne doar în
-// memoria tab-ului (sessionStorage) — se șterge când închizi tab-ul.
+const API_URL = "https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec";
+
+// Parola NU e în cod. O tastezi la login, rămâne doar în tab (sessionStorage).
 let ADMIN_PASS = sessionStorage.getItem('gw_admin_pw') || '';
 
-async function apiFetch(params) {
+const DRAWN_VISIBLE   = 8;    // câte tombole extrase arătăm înainte de „Arată toate"
+const WINNERS_VISIBLE = 10;   // la fel pentru câștigători
+
+let homeData = { raffles: [], winners: [] };
+let showAllDrawn = false, showAllWinners = false;
+
+async function apiFetch(params){
   const r = await fetch(API_URL + "?" + new URLSearchParams(params));
   return r.json();
 }
-async function apiPost(body) {
-  const params = new URLSearchParams({ action: body.action, body: JSON.stringify(body) });
-  const r = await fetch(API_URL + "?" + params);
+async function apiPost(body){
+  const r = await fetch(API_URL + "?" + new URLSearchParams({ action: body.action, body: JSON.stringify(body) }));
   return r.json();
 }
+const esc = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const $ = id => document.getElementById(id);
 
-let homeData = { raffles: [], winners: [] };
-let adminLoggedIn = false;
+/* ═══ TABURI ═══════════════════════════════════════════════ */
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+  sessionStorage.setItem('gw_admin_tab', name);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-// ════════════════════════════════════════════════════════
-//  TIMEZONE — totul se salvează ca UTC ISO
-// ════════════════════════════════════════════════════════
-let tzMode = localStorage.getItem('gw_tz_mode') || 'uk';   // 'uk' | 'local'
+/* ═══ FUS ORAR — totul se salvează ca UTC ISO ═══════════════ */
+let tzMode = localStorage.getItem('gw_tz_mode') || 'uk';
 const UK_TZ = 'Europe/London';
 
 function setTZ(mode){
   tzMode = mode;
   localStorage.setItem('gw_tz_mode', mode);
-  document.getElementById('tz-uk').classList.toggle('active', mode==='uk');
-  document.getElementById('tz-local').classList.toggle('active', mode==='local');
-  ['r-opensat','r-drawdate','update-opensat','update-drawdate'].forEach(id=>{
-    renderTimeHint(id, id+'-hint');
-  });
+  $('tz-uk').classList.toggle('active', mode === 'uk');
+  $('tz-local').classList.toggle('active', mode === 'local');
+  ['r-opensat','r-drawdate','update-opensat','update-drawdate'].forEach(id => renderTimeHint(id, id + '-hint'));
+  renderAdminRaffles();
 }
-
 function tzOffsetMinutes(date, tz){
-  const dtf = new Intl.DateTimeFormat('en-US', {
-    timeZone: tz, hour12: false,
-    year:'numeric', month:'2-digit', day:'2-digit',
-    hour:'2-digit', minute:'2-digit', second:'2-digit'
-  });
   const p = {};
-  dtf.formatToParts(date).forEach(x => { p[x.type] = x.value; });
-  let h = parseInt(p.hour, 10);
-  if (h === 24) h = 0;
-  const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, h, +p.minute, +p.second);
-  return (asUTC - date.getTime()) / 60000;
+  new Intl.DateTimeFormat('en-US', { timeZone: tz, hour12: false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' })
+    .formatToParts(date).forEach(x => { p[x.type] = x.value; });
+  let h = parseInt(p.hour, 10); if(h === 24) h = 0;
+  return (Date.UTC(+p.year, +p.month - 1, +p.day, h, +p.minute, +p.second) - date.getTime()) / 60000;
 }
-
-function inputToISO(localStr){
-  if(!localStr) return "";
-  if(tzMode === 'local'){
-    const d = new Date(localStr);
-    return isNaN(d) ? "" : d.toISOString();
-  }
-  const naiveUTC = new Date(localStr + ':00Z').getTime();
-  if(isNaN(naiveUTC)) return "";
-  let ts = naiveUTC;
-  for(let i=0;i<3;i++){
-    const off = tzOffsetMinutes(new Date(ts), UK_TZ);
-    ts = naiveUTC - off*60000;
-  }
+function inputToISO(v){
+  if(!v) return "";
+  if(tzMode === 'local'){ const d = new Date(v); return isNaN(d) ? "" : d.toISOString(); }
+  const naive = new Date(v + ':00Z').getTime();
+  if(isNaN(naive)) return "";
+  let ts = naive;
+  for(let i = 0; i < 3; i++) ts = naive - tzOffsetMinutes(new Date(ts), UK_TZ) * 60000;
   return new Date(ts).toISOString();
 }
-
 function isoToInput(iso){
   if(!iso) return "";
   const d = new Date(iso);
   if(isNaN(d)) return "";
-  if(tzMode === 'local'){
-    return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  }
-  const off = tzOffsetMinutes(d, UK_TZ);
-  return new Date(d.getTime() + off*60000).toISOString().slice(0,16);
+  if(tzMode === 'local') return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+  return new Date(d.getTime() + tzOffsetMinutes(d, UK_TZ) * 60000).toISOString().slice(0,16);
 }
-
 function renderTimeHint(inputId, hintId){
-  const inp  = document.getElementById(inputId);
-  const hint = document.getElementById(hintId);
+  const inp = $(inputId), hint = $(hintId);
   if(!inp || !hint) return;
-  if(!inp.value){ hint.textContent = ''; hint.classList.remove('warn'); return; }
+  if(!inp.value){ hint.textContent = ''; return; }
   const iso = inputToISO(inp.value);
   if(!iso){ hint.textContent = 'Dată invalidă'; hint.classList.add('warn'); return; }
   const d = new Date(iso);
   const uk = d.toLocaleString('en-GB', { timeZone: UK_TZ, weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
   const ro = d.toLocaleString('ro-RO', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
   hint.classList.remove('warn');
-  hint.innerHTML = '🇬🇧 <strong>' + uk + '</strong> &nbsp;·&nbsp; 🇷🇴 ' + ro;
+  hint.innerHTML = '🇬🇧 <strong>' + uk + '</strong> · 🇷🇴 ' + ro;
 }
-
+// dată scurtă pentru rândurile din listă, în fusul ales
+function shortDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  const o = { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' };
+  if(tzMode === 'uk') o.timeZone = UK_TZ;
+  return d.toLocaleString('ro-RO', o);
+}
 function fillDailyCashPot(){
-  const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
-  let today;
-  if(tzMode === 'uk'){
-    const shifted = new Date(now.getTime() + tzOffsetMinutes(now, UK_TZ)*60000);
-    today = shifted.toISOString().slice(0,10);
-  } else {
-    today = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-  }
-  const tomorrow = (() => {
-    const d = new Date(today + 'T00:00:00Z');
-    d.setUTCDate(d.getUTCDate() + 1);
-    return d.toISOString().slice(0,10);
-  })();
-  document.getElementById('r-opensat').value  = today + 'T10:00';
-  document.getElementById('r-drawdate').value = tomorrow + 'T12:00';
+  const now = new Date(), pad = n => String(n).padStart(2,'0');
+  const today = tzMode === 'uk'
+    ? new Date(now.getTime() + tzOffsetMinutes(now, UK_TZ) * 60000).toISOString().slice(0,10)
+    : `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  $('r-opensat').value  = today + 'T10:00';
+  $('r-drawdate').value = addDaysStr(today, 1) + 'T12:00';
   renderTimeHint('r-opensat','r-opensat-hint');
   renderTimeHint('r-drawdate','r-drawdate-hint');
 }
 
-async function loadHomeData() {
-  try {
-    const [r1, r2] = await Promise.all([
-      apiFetch({ action: "getHomeRaffles" }),
-      apiFetch({ action: "getHomeWinners" })
-    ]);
-    homeData.raffles = r1.raffles || [];
-    homeData.winners = r2.winners || [];
-  } catch(e) { console.error("Load error:", e); }
+/* ═══ UTILITARE DATĂ PENTRU CLONARE ═══════════════════════════ */
+function addDaysStr(ymd, n){
+  const d = new Date(ymd + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0,10);
+}
+const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const WD_RE = /\b(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\b/i;
+const DATE_RE = /\b(\d{1,2})\.(\d{1,2})(?:\.(\d{2,4}))?\b/;
+
+// "cheia de serie": numele fără zi și dată — ca să găsim toate Daily Cash Pot-urile
+function seriesKey(name){
+  return String(name||'').replace(WD_RE,'').replace(DATE_RE,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+}
+// înlocuiește ziua și data din nume cu cele ale noii zile, păstrând formatul
+function renameForDate(name, ymd){
+  const [Y, M, D] = ymd.split('-');
+  const wd = WEEKDAYS[new Date(ymd + 'T12:00:00Z').getUTCDay()];
+  let out = String(name||'');
+  out = out.replace(WD_RE, m =>
+    m === m.toUpperCase() ? wd.toUpperCase() : m === m.toLowerCase() ? wd.toLowerCase() : wd);
+  out = out.replace(DATE_RE, (m, dd, mm, yy) =>
+    yy ? `${D}.${M}.${yy.length === 2 ? Y.slice(2) : Y}` : `${D}.${M}`);
+  return out;
 }
 
-async function doAdminLogin(silent) {
-  const pass = silent ? ADMIN_PASS : document.getElementById("admin-password").value;
-  if (!pass) return;
-  const d = await apiPost({ action: "checkAdmin", password: pass });
-  if (d.error) {
-    if (!silent) showAlert("login-alert", "error", d.error);
-    return;
-  }
-  if (!d.ok) {
-    sessionStorage.removeItem('gw_admin_pw');
-    ADMIN_PASS = '';
-    if (!silent) showAlert("login-alert", "error", "Parolă greșită. După 15 încercări greșite accesul se blochează 15 minute.");
+/* ═══ LOGIN ════════════════════════════════════════════════ */
+async function doAdminLogin(silent){
+  const pass = silent ? ADMIN_PASS : $("admin-password").value;
+  if(!pass) return;
+  const d = await apiPost({ action:"checkAdmin", password: pass });
+  if(d.error){ if(!silent) showAlert("login-alert","error", d.error); return; }
+  if(!d.ok){
+    sessionStorage.removeItem('gw_admin_pw'); ADMIN_PASS = '';
+    if(!silent) showAlert("login-alert","error","Parolă greșită. După 15 încercări greșite accesul se blochează 15 minute.");
     return;
   }
   ADMIN_PASS = pass;
   sessionStorage.setItem('gw_admin_pw', pass);
-  adminLoggedIn = true;
-  document.getElementById("admin-login-view").style.display = "none";
-  document.getElementById("admin-main-view").style.display = "block";
+  $("admin-login-view").style.display = "none";
+  $("admin-main-view").style.display = "block";
+  $("logout-link").style.display = "inline";
   setTZ(tzMode);
-  await loadHomeData();
-  renderAdminRaffles();
-  renderAdminWinners();
-  populatePoolSelect();
-  populateWinnerRaffleSelect();
+  await reloadAll();
+  showTab(sessionStorage.getItem('gw_admin_tab') || 'raffles');
   loadFCMStats();
-  document.getElementById("logout-link").style.display = "inline";
 }
-
-function togglePoolField() {
-  const type = document.getElementById("r-type").value;
-  // Caseta "Current Pool" are sens doar la cash pool.
-  document.getElementById("pool-field").style.display = type === "pool" ? "block" : "none";
-  // Descrierea se poate scrie la orice tip de tombolă.
-  document.getElementById("fixed-field").style.display = "block";
-}
-
-// ── IMAGE HELPERS ──
-function previewCover(previewId, url) {
-  const box = document.getElementById(previewId);
-  if (!box) return;
-  const img = box.querySelector('img');
-  if (url && url.startsWith('http')) {
-    img.src = url;
-    img.onload = () => box.classList.add('has-img');
-    img.onerror = () => box.classList.remove('has-img');
-  } else {
-    box.classList.remove('has-img');
-    img.src = '';
-  }
-}
-
-let imgCounter = 0;
-function addImageField(listId, prefix, existingUrl = '') {
-  const list = document.getElementById(listId);
-  const id = prefix + '_' + (++imgCounter);
-  const item = document.createElement('div');
-  item.className = 'extra-img-item';
-  item.id = 'item_' + id;
-  item.innerHTML = `
-    <img class="extra-img-thumb" id="thumb_${id}" src="${existingUrl||''}" style="${existingUrl?'':'display:none'}" alt=""/>
-    <input type="text" placeholder="https://res.cloudinary.com/..." value="${existingUrl}"
-      oninput="updateThumb('${id}', this.value)" style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--black);background:var(--bg);outline:none"/>
-    <button class="extra-img-remove" onclick="removeImageField('item_${id}')">✕</button>
-  `;
-  list.appendChild(item);
-  if (existingUrl) updateThumb(id, existingUrl);
-}
-
-function updateThumb(id, url) {
-  const thumb = document.getElementById('thumb_' + id);
-  if (!thumb) return;
-  if (url && url.startsWith('http')) {
-    thumb.src = url;
-    thumb.style.display = 'block';
-  } else {
-    thumb.style.display = 'none';
-  }
-}
-
-function removeImageField(itemId) {
-  const el = document.getElementById(itemId);
-  if (el) el.remove();
-}
-
-function getImageUrls(listId) {
-  const list = document.getElementById(listId);
-  if (!list) return [];
-  return Array.from(list.querySelectorAll('input[type="text"]'))
-    .map(inp => inp.value.trim())
-    .filter(url => url.startsWith('http'));
-}
-
-function clearImageFields(listId) {
-  const list = document.getElementById(listId);
-  if (list) list.innerHTML = '';
-}
-
-// ── ADD RAFFLE ──
-async function addRaffle() {
-  const name = document.getElementById("r-name").value.trim();
-  if (!name) return showAlert("create-alert", "error", "Enter a raffle name.");
-
-  const opensAtISO  = inputToISO(document.getElementById("r-opensat").value);
-  const drawDateISO = inputToISO(document.getElementById("r-drawdate").value);
-  if (opensAtISO && drawDateISO && new Date(opensAtISO) >= new Date(drawDateISO)) {
-    return showAlert("create-alert", "error", "Deschiderea trebuie să fie înainte de extragere.");
-  }
-
-  showAlert("create-alert", "info", "Saving...");
-  const d = await apiPost({
-    action: "addHomeRaffle", password: ADMIN_PASS, name,
-    type: document.getElementById("r-type").value,
-    price: document.getElementById("r-price").value.trim(),
-    link: document.getElementById("r-link").value.trim(),
-    pool: parseFloat(document.getElementById("r-pool").value) || 0,
-    fixedPrize: document.getElementById("r-fixed-prize").value.trim(),
-    sold: parseInt(document.getElementById("r-sold").value) || 0,
-    total: parseInt(document.getElementById("r-total").value) || 0,
-    instants: document.getElementById("r-instants").value.trim(),
-    drawDate: drawDateISO,
-    opensAt: opensAtISO,
-    promos: [],
-    coverImage: document.getElementById("r-cover").value.trim(),
-    images: getImageUrls("r-images-list"),
-    order: parseInt(document.getElementById("r-order").value) || 999
-  });
-  if (d.error) return showAlert("create-alert", "error", d.error);
-  showAlert("create-alert", "success", "✅ Raffle added!");
-  await loadHomeData(); renderAdminRaffles(); populatePoolSelect(); populateWinnerRaffleSelect();
-  ["r-name","r-price","r-link","r-pool","r-fixed-prize","r-sold","r-total","r-instants","r-drawdate","r-opensat","r-cover","r-order"].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = "";
-  });
-  renderTimeHint('r-opensat','r-opensat-hint');
-  renderTimeHint('r-drawdate','r-drawdate-hint');
-  clearImageFields("r-images-list");
-  previewCover("r-cover-preview", "");
-}
-
-// ── STARE + POTRIVIRE CÂȘTIGĂTOR ──
-function raffleState(r){
-  const now = Date.now();
-  const o = r.opensAt ? new Date(r.opensAt).getTime() : NaN;
-  const d = r.drawDate ? new Date(r.drawDate).getTime() : NaN;
-  if(!isNaN(o) && now < o) return 'upcoming';
-  if(!isNaN(d) && now >= d) return 'drawn';
-  return 'live';
-}
-
-function hasWinner(r){
-  const key = String(r.name||'').trim().toLowerCase();
-  if(!key) return false;
-  return (homeData.winners||[]).some(w => String(w.raffle||'').trim().toLowerCase() === key);
-}
-
-function raffleStateLabel(r){
-  const s = raffleState(r);
-  if(s === 'upcoming') return '<span style="color:var(--gold);font-weight:600">🔜 Opens soon</span>';
-  if(s === 'drawn'){
-    return hasWinner(r)
-      ? '<span style="color:var(--gray);font-weight:600">🏁 În Recent Draws</span>'
-      : '<span style="color:#e67e22;font-weight:600">⚠️ Extrasă — lipsește câștigătorul</span>';
-  }
-  return '<span style="color:var(--green);font-weight:600">🟢 Live</span>';
-}
-
-function renderAdminRaffles() {
-  const list = document.getElementById("admin-raffles-list");
-  if (!homeData.raffles.length) { list.innerHTML = '<p style="font-size:13px;color:var(--gray)">No raffles yet.</p>'; return; }
-  list.innerHTML = homeData.raffles.map(r => {
-    const pct = r.total > 0 ? Math.min(100, Math.round((r.sold/r.total)*100)) : null;
-    const allImgs = [r.coverImage, ...(r.images||[])].filter(Boolean);
-    return `<div class="admin-raffle-item" style="flex-direction:column;align-items:stretch;gap:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex;align-items:center;gap:10px">
-          ${allImgs.length ? `<img src="${allImgs[0]}" style="width:48px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--border)" alt=""/>` : '<div style="width:48px;height:36px;background:var(--bg);border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px">🖼️</div>'}
-          <div>
-            <div style="font-weight:600">${esc(r.name)}</div>
-            <div style="font-size:11px;color:var(--gray)">${raffleStateLabel(r)} · ${r.type==="pool"?"Pool: £"+(r.pool||0).toFixed(2):esc(r.fixedPrize||"")} · ${r.sold} sold${r.total>0?" / "+r.total+" ("+pct+"%)":""}</div>
-          </div>
-        </div>
-        <button class="del-btn" onclick="deleteRaffle(${r.id})">Delete</button>
-      </div>
-      ${pct!==null?`<div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:3px"></div></div>`:""}
-    </div>`;
-  }).join("");
-}
-
-async function deleteRaffle(id) {
-  if (!confirm("Delete this raffle?")) return;
-  await apiPost({ action: "deleteHomeRaffle", password: ADMIN_PASS, id });
-  await loadHomeData(); renderAdminRaffles(); populatePoolSelect(); populateWinnerRaffleSelect();
-}
-
-// ── ADD WINNER (cu dropdown de tombole) ──
-function populateWinnerRaffleSelect(){
-  const sel = document.getElementById("w-raffle-select");
-  if(!sel) return;
-  const prev = sel.value;
-  // tombolele extrase, cele mai recente primele — apoi restul
-  const sorted = homeData.raffles.slice().sort((a,b)=>{
-    const sa = raffleState(a)==='drawn' ? 0 : 1;
-    const sb = raffleState(b)==='drawn' ? 0 : 1;
-    if(sa!==sb) return sa-sb;
-    return (new Date(b.drawDate||0)) - (new Date(a.drawDate||0));
-  });
-  const opts = sorted.map(r=>{
-    const mark = raffleState(r)==='drawn' && !hasWinner(r) ? '⚠️ ' : '';
-    return `<option value="${esc(r.name)}">${mark}${esc(r.name)}</option>`;
-  }).join("");
-  sel.innerHTML = (opts || '<option value="">No raffles</option>')
-    + '<option value="__custom__">✏️ Altă tombolă (scriu manual)</option>';
-  if(prev) sel.value = prev;
-  toggleRaffleCustom();
-}
-
-function toggleRaffleCustom(){
-  const sel = document.getElementById("w-raffle-select");
-  const inp = document.getElementById("w-raffle-custom");
-  if(!sel || !inp) return;
-  inp.style.display = sel.value === "__custom__" ? "block" : "none";
-}
-
-function getSelectedWinnerRaffle(){
-  const sel = document.getElementById("w-raffle-select");
-  if(!sel) return "";
-  if(sel.value === "__custom__") return document.getElementById("w-raffle-custom").value.trim();
-  return sel.value;
-}
-
-async function addWinner() {
-  const username = document.getElementById("w-username").value.trim();
-  const prize    = document.getElementById("w-prize").value.trim();
-  const raffle   = getSelectedWinnerRaffle();
-  const dateVal  = document.getElementById("w-date").value;
-  if (!username || !prize) return showAlert("create-alert", "error", "Fill in username and prize.");
-  if (!raffle) return showAlert("create-alert", "error", "Alege sau scrie numele tombolei.");
-  const date = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
-  showAlert("create-alert", "info", "Saving...");
-  const d = await apiPost({ action: "addHomeWinner", password: ADMIN_PASS, username, prize, raffle, date });
-  if (d.error) return showAlert("create-alert", "error", d.error);
-  showAlert("create-alert", "success", "🏆 Winner added!");
-  await loadHomeData(); renderAdminWinners(); renderAdminRaffles(); populateWinnerRaffleSelect();
-  ["w-username","w-prize","w-raffle-custom","w-date"].forEach(id => { const el=document.getElementById(id); if(el) el.value = ""; });
-}
-
-function winnerMatchesRaffle(w){
-  const key = String(w.raffle||'').trim().toLowerCase();
-  if(!key) return false;
-  return homeData.raffles.some(r => String(r.name||'').trim().toLowerCase() === key);
-}
-
-function renderAdminWinners() {
-  const el = document.getElementById("admin-winners-list");
-  if (!el) return;
-  if (!homeData.winners.length) { el.innerHTML = '<p style="font-size:13px;color:var(--gray)">No winners yet.</p>'; return; }
-  el.innerHTML = homeData.winners.slice().reverse().map(w => {
-    const matched = winnerMatchesRaffle(w);
-    return `
-    <div class="admin-raffle-item" style="flex-wrap:wrap;gap:8px">
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:600;font-size:13px">${esc(w.username)} — <span style="color:var(--gold)">${esc(w.prize)}</span></div>
-        <div style="font-size:11px;color:${matched?'var(--gray)':'#e67e22'};margin-top:2px">${matched?'':'⚠️ nu se potrivește cu nicio tombolă · '}${esc(w.raffle)}</div>
-        <input type="date" value="${w.date?w.date.slice(0,10):""}" onchange="updateWinnerDate(${w.id},this.value)" style="margin-top:6px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--bg);color:var(--black);outline:none"/>
-      </div>
-      <button class="del-btn" onclick="deleteWinner(${w.id})">Delete</button>
-    </div>`;
-  }).join("");
-}
-
-async function updateWinnerDate(id, dateVal) {
-  const date = new Date(dateVal).toISOString();
-  await apiPost({ action: "updateHomeWinner", password: ADMIN_PASS, id, date });
-  await loadHomeData(); renderAdminWinners();
-  showAlert("create-alert", "success", "✅ Date updated!");
-}
-
-async function deleteWinner(id) {
-  if (!confirm("Delete this winner?")) return;
-  await apiPost({ action: "deleteHomeWinner", password: ADMIN_PASS, id });
-  await loadHomeData(); renderAdminWinners(); renderAdminRaffles();
-}
-
-function populatePoolSelect() {
-  const sel = document.getElementById("pool-raffle-select");
-  sel.innerHTML = homeData.raffles.length
-    ? homeData.raffles.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join("")
-    : '<option value="">No raffles</option>';
-  if (homeData.raffles.length) loadRaffleForEdit();
-}
-
-function loadRaffleForEdit() {
-  const id = document.getElementById("pool-raffle-select").value;
-  const r  = homeData.raffles.find(r => String(r.id) === String(id));
-  if (!r) return;
-  document.getElementById("pool-amount").value  = r.pool  || "";
-  document.getElementById("update-sold").value  = r.sold  || "";
-  document.getElementById("update-total").value = r.total || "";
-  document.getElementById("update-promos").value = (r.promos||[]).map(p=>`${p.code} | ${p.uses}`).join("\n");
-
-  document.getElementById("update-drawdate").value = isoToInput(r.drawDate);
-  document.getElementById("update-opensat").value  = isoToInput(r.opensAt);
-  renderTimeHint('update-drawdate','update-drawdate-hint');
-  renderTimeHint('update-opensat','update-opensat-hint');
-
-  const coverUrl = r.coverImage || "";
-  document.getElementById("u-cover").value = coverUrl;
-  previewCover("u-cover-preview", coverUrl);
-  clearImageFields("u-images-list");
-  (r.images||[]).forEach(url => addImageField("u-images-list", "u-img", url));
-  document.getElementById("u-link").value = r.link || "";
-  document.getElementById("u-fixed-prize").value = r.fixedPrize || "";
-  document.getElementById("update-order").value = (r.order && r.order !== 999) ? r.order : "";
-
-  updateProgressPreview();
-}
-
-function updateProgressPreview() {
-  const sold  = parseInt(document.getElementById("update-sold").value)  || 0;
-  const total = parseInt(document.getElementById("update-total").value) || 0;
-  const wrap  = document.getElementById("progress-preview-wrap");
-  if (total > 0) {
-    const pct = Math.min(100, Math.round((sold/total)*100));
-    wrap.style.display = "block";
-    document.getElementById("progress-preview-fill").style.width = pct + "%";
-    document.getElementById("progress-label-text").textContent = pct + "% sold";
-    document.getElementById("progress-label-text").style.color = pct>75?"#e74c3c":pct>50?"#e67e22":"var(--green)";
-    document.getElementById("tickets-info-text").textContent = `${sold} / ${total} tickets · ${total-sold} remaining`;
-  } else {
-    wrap.style.display = sold > 0 ? "block" : "none";
-    if (sold > 0) {
-      document.getElementById("progress-preview-fill").style.width = "100%";
-      document.getElementById("progress-label-text").textContent = "Unlimited";
-      document.getElementById("progress-label-text").style.color = "var(--gold)";
-      document.getElementById("tickets-info-text").textContent = `${sold} tickets sold · no cap`;
-    }
-  }
-}
-
-async function updateRaffle() {
-  const id = document.getElementById("pool-raffle-select").value;
-  if (!id) return showAlert("create-alert", "error", "Select a raffle.");
-  const promosRaw = document.getElementById("update-promos").value.trim();
-  const promos = promosRaw
-    ? promosRaw.split("\n").filter(l=>l.trim()).map(line=>{const parts=line.split("|").map(s=>s.trim());return{code:parts[0]||"",uses:parseInt(parts[1])||0};})
-    : [];
-
-  const opensAtISO  = inputToISO(document.getElementById("update-opensat").value);
-  const drawDateISO = inputToISO(document.getElementById("update-drawdate").value);
-  if (opensAtISO && drawDateISO && new Date(opensAtISO) >= new Date(drawDateISO)) {
-    return showAlert("create-alert", "error", "Deschiderea trebuie să fie înainte de extragere.");
-  }
-
-  showAlert("create-alert", "info", "Saving...");
-  const d = await apiPost({
-    action: "updateHomeRaffle", password: ADMIN_PASS, id,
-    pool:        parseFloat(document.getElementById("pool-amount").value) || 0,
-    sold:        parseInt(document.getElementById("update-sold").value)   || 0,
-    total:       parseInt(document.getElementById("update-total").value)  || 0,
-    promos,
-    drawDate:    drawDateISO,
-    opensAt:     opensAtISO,
-    link:        document.getElementById("u-link").value.trim(),
-    fixedPrize:  document.getElementById("u-fixed-prize").value.trim(),
-    coverImage:  document.getElementById("u-cover").value.trim(),
-    images:      getImageUrls("u-images-list"),
-    order:       parseInt(document.getElementById("update-order").value) || 999
-  });
-  if (d.error) return showAlert("create-alert", "error", d.error);
-  showAlert("create-alert", "success", "✅ Updated!");
-  await loadHomeData(); renderAdminRaffles();
-  updateProgressPreview();
-}
-
-// ── PUSH NOTIFICATIONS ──
-async function loadFCMStats() {
-  try {
-    const d = await apiPost({ action: "getFCMStats", password: ADMIN_PASS });
-    if (d.ok) document.getElementById("notif-subscriber-count").textContent = d.subscribers;
-  } catch(e) {}
-}
-
-function fillNotifTemplate(type) {
-  const t = {
-    new_draw: { title:"🎰 New Draw is LIVE!", body:"A new competition just launched. Buy your ticket and enter the Instant Win platform now!" },
-    winner:   { title:"🏆 We Have a Winner!", body:"Congratulations to our latest winner! Check who won and join the next draw." },
-    instant:  { title:"⚡ Instant Prize Draw — NOW!", body:"The Instant Win draw is happening right now! Register your username to enter for free." },
-    reminder: { title:"⏰ Draw Closing Soon!", body:"Last chance to buy tickets before the draw. Don't miss out — enter now!" },
-    pot_open: { title:"💰 The Daily Cash Pot is OPEN!", body:"Today's pot is live — £0.50 a ticket, one winner takes it all. Draw tomorrow at 12:00." }
-  }[type];
-  if (!t) return;
-  document.getElementById("notif-title").value = t.title;
-  document.getElementById("notif-body").value  = t.body;
-}
-
-async function sendPushNotification() {
-  const title   = document.getElementById("notif-title").value.trim();
-  const message = document.getElementById("notif-body").value.trim();
-  const url     = document.getElementById("notif-url").value.trim() || "https://giveaways-homepage.vercel.app";
-  if (!title)   return showAlert("notif-alert","error","Adaugă un titlu.");
-  if (!message) return showAlert("notif-alert","error","Adaugă un mesaj.");
-  const subCount = parseInt(document.getElementById("notif-subscriber-count").textContent) || 0;
-  if (subCount === 0) return showAlert("notif-alert","error","Nu există abonați în FCMTokens.");
-  if (!confirm(`Trimiți la ${subCount} abonat${subCount!==1?"i":""}?\n\n"${title}"\n${message}`)) return;
-  const btn = document.getElementById("notif-send-btn");
-  btn.disabled = true; btn.textContent = "⏳ SE TRIMITE...";
-  document.getElementById("notif-result").classList.remove("show");
-  showAlert("notif-alert","info","Se trimit notificările...");
-  try {
-    const d = await apiPost({ action:"sendPushNotification", password:ADMIN_PASS, title, message, url });
-    if (d.error) { showAlert("notif-alert","error","Eroare: "+d.error); }
-    else if (d.ok) {
-      document.getElementById("notif-result-num").textContent = d.sent;
-      document.getElementById("notif-result-lbl").textContent = `din ${d.total} trimise${d.failed>0?` · ${d.failed} eșuate`:" · 100% livrate"}`;
-      document.getElementById("notif-result").classList.add("show");
-      showAlert("notif-alert","success",`✅ ${d.sent} notificări trimise!`);
-      document.getElementById("notif-last-sent").textContent = new Date().toLocaleTimeString("ro-RO",{hour:"2-digit",minute:"2-digit"});
-    }
-  } catch(e) { showAlert("notif-alert","error","Eroare de rețea."); }
-  finally { btn.disabled=false; btn.innerHTML="🔔 SEND TO ALL SUBSCRIBERS"; }
-}
-
-// ── UTILS ──
-function showAlert(id, type, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.className = `alert alert-${type} show`;
-  el.textContent = msg;
-  clearTimeout(el._t);
-  if (type !== "info") el._t = setTimeout(()=>el.classList.remove("show"), 5000);
-}
-function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-
 function doLogout(){
   sessionStorage.removeItem('gw_admin_pw');
   ADMIN_PASS = '';
   location.reload();
 }
 
-document.addEventListener("keydown", e => {
-  if(e.key==="Enter" && document.getElementById("admin-login-view").style.display!=="none") doAdminLogin();
-});
+async function loadHomeData(){
+  try{
+    const [r1, r2] = await Promise.all([ apiFetch({ action:"getHomeRaffles" }), apiFetch({ action:"getHomeWinners" }) ]);
+    homeData.raffles = r1.raffles || [];
+    homeData.winners = r2.winners || [];
+  }catch(e){ console.error(e); showAlert("create-alert","error","Nu am putut încărca datele."); }
+}
+async function reloadAll(){
+  await loadHomeData();
+  renderAdminRaffles();
+  renderAdminWinners();
+  populateWinnerRaffleSelect();
+}
 
-// Dacă parola e deja în tab (ai dat refresh), reintrăm automat.
-if (ADMIN_PASS) doAdminLogin(true);
+/* ═══ STARE TOMBOLĂ ══════════════════════════════════════════ */
+function raffleState(r){
+  const now = Date.now(), o = r.opensAt ? new Date(r.opensAt).getTime() : NaN, d = r.drawDate ? new Date(r.drawDate).getTime() : NaN;
+  if(!isNaN(o) && now < o) return 'upcoming';
+  if(!isNaN(d) && now >= d) return 'drawn';
+  return 'live';
+}
+const nkey = s => String(s||'').trim().toLowerCase();
+function winnerOf(r){
+  const k = nkey(r.name);
+  if(!k) return null;
+  const m = homeData.winners.filter(w => nkey(w.raffle) === k);
+  return m.length ? m[m.length - 1] : null;
+}
+const hasWinner = r => !!winnerOf(r);
+const winnerMatchesRaffle = w => homeData.raffles.some(r => nkey(r.name) === nkey(w.raffle));
+
+/* ═══ LISTA DE TOMBOLE, PE GRUPURI ══════════════════════════ */
+function raffleRow(r){
+  const s = raffleState(r);
+  const thumb = r.coverImage || (r.images||[])[0];
+  const img = thumb ? `<img class="rthumb" src="${esc(thumb)}" alt="" loading="lazy">` : `<div class="rthumb">🖼️</div>`;
+  const parts = [];
+  if(s === 'upcoming' && r.opensAt) parts.push(`Deschide <b>${esc(shortDate(r.opensAt))}</b>`);
+  if(r.drawDate) parts.push(`${s === 'drawn' ? 'Extrasă' : 'Extragere'} <b>${esc(shortDate(r.drawDate))}</b>`);
+  const sold = r.total > 0 ? `${r.sold||0}/${r.total}` : `${r.sold||0}`;
+  parts.push(`${sold} bilete`);
+  if(r.order && r.order !== 999) parts.push(`#${r.order}`);
+  const w = s === 'drawn' ? winnerOf(r) : null;
+  const editing = $('edit-id').value === String(r.id) ? ' editing' : '';
+  return `<div class="rrow${editing}" id="row-${esc(r.id)}">
+    ${img}
+    <div class="rinfo">
+      <div class="rname" title="${esc(r.name)}">${esc(r.name)}</div>
+      <div class="rmeta">${parts.join(' · ')}</div>
+      ${w ? `<div class="rwin">🏆 ${esc(w.username)} — ${esc(w.prize)}</div>` : ''}
+    </div>
+    <div class="ractions">
+      <button class="icon-btn" title="Editează" onclick="openEditor('${esc(r.id)}')">✏️</button>
+      <button class="icon-btn" title="Clonează" onclick="cloneRaffle('${esc(r.id)}')">📋</button>
+      <button class="icon-btn del" title="Șterge" onclick="deleteRaffle('${esc(r.id)}')">🗑️</button>
+    </div>
+  </div>`;
+}
+
+function group(id, title, items, opts){
+  opts = opts || {};
+  const open = opts.open ? ' open' : '';
+  const cls = opts.warn ? ' warn' : '';
+  let body = items.length ? items.map(raffleRow).join('') : `<div class="group-empty">${opts.empty || 'Nimic aici.'}</div>`;
+  if(opts.more) body += opts.more;
+  return `<details class="group${cls}" id="grp-${id}"${open}><summary><span>${title}</span><span class="gcount">${items.length}</span></summary><div class="group-body">${body}</div></details>`;
+}
+
+function renderAdminRaffles(){
+  const wrap = $('raffle-groups');
+  if(!wrap) return;
+  // păstrăm ce grupuri erau deschise/închise
+  const openState = {};
+  wrap.querySelectorAll('details.group').forEach(d => { openState[d.id] = d.open; });
+
+  const q = nkey($('raffle-search')?.value);
+  const list = homeData.raffles.filter(r => !q || nkey(r.name).includes(q));
+  const live = [], upcoming = [], missing = [], drawn = [];
+  list.forEach(r => {
+    const s = raffleState(r);
+    if(s === 'live') live.push(r);
+    else if(s === 'upcoming') upcoming.push(r);
+    else if(hasWinner(r)) drawn.push(r);
+    else missing.push(r);
+  });
+  const t = r => new Date(r.drawDate || r.opensAt || 0).getTime() || 0;
+  live.sort((a,b) => (Number(a.order)||999) - (Number(b.order)||999) || t(a) - t(b));
+  upcoming.sort((a,b) => new Date(a.opensAt) - new Date(b.opensAt));
+  missing.sort((a,b) => t(b) - t(a));
+  drawn.sort((a,b) => t(b) - t(a));
+
+  const drawnShown = (showAllDrawn || q) ? drawn : drawn.slice(0, DRAWN_VISIBLE);
+  const more = drawn.length > drawnShown.length
+    ? `<button class="showmore" onclick="showAllDrawn=true;renderAdminRaffles()">Arată toate (${drawn.length})</button>` : '';
+
+  const st = (id, def) => openState['grp-' + id] !== undefined ? openState['grp-' + id] : def;
+  wrap.innerHTML =
+      (missing.length ? group('missing', '⚠️ Extrase — lipsește câștigătorul', missing, { open: st('missing', true), warn: true }) : '')
+    + group('live', '🟢 Live acum', live, { open: st('live', true), empty: 'Nicio tombolă activă.' })
+    + group('upcoming', '🔜 Programate', upcoming, { open: st('upcoming', true), empty: 'Nimic programat.' })
+    + group('drawn', '🏁 Încheiate', drawnShown, { open: st('drawn', !!q), more });
+
+  $('tb-raffles').textContent = live.length + upcoming.length || '';
+}
+
+/* ═══ EDITOR ═════════════════════════════════════════════════ */
+function openEditor(id){
+  const r = homeData.raffles.find(x => String(x.id) === String(id));
+  if(!r) return;
+  $('edit-id').value = r.id;
+  $('editor-title').textContent = r.name;
+  $('u-link').value = r.link || '';
+  $('pool-amount').value = r.pool || '';
+  $('update-sold').value = r.sold || '';
+  $('update-total').value = r.total || '';
+  $('update-promos').value = (r.promos||[]).map(p => `${p.code} | ${p.uses}`).join('\n');
+  $('update-opensat').value = isoToInput(r.opensAt);
+  $('update-drawdate').value = isoToInput(r.drawDate);
+  renderTimeHint('update-opensat','update-opensat-hint');
+  renderTimeHint('update-drawdate','update-drawdate-hint');
+  $('u-fixed-prize').value = r.fixedPrize || '';
+  $('update-order').value = (r.order && r.order !== 999) ? r.order : '';
+  $('u-cover').value = r.coverImage || '';
+  previewCover('u-cover-preview', r.coverImage || '');
+  clearImageFields('u-images-list');
+  (r.images||[]).forEach(u => addImageField('u-images-list','u-img',u));
+  updateProgressPreview();
+  $('editor').style.display = 'block';
+  showTab('raffles');
+  renderAdminRaffles();
+}
+function closeEditor(){
+  $('editor').style.display = 'none';
+  $('edit-id').value = '';
+  renderAdminRaffles();
+}
+function updateProgressPreview(){
+  const sold = parseInt($('update-sold').value) || 0, total = parseInt($('update-total').value) || 0;
+  const wrap = $('progress-preview-wrap');
+  if(total > 0){
+    const pct = Math.min(100, Math.round(sold/total*100));
+    wrap.style.display = 'block';
+    $('progress-preview-fill').style.width = pct + '%';
+    $('progress-label-text').textContent = pct + '% vândut';
+    $('tickets-info-text').textContent = `${sold} / ${total} · ${total - sold} rămase`;
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+async function updateRaffle(){
+  const id = $('edit-id').value;
+  if(!id) return;
+  const raw = $('update-promos').value.trim();
+  const promos = raw ? raw.split('\n').filter(l => l.trim()).map(l => { const p = l.split('|').map(x => x.trim()); return { code: p[0]||'', uses: parseInt(p[1])||0 }; }) : [];
+  const opensAt = inputToISO($('update-opensat').value), drawDate = inputToISO($('update-drawdate').value);
+  if(opensAt && drawDate && new Date(opensAt) >= new Date(drawDate)) return showAlert('create-alert','error','Deschiderea trebuie să fie înainte de extragere.');
+  showAlert('create-alert','info','Se salvează…');
+  const d = await apiPost({
+    action:'updateHomeRaffle', password: ADMIN_PASS, id,
+    link: $('u-link').value.trim(),
+    pool: parseFloat($('pool-amount').value) || 0,
+    sold: parseInt($('update-sold').value) || 0,
+    total: parseInt($('update-total').value) || 0,
+    promos, drawDate, opensAt,
+    fixedPrize: $('u-fixed-prize').value.trim(),
+    coverImage: $('u-cover').value.trim(),
+    images: getImageUrls('u-images-list'),
+    order: parseInt($('update-order').value) || 999
+  });
+  if(d.error) return showAlert('create-alert','error', d.error);
+  showAlert('create-alert','success','✅ Salvat!');
+  await reloadAll();
+}
+
+/* ═══ CLONARE ═══════════════════════════════════════════════
+   Copiază tot ce e reutilizabil. Resetează vânzările și codurile.
+   Golește link-ul (e altă tombolă pe Raffall → alt link).
+   Pentru serii zilnice, o pune pe următoarea zi liberă după
+   ultima programată și actualizează ziua + data din nume.      */
+function cloneRaffle(id){
+  const r = homeData.raffles.find(x => String(x.id) === String(id));
+  if(!r) return;
+  resetAddForm(true);
+
+  $('r-type').value = r.type || 'pool';
+  togglePoolField();
+  $('r-price').value = r.price || '';
+  $('r-link').value = '';
+  $('r-pool').value = '';
+  $('r-fixed-prize').value = r.fixedPrize || '';
+  $('r-sold').value = '';
+  $('r-total').value = r.total || '';
+  $('r-instants').value = r.instants || '';
+  $('r-order').value = (r.order && r.order !== 999) ? r.order : '';
+  $('r-cover').value = r.coverImage || '';
+  previewCover('r-cover-preview', r.coverImage || '');
+  (r.images||[]).forEach(u => addImageField('r-images-list','r-img',u));
+
+  const notes = [];
+  let newName = r.name;
+  const srcOpen = isoToInput(r.opensAt), srcDraw = isoToInput(r.drawDate);
+
+  if(srcOpen || srcDraw){
+    // cea mai recentă tombolă din aceeași serie → următoarea zi după ea
+    const key = seriesKey(r.name);
+    const series = homeData.raffles.filter(x => seriesKey(x.name) === key);
+    const latestYMD = series.map(x => isoToInput(x.opensAt || x.drawDate).slice(0,10)).filter(Boolean).sort().pop();
+    let startYMD = addDaysStr(latestYMD || (srcOpen || srcDraw).slice(0,10), 1);
+
+    // nu programăm în trecut
+    const now = new Date();
+    const todayYMD = (tzMode === 'uk' ? new Date(now.getTime() + tzOffsetMinutes(now, UK_TZ) * 60000) : new Date(now.getTime() - now.getTimezoneOffset() * 60000)).toISOString().slice(0,10);
+    if(startYMD < todayYMD) startYMD = todayYMD;
+
+    // păstrăm ora și durata dintre deschidere și extragere
+    const baseYMD = (srcOpen || srcDraw).slice(0,10);
+    const shift = Math.round((new Date(startYMD + 'T00:00:00Z') - new Date(baseYMD + 'T00:00:00Z')) / 86400000);
+    if(srcOpen) $('r-opensat').value = addDaysStr(srcOpen.slice(0,10), shift) + srcOpen.slice(10);
+    if(srcDraw) $('r-drawdate').value = addDaysStr(srcDraw.slice(0,10), shift) + srcDraw.slice(10);
+    renderTimeHint('r-opensat','r-opensat-hint');
+    renderTimeHint('r-drawdate','r-drawdate-hint');
+
+    const renamed = renameForDate(r.name, startYMD);
+    if(renamed !== r.name){ newName = renamed; notes.push('ziua și data din <b>nume</b> au fost actualizate automat'); }
+    notes.push('<b>datele</b> au fost mutate pe ' + shortDate(inputToISO($('r-opensat').value || $('r-drawdate').value)));
+  }
+  $('r-name').value = newName;
+
+  // numele identic ar strica legătura cu câștigătorul
+  if(nkey(newName) === nkey(r.name)){
+    $('r-name').classList.add('need');
+    notes.unshift('<b>schimbă numele</b> — nu poate fi identic cu originalul');
+  }
+  $('r-link').classList.add('need');
+  notes.unshift('pune <b>link-ul Raffall</b> al noii tombole (l-am golit intenționat)');
+
+  const b = $('clone-banner');
+  b.innerHTML = `📋 <b>Clonat din:</b> ${esc(r.name)}<br>Verifică înainte să salvezi:<ul>${notes.map(n => `<li>${n}</li>`).join('')}</ul>`;
+  b.style.display = 'block';
+  showTab('add');
+}
+
+function resetAddForm(keepBanner){
+  ['r-name','r-price','r-link','r-pool','r-fixed-prize','r-sold','r-total','r-instants','r-drawdate','r-opensat','r-cover','r-order']
+    .forEach(id => { const el = $(id); if(el){ el.value = ''; el.classList.remove('need'); } });
+  $('r-type').value = 'pool'; togglePoolField();
+  clearImageFields('r-images-list');
+  previewCover('r-cover-preview','');
+  renderTimeHint('r-opensat','r-opensat-hint');
+  renderTimeHint('r-drawdate','r-drawdate-hint');
+  if(!keepBanner) $('clone-banner').style.display = 'none';
+}
+['r-name','r-link'].forEach(id => document.addEventListener('input', e => { if(e.target.id === id) e.target.classList.remove('need'); }));
+
+/* ═══ ADAUGĂ TOMBOLĂ ═══════════════════════════════════════ */
+function togglePoolField(){
+  $('pool-field').style.visibility = $('r-type').value === 'pool' ? 'visible' : 'hidden';
+}
+async function addRaffle(){
+  const name = $('r-name').value.trim();
+  if(!name) return showAlert('create-alert','error','Scrie numele tombolei.');
+  if(homeData.raffles.some(r => nkey(r.name) === nkey(name))){
+    $('r-name').classList.add('need');
+    return showAlert('create-alert','error','Există deja o tombolă cu numele ăsta. Schimbă ziua/data din nume — altfel câștigătorul se leagă de amândouă.');
+  }
+  const opensAt = inputToISO($('r-opensat').value), drawDate = inputToISO($('r-drawdate').value);
+  if(opensAt && drawDate && new Date(opensAt) >= new Date(drawDate)) return showAlert('create-alert','error','Deschiderea trebuie să fie înainte de extragere.');
+  showAlert('create-alert','info','Se salvează…');
+  const d = await apiPost({
+    action:'addHomeRaffle', password: ADMIN_PASS, name,
+    type: $('r-type').value,
+    price: $('r-price').value.trim(),
+    link: $('r-link').value.trim(),
+    pool: parseFloat($('r-pool').value) || 0,
+    fixedPrize: $('r-fixed-prize').value.trim(),
+    sold: parseInt($('r-sold').value) || 0,
+    total: parseInt($('r-total').value) || 0,
+    instants: $('r-instants').value.trim(),
+    drawDate, opensAt, promos: [],
+    coverImage: $('r-cover').value.trim(),
+    images: getImageUrls('r-images-list'),
+    order: parseInt($('r-order').value) || 999
+  });
+  if(d.error) return showAlert('create-alert','error', d.error);
+  showAlert('create-alert','success','✅ Tombola a fost adăugată!');
+  resetAddForm();
+  await reloadAll();
+  showTab('raffles');
+}
+async function deleteRaffle(id){
+  const r = homeData.raffles.find(x => String(x.id) === String(id));
+  if(!confirm('Ștergi definitiv tombola?\n\n' + (r ? r.name : ''))) return;
+  await apiPost({ action:'deleteHomeRaffle', password: ADMIN_PASS, id });
+  if($('edit-id').value === String(id)) closeEditor();
+  await reloadAll();
+}
+
+/* ═══ IMAGINI ═══════════════════════════════════════════════ */
+function previewCover(boxId, url){
+  const box = $(boxId); if(!box) return;
+  const img = box.querySelector('img');
+  if(url && url.startsWith('http')){ img.src = url; img.onload = () => box.classList.add('has-img'); img.onerror = () => box.classList.remove('has-img'); }
+  else { box.classList.remove('has-img'); img.src = ''; }
+}
+let imgCounter = 0;
+function addImageField(listId, prefix, url){
+  url = url || '';
+  const id = prefix + '_' + (++imgCounter);
+  const item = document.createElement('div');
+  item.className = 'extra-img-item'; item.id = 'item_' + id;
+  item.innerHTML = `<img class="extra-img-thumb" id="thumb_${id}" src="${esc(url)}" style="${url ? '' : 'display:none'}" alt=""/>
+    <input type="text" placeholder="https://res.cloudinary.com/..." value="${esc(url)}" oninput="updateThumb('${id}', this.value)" style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--bg);outline:none"/>
+    <button class="extra-img-remove" onclick="document.getElementById('item_${id}').remove()">✕</button>`;
+  $(listId).appendChild(item);
+}
+function updateThumb(id, url){
+  const t = $('thumb_' + id); if(!t) return;
+  if(url && url.startsWith('http')){ t.src = url; t.style.display = 'block'; } else t.style.display = 'none';
+}
+const getImageUrls = listId => Array.from($(listId).querySelectorAll('input[type="text"]')).map(i => i.value.trim()).filter(u => u.startsWith('http'));
+const clearImageFields = listId => { $(listId).innerHTML = ''; };
+
+/* ═══ CÂȘTIGĂTORI ═══════════════════════════════════════════ */
+function populateWinnerRaffleSelect(){
+  const sel = $('w-raffle-select'); if(!sel) return;
+  const prev = sel.value;
+  const missing = homeData.raffles.filter(r => raffleState(r) === 'drawn' && !hasWinner(r))
+    .sort((a,b) => new Date(b.drawDate) - new Date(a.drawDate));
+  const rest = homeData.raffles.filter(r => !missing.includes(r))
+    .sort((a,b) => new Date(b.drawDate||0) - new Date(a.drawDate||0));
+  const opt = (r, mark) => `<option value="${esc(r.name)}">${mark}${esc(r.name)}</option>`;
+  sel.innerHTML =
+      (missing.length ? `<optgroup label="⚠️ Fără câștigător">${missing.map(r => opt(r,'⚠️ ')).join('')}</optgroup>` : '')
+    + (rest.length ? `<optgroup label="Celelalte">${rest.map(r => opt(r,'')).join('')}</optgroup>` : '')
+    + '<option value="__custom__">✏️ Altă tombolă (scriu manual)</option>';
+  if(prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+  toggleRaffleCustom();
+}
+function toggleRaffleCustom(){
+  $('w-raffle-custom').style.display = $('w-raffle-select').value === '__custom__' ? 'block' : 'none';
+}
+async function addWinner(){
+  const username = $('w-username').value.trim(), prize = $('w-prize').value.trim();
+  const sel = $('w-raffle-select').value;
+  const raffle = sel === '__custom__' ? $('w-raffle-custom').value.trim() : sel;
+  if(!username || !prize) return showAlert('create-alert','error','Completează username-ul și premiul.');
+  if(!raffle) return showAlert('create-alert','error','Alege tombola.');
+  const dv = $('w-date').value;
+  showAlert('create-alert','info','Se salvează…');
+  const d = await apiPost({ action:'addHomeWinner', password: ADMIN_PASS, username, prize, raffle, date: dv ? new Date(dv).toISOString() : new Date().toISOString() });
+  if(d.error) return showAlert('create-alert','error', d.error);
+  showAlert('create-alert','success','🏆 Câștigător adăugat!');
+  ['w-username','w-prize','w-raffle-custom','w-date'].forEach(id => $(id).value = '');
+  await reloadAll();
+}
+function winnerRow(w){
+  const ok = winnerMatchesRaffle(w);
+  return `<div class="wrow">
+    <div class="wavatar">${esc((w.username||'?').trim().slice(0,1).toUpperCase())}</div>
+    <div class="winfo">
+      <div class="wname">${esc(w.username)} — <span>${esc(w.prize)}</span></div>
+      <div class="wraffle${ok ? '' : ' bad'}" title="${esc(w.raffle)}">${ok ? '' : '⚠️ nu se potrivește · '}${esc(w.raffle)}</div>
+    </div>
+    <input type="date" class="wdate" value="${w.date ? String(w.date).slice(0,10) : ''}" onchange="updateWinnerDate('${esc(w.id)}', this.value)"/>
+    <button class="icon-btn del" title="Șterge" onclick="deleteWinner('${esc(w.id)}')">🗑️</button>
+  </div>`;
+}
+function renderAdminWinners(){
+  const wrap = $('winner-groups'); if(!wrap) return;
+  const q = nkey($('winner-search')?.value);
+  const all = homeData.winners.slice().reverse()
+    .filter(w => !q || nkey(w.username).includes(q) || nkey(w.raffle).includes(q));
+  const bad = all.filter(w => !winnerMatchesRaffle(w));
+  const good = all.filter(w => winnerMatchesRaffle(w));
+  const shown = (showAllWinners || q) ? good : good.slice(0, WINNERS_VISIBLE);
+  const more = good.length > shown.length
+    ? `<button class="showmore" onclick="showAllWinners=true;renderAdminWinners()">Arată toți (${good.length})</button>` : '';
+  const sec = (id, title, rows, open, warn, extra) =>
+    `<details class="group${warn ? ' warn' : ''}"${open ? ' open' : ''}><summary><span>${title}</span><span class="gcount">${rows.length}</span></summary><div class="group-body">${rows.length ? rows.map(winnerRow).join('') : '<div class="group-empty">Nimic aici.</div>'}${extra||''}</div></details>`;
+  wrap.innerHTML =
+      (bad.length ? sec('bad', '⚠️ Nume de tombolă nepotrivit — nu apar pe carduri', bad, true, true,
+         '<div class="group-empty">Corectează numele în Sheet (coloana Raffle din HomeWinners) ca să apară pe cardul tombolei.</div>') : '')
+    + sec('good', '🏆 Câștigători', shown, true, false, more);
+
+  const pending = homeData.raffles.filter(r => raffleState(r) === 'drawn' && !hasWinner(r)).length;
+  $('tb-winners').textContent = pending || '';
+}
+async function updateWinnerDate(id, v){
+  await apiPost({ action:'updateHomeWinner', password: ADMIN_PASS, id, date: new Date(v).toISOString() });
+  showAlert('create-alert','success','✅ Data actualizată');
+  await reloadAll();
+}
+async function deleteWinner(id){
+  if(!confirm('Ștergi acest câștigător?')) return;
+  await apiPost({ action:'deleteHomeWinner', password: ADMIN_PASS, id });
+  await reloadAll();
+}
+
+/* ═══ NOTIFICĂRI PUSH ═══════════════════════════════════════ */
+async function loadFCMStats(){
+  try{ const d = await apiPost({ action:'getFCMStats', password: ADMIN_PASS }); if(d.ok) $('notif-subscriber-count').textContent = d.subscribers; }catch(e){}
+}
+function fillNotifTemplate(type){
+  const t = {
+    new_draw: { title:"🎰 New Draw is LIVE!", body:"A new competition just launched. Buy your ticket and enter the Instant Win platform now!" },
+    winner:   { title:"🏆 We Have a Winner!", body:"Congratulations to our latest winner! Check who won and join the next draw." },
+    instant:  { title:"⚡ Instant Prize Draw — NOW!", body:"The Instant Win draw is happening right now! Register your username to enter for free." },
+    reminder: { title:"⏰ Draw Closing Soon!", body:"Last chance to buy tickets before the draw. Don't miss out — enter now!" },
+    pot_open: { title:"💰 The Daily Cash Pot is OPEN!", body:"Today's pot is live — £0.50 a ticket, one winner takes it all." }
+  }[type];
+  if(!t) return;
+  $('notif-title').value = t.title; $('notif-body').value = t.body;
+}
+async function sendPushNotification(){
+  const title = $('notif-title').value.trim(), message = $('notif-body').value.trim();
+  const url = $('notif-url').value.trim() || 'https://giveaways-homepage.vercel.app';
+  if(!title) return showAlert('notif-alert','error','Adaugă un titlu.');
+  if(!message) return showAlert('notif-alert','error','Adaugă un mesaj.');
+  const n = parseInt($('notif-subscriber-count').textContent) || 0;
+  if(n === 0) return showAlert('notif-alert','error','Nu există abonați.');
+  if(!confirm(`Trimiți la ${n} abonați?\n\n"${title}"\n${message}`)) return;
+  const btn = $('notif-send-btn');
+  btn.disabled = true; btn.textContent = '⏳ SE TRIMITE...';
+  $('notif-result').classList.remove('show');
+  try{
+    const d = await apiPost({ action:'sendPushNotification', password: ADMIN_PASS, title, message, url });
+    if(d.error) showAlert('notif-alert','error','Eroare: ' + d.error);
+    else if(d.ok){
+      $('notif-result-num').textContent = d.sent;
+      $('notif-result-lbl').textContent = `din ${d.total} trimise${d.failed > 0 ? ` · ${d.failed} eșuate` : ' · 100% livrate'}`;
+      $('notif-result').classList.add('show');
+      showAlert('notif-alert','success',`✅ ${d.sent} notificări trimise!`);
+      $('notif-last-sent').textContent = new Date().toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
+    }
+  }catch(e){ showAlert('notif-alert','error','Eroare de rețea.'); }
+  finally{ btn.disabled = false; btn.textContent = '🔔 SEND TO ALL SUBSCRIBERS'; }
+}
+
+/* ═══ UTILE ═════════════════════════════════════════════════ */
+function showAlert(id, type, msg){
+  const el = $(id); if(!el) return;
+  el.className = `alert alert-${type} show` + (id === 'create-alert' ? ' sticky-alert' : '');
+  el.textContent = msg;
+  clearTimeout(el._t);
+  if(type !== 'info') el._t = setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && $('admin-login-view').style.display !== 'none') doAdminLogin();
+});
+if(ADMIN_PASS) doAdminLogin(true);
+
 </script>
 </body>
 </html>
