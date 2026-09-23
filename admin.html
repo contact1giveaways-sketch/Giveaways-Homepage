@@ -207,7 +207,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
   <div class="nav-logo">🦁 Giveaways Admin</div>
   <div style="display:flex;gap:14px;align-items:center">
     <a href="#" id="logout-link" onclick="doLogout();return false" style="font-size:13px;color:rgba(255,255,255,0.5);display:none">🔓 Ieși din cont</a>
-    <a href="https://giveaways-homepage.vercel.app" class="nav-back">← Site</a>
+    <a href="https://giveawayscommunity.com" class="nav-back">← Site</a>
   </div>
 </nav>
 
@@ -443,7 +443,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
           <textarea id="notif-body" rows="3" maxlength="140" placeholder="Today's pot is live…"></textarea>
           <div class="field-note">Max 140 caractere</div>
         </div>
-        <div class="form-group"><label>URL la click</label><input type="text" id="notif-url" value="https://giveaways-homepage.vercel.app"/></div>
+        <div class="form-group"><label>URL la click</label><input type="text" id="notif-url" value="https://giveawayscommunity.com"/></div>
         <div class="tpl-row">
           <button class="tpl" onclick="fillNotifTemplate('new_draw')">🎰 New Draw</button>
           <button class="tpl" onclick="fillNotifTemplate('winner')">🏆 Winner</button>
@@ -1072,7 +1072,7 @@ function fillNotifTemplate(type){
 }
 async function sendPushNotification(){
   const title = $('notif-title').value.trim(), message = $('notif-body').value.trim();
-  const url = $('notif-url').value.trim() || 'https://giveaways-homepage.vercel.app';
+  const url = $('notif-url').value.trim() || 'https://giveawayscommunity.com';
   if(!title) return showAlert('notif-alert','error','Adaugă un titlu.');
   if(!message) return showAlert('notif-alert','error','Adaugă un mesaj.');
   const n = parseInt($('notif-subscriber-count').textContent) || 0;
