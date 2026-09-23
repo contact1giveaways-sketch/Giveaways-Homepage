@@ -22,7 +22,7 @@ messaging.onBackgroundMessage(payload => {
   // Get click URL from data payload or notification
   const clickUrl = (payload.data && payload.data.url)
     || (payload.notification && payload.notification.click_action)
-    || 'https://giveaways-homepage.vercel.app';
+    || 'https://giveawayscommunity.com';
 
   self.registration.showNotification(title || 'Giveaways Community', {
     body: body || '',
@@ -45,7 +45,7 @@ self.addEventListener('notificationclick', e => {
   // Get the URL to open — priority: notification data > default homepage
   const urlToOpen = (e.notification.data && e.notification.data.url)
     ? e.notification.data.url
-    : 'https://giveaways-homepage.vercel.app';
+    : 'https://giveawayscommunity.com';
 
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
