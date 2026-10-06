@@ -551,9 +551,39 @@ function money(v){
   return /^[£€$]/.test(v) ? v : (/^\d/.test(v) ? '£' + v : v);
 }
 
-async function api(action){
-  const r = await fetch(API_URL + '?' + new URLSearchParams({ action }));
+/* ── DATE DIN SUPABASE ───────────────────────────────────────────
+   Cheia anon e publică prin construcție. Regulile din baza de date
+   (RLS) lasă vizitatorii doar să CITEASCĂ, și doar tombolele publicate.
+   Apps Script rămâne doar pentru notificările push (saveFCMToken). */
+const SUPABASE_URL  = 'https://bgbsfufelueubbnxsdsy.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnYnNmdWZlbHVldWJibnhzZHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzgwNDksImV4cCI6MjEwNjg1NDA0OX0.CU6Ka5jWd6xeh-jdlNaH8_IR3xGWcX3-oLdBsaWiR8s';
+
+async function sbGet(path){
+  const r = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON }
+  });
+  if(!r.ok) throw new Error('Supabase ' + r.status);
   return r.json();
+}
+/* Rândurile din Supabase → forma pe care o folosește restul paginii */
+const raffleFromRow = x => ({
+  id: x.id, name: x.name, type: x.type, price: x.price ?? '', link: x.link ?? '',
+  pool: Number(x.pool) || 0, fixedPrize: x.description ?? '',
+  sold: x.sold || 0, total: x.total || 0, instants: x.instants ?? '',
+  promos: Array.isArray(x.promos) ? x.promos : [],
+  coverImage: x.cover_image ?? '', images: Array.isArray(x.images) ? x.images : [],
+  opensAt: x.opens_at || '', drawDate: x.draw_date || '',
+  order: x.display_order || 999, createdAt: x.created_at, draft: !!x.draft
+});
+const winnerFromRow = x => ({
+  id: x.id, username: x.username, prize: x.prize, raffle: x.raffle_name ?? '', date: x.won_at
+});
+async function loadRaffles(){
+  return (await sbGet('raffles?select=*&draft=eq.false&order=display_order.asc,id.asc')).map(raffleFromRow);
+}
+async function loadWinners(){
+  // ordinea de adăugare: cel mai nou e ultimul (la fel ca rândurile din Sheets)
+  return (await sbGet('winners?select=*&order=id.asc')).map(winnerFromRow);
 }
 
 /* ── LIMBĂ ───────────────────────────────────────────────────── */
@@ -912,9 +942,9 @@ function renderAll(){
 applyTranslations();
 (async () => {
   try{
-    const [r, w] = await Promise.all([ api('getHomeRaffles'), api('getHomeWinners') ]);
-    homeData.raffles = (r.raffles || []).sort((a,b) => (Number(a.order)||999) - (Number(b.order)||999));
-    homeData.winners = w.winners || [];
+    const [r, w] = await Promise.all([ loadRaffles(), loadWinners() ]);
+    homeData.raffles = r.sort((a,b) => (Number(a.order)||999) - (Number(b.order)||999));
+    homeData.winners = w;
     renderAll();
   }catch(e){
     console.error('Load error:', e);
