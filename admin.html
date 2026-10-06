@@ -201,6 +201,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
   .wdate{display:none}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <nav>
@@ -218,11 +219,15 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
     <div id="admin-login-view">
       <h2>Admin Access</h2>
       <div class="admin-login-wrap">
-        <p>Introdu parola ca să administrezi tombolele și câștigătorii.</p>
+        <p>Intră cu contul Supabase ca să administrezi tombolele și câștigătorii.</p>
         <div id="login-alert" class="alert"></div>
         <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="admin-email" placeholder="Email" autocomplete="username"/>
+        </div>
+        <div class="form-group">
           <label>Parolă</label>
-          <input type="password" id="admin-password" placeholder="Parola admin"/>
+          <input type="password" id="admin-password" placeholder="Parola Supabase" autocomplete="current-password"/>
         </div>
         <button class="admin-btn" onclick="doAdminLogin()">🔐 Intră</button>
       </div>
@@ -429,6 +434,12 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 
       <!-- ─────────────── TAB: NOTIFICĂRI ─────────────── -->
       <section class="tabpane" id="tab-notif">
+        <div id="notif-lock" class="form-group" style="display:none;background:var(--gold-pale);border:1px solid var(--gold-line);border-radius:12px;padding:16px;margin-bottom:20px">
+          <label>Parola din Sheets (doar pentru notificări)</label>
+          <div class="field-note" style="margin-bottom:8px">Notificările rămân pe Apps Script, deci cer parola veche din Script Properties. O ceri o dată pe sesiune.</div>
+          <input type="password" id="notif-pass" placeholder="Parola admin Sheets" autocomplete="off"/>
+          <button class="admin-btn" onclick="unlockNotif()">🔓 Deblochează notificările</button>
+        </div>
         <div class="notif-stats-bar">
           <div class="notif-stat"><div class="notif-stat-val" id="notif-subscriber-count">—</div><div class="notif-stat-lbl">Abonați</div></div>
           <div class="notif-stat"><div class="notif-stat-val" id="notif-last-sent">—</div><div class="notif-stat-lbl">Ultimul trimis</div></div>
@@ -465,8 +476,42 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec";
 
-// Parola NU e în cod. O tastezi la login, rămâne doar în tab (sessionStorage).
+/* ═══ SUPABASE ═══════════════════════════════════════════════
+   Tombolele și câștigătorii stau în Supabase. Intri cu email +
+   parolă (Supabase Auth). Regulile din baza de date (RLS) lasă
+   doar utilizatorul logat să scrie și să vadă ciornele.
+   Apps Script rămâne DOAR pentru notificările push — de aceea
+   tabul Notificări cere separat parola din Sheets.            */
+const SUPABASE_URL  = 'https://bgbsfufelueubbnxsdsy.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnYnNmdWZlbHVldWJibnhzZHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzgwNDksImV4cCI6MjEwNjg1NDA0OX0.CU6Ka5jWd6xeh-jdlNaH8_IR3xGWcX3-oLdBsaWiR8s';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// Parola din Sheets — doar pentru notificări. Rămâne doar în tab (sessionStorage).
 let ADMIN_PASS = sessionStorage.getItem('gw_admin_pw') || '';
+
+/* Rândurile din Supabase ↔ forma folosită de restul paginii */
+const raffleFromRow = x => ({
+  id: x.id, name: x.name, type: x.type, price: x.price ?? '', link: x.link ?? '',
+  pool: Number(x.pool) || 0, fixedPrize: x.description ?? '',
+  sold: x.sold || 0, total: x.total || 0, instants: x.instants ?? '',
+  promos: Array.isArray(x.promos) ? x.promos : [],
+  coverImage: x.cover_image ?? '', images: Array.isArray(x.images) ? x.images : [],
+  opensAt: x.opens_at || '', drawDate: x.draw_date || '',
+  order: x.display_order || 999, createdAt: x.created_at, draft: !!x.draft
+});
+const winnerFromRow = x => ({
+  id: x.id, username: x.username, prize: x.prize, raffle: x.raffle_name ?? '', date: x.won_at
+});
+const emptyToNull = v => (v === '' || v === undefined) ? null : v;
+
+/* Mesaje de eroare pe înțeles */
+function sbErr(e){
+  const m = (e && (e.message || e.details)) || String(e);
+  if(e && e.code === '23505') return 'Există deja o tombolă cu numele ăsta. Schimbă ziua/data din nume — altfel câștigătorul se leagă de amândouă.';
+  if(/JWT|expired|row-level security|permission/i.test(m)) return 'Sesiunea a expirat. Reîncarcă pagina și intră din nou.';
+  if(/Failed to fetch|NetworkError/i.test(m)) return 'Nu am conexiune cu Supabase. Verifică internetul și reîncearcă.';
+  return 'Eroare: ' + m;
+}
 
 const DRAWN_VISIBLE   = 8;    // câte tombole extrase arătăm înainte de „Arată toate"
 const WINNERS_VISIBLE = 10;   // la fel pentru câștigători
@@ -588,40 +633,49 @@ function renameForDate(name, ymd){
 
 /* ═══ LOGIN ════════════════════════════════════════════════ */
 async function doAdminLogin(silent){
-  const pass = silent ? ADMIN_PASS : $("admin-password").value;
-  if(!pass) return;
-  const d = await apiPost({ action:"checkAdmin", password: pass });
-  if(d.error){ if(!silent) showAlert("login-alert","error", d.error); return; }
-  if(!d.ok){
-    sessionStorage.removeItem('gw_admin_pw'); ADMIN_PASS = '';
-    if(!silent) showAlert("login-alert","error","Parolă greșită. După 15 încercări greșite accesul se blochează 15 minute.");
-    return;
+  if(silent){
+    const { data } = await sb.auth.getSession();
+    if(!data.session) return;
+  } else {
+    const email = $("admin-email").value.trim(), password = $("admin-password").value;
+    if(!email || !password) return showAlert("login-alert","error","Completează emailul și parola.");
+    showAlert("login-alert","info","Se verifică…");
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if(error){
+      return showAlert("login-alert","error",
+        /invalid/i.test(error.message) ? "Email sau parolă greșită." :
+        /many|rate/i.test(error.message) ? "Prea multe încercări. Așteaptă câteva minute." :
+        error.message);
+    }
+    $("admin-password").value = '';
   }
-  ADMIN_PASS = pass;
-  sessionStorage.setItem('gw_admin_pw', pass);
+  $("login-alert").classList.remove('show');
   $("admin-login-view").style.display = "none";
   $("admin-main-view").style.display = "block";
   $("logout-link").style.display = "inline";
   setTZ(tzMode);
   await reloadAll();
   showTab(sessionStorage.getItem('gw_admin_tab') || 'raffles');
-  loadFCMStats();
+  refreshNotifLock();
 }
-function doLogout(){
+async function doLogout(){
   sessionStorage.removeItem('gw_admin_pw');
   ADMIN_PASS = '';
+  await sb.auth.signOut();
   location.reload();
 }
 
 async function loadHomeData(){
   try{
     const [r1, r2] = await Promise.all([
-      apiFetch({ action:"getHomeRaffles", body: JSON.stringify({ password: ADMIN_PASS }) }),
-      apiFetch({ action:"getHomeWinners" })
+      sb.from('raffles').select('*').order('display_order', { ascending:true }).order('id', { ascending:true }),
+      sb.from('winners').select('*').order('id', { ascending:true })
     ]);
-    homeData.raffles = r1.raffles || [];
-    homeData.winners = r2.winners || [];
-  }catch(e){ console.error(e); showAlert("create-alert","error","Nu am putut încărca datele."); }
+    if(r1.error) throw r1.error;
+    if(r2.error) throw r2.error;
+    homeData.raffles = r1.data.map(raffleFromRow);
+    homeData.winners = r2.data.map(winnerFromRow);
+  }catch(e){ console.error(e); showAlert("create-alert","error","Nu am putut încărca datele. " + sbErr(e)); }
 }
 async function reloadAll(){
   await loadHomeData();
@@ -778,20 +832,21 @@ async function updateRaffle(draftState){
   const opensAt = inputToISO($('update-opensat').value), drawDate = inputToISO($('update-drawdate').value);
   if(opensAt && drawDate && new Date(opensAt) >= new Date(drawDate)) return showAlert('create-alert','error','Deschiderea trebuie să fie înainte de extragere.');
   showAlert('create-alert','info','Se salvează…');
-  const d = await apiPost({
-    action:'updateHomeRaffle', password: ADMIN_PASS, id,
-    link: $('u-link').value.trim(),
+  const { error } = await sb.from('raffles').update({
+    link: emptyToNull($('u-link').value.trim()),
     pool: parseFloat($('pool-amount').value) || 0,
     sold: parseInt($('update-sold').value) || 0,
     total: parseInt($('update-total').value) || 0,
-    promos, drawDate, opensAt,
-    fixedPrize: $('u-fixed-prize').value.trim(),
-    coverImage: $('u-cover').value.trim(),
+    promos: promos.filter(p => p.code),
+    opens_at: opensAt || null,
+    draw_date: drawDate || null,
+    description: emptyToNull($('u-fixed-prize').value.trim()),
+    cover_image: emptyToNull($('u-cover').value.trim()),
     images: getImageUrls('u-images-list'),
-    order: parseInt($('update-order').value) || 999,
+    display_order: parseInt($('update-order').value) || 999,
     ...(draftState !== undefined ? { draft: !!draftState } : {})
-  });
-  if(d.error) return showAlert('create-alert','error', d.error);
+  }).eq('id', id);
+  if(error) return showAlert('create-alert','error', sbErr(error));
   showAlert('create-alert','success',
     draftState === false ? '🚀 Publicată! Apare acum pe site.' :
     draftState === true  ? '📝 Mutată în ciorne — nu mai apare pe site.' : '✅ Salvat!');
@@ -924,22 +979,27 @@ async function addRaffle(draft){
     return showAlert('create-alert','error','Ca să publici, pune link-ul Raffall. Dacă tombola nu e aprobată încă, salveaz-o ca ciornă.');
   }
   showAlert('create-alert','info','Se salvează…');
-  const d = await apiPost({
-    action:'addHomeRaffle', password: ADMIN_PASS, name, draft: !!draft,
-    type: $('r-type').value,
-    price: $('r-price').value.trim(),
-    link: $('r-link').value.trim(),
+  const { error } = await sb.from('raffles').insert({
+    name, draft: !!draft,
+    type: $('r-type').value || 'pool',
+    price: emptyToNull($('r-price').value.trim()),
+    link: emptyToNull($('r-link').value.trim()),
     pool: parseFloat($('r-pool').value) || 0,
-    fixedPrize: $('r-fixed-prize').value.trim(),
+    description: emptyToNull($('r-fixed-prize').value.trim()),
     sold: parseInt($('r-sold').value) || 0,
     total: parseInt($('r-total').value) || 0,
-    instants: $('r-instants').value.trim(),
-    drawDate, opensAt, promos: [],
-    coverImage: $('r-cover').value.trim(),
+    instants: emptyToNull($('r-instants').value.trim()),
+    opens_at: opensAt || null,
+    draw_date: drawDate || null,
+    promos: [],
+    cover_image: emptyToNull($('r-cover').value.trim()),
     images: getImageUrls('r-images-list'),
-    order: parseInt($('r-order').value) || 999
+    display_order: parseInt($('r-order').value) || 999
   });
-  if(d.error) return showAlert('create-alert','error', d.error);
+  if(error){
+    if(error.code === '23505') $('r-name').classList.add('need');
+    return showAlert('create-alert','error', sbErr(error));
+  }
   showAlert('create-alert','success', draft ? '📝 Salvată ca ciornă — nu apare pe site.' : '🚀 Publicată pe site!');
   resetAddForm();
   await reloadAll();
@@ -948,7 +1008,8 @@ async function addRaffle(draft){
 async function deleteRaffle(id){
   const r = homeData.raffles.find(x => String(x.id) === String(id));
   if(!confirm('Ștergi definitiv tombola?\n\n' + (r ? r.name : ''))) return;
-  await apiPost({ action:'deleteHomeRaffle', password: ADMIN_PASS, id });
+  const { error } = await sb.from('raffles').delete().eq('id', id);
+  if(error) return showAlert('create-alert','error', sbErr(error));
   if($('edit-id').value === String(id)) closeEditor();
   await reloadAll();
 }
@@ -1006,8 +1067,11 @@ async function addWinner(){
   if(!raffle) return showAlert('create-alert','error','Alege tombola.');
   const dv = $('w-date').value;
   showAlert('create-alert','info','Se salvează…');
-  const d = await apiPost({ action:'addHomeWinner', password: ADMIN_PASS, username, prize, raffle, date: dv ? new Date(dv).toISOString() : new Date().toISOString() });
-  if(d.error) return showAlert('create-alert','error', d.error);
+  const { error } = await sb.from('winners').insert({
+    username, prize, raffle_name: raffle,
+    won_at: dv ? new Date(dv).toISOString() : new Date().toISOString()
+  });
+  if(error) return showAlert('create-alert','error', sbErr(error));
   showAlert('create-alert','success','🏆 Câștigător adăugat!');
   ['w-username','w-prize','w-raffle-custom','w-date'].forEach(id => $(id).value = '');
   await reloadAll();
@@ -1038,25 +1102,50 @@ function renderAdminWinners(){
     `<details class="group${warn ? ' warn' : ''}"${open ? ' open' : ''}><summary><span>${title}</span><span class="gcount">${rows.length}</span></summary><div class="group-body">${rows.length ? rows.map(winnerRow).join('') : '<div class="group-empty">Nimic aici.</div>'}${extra||''}</div></details>`;
   wrap.innerHTML =
       (bad.length ? sec('bad', '⚠️ Nume de tombolă nepotrivit — nu apar pe carduri', bad, true, true,
-         '<div class="group-empty">Corectează numele în Sheet (coloana Raffle din HomeWinners) ca să apară pe cardul tombolei.</div>') : '')
+         '<div class="group-empty">Ca să apară pe cardul tombolei: șterge câștigătorul și adaugă-l din nou, alegând tombola din listă.</div>') : '')
     + sec('good', '🏆 Câștigători', shown, true, false, more);
 
   const pending = homeData.raffles.filter(r => !r.draft && raffleState(r) === 'drawn' && !hasWinner(r)).length;
   $('tb-winners').textContent = pending || '';
 }
 async function updateWinnerDate(id, v){
-  await apiPost({ action:'updateHomeWinner', password: ADMIN_PASS, id, date: new Date(v).toISOString() });
+  if(!v) return;
+  const { error } = await sb.from('winners').update({ won_at: new Date(v).toISOString() }).eq('id', id);
+  if(error) return showAlert('create-alert','error', sbErr(error));
   showAlert('create-alert','success','✅ Data actualizată');
   await reloadAll();
 }
 async function deleteWinner(id){
   if(!confirm('Ștergi acest câștigător?')) return;
-  await apiPost({ action:'deleteHomeWinner', password: ADMIN_PASS, id });
+  const { error } = await sb.from('winners').delete().eq('id', id);
+  if(error) return showAlert('create-alert','error', sbErr(error));
   await reloadAll();
 }
 
-/* ═══ NOTIFICĂRI PUSH ═══════════════════════════════════════ */
+/* ═══ NOTIFICĂRI PUSH (rămân pe Apps Script) ══════════════════ */
+function refreshNotifLock(){
+  const locked = !ADMIN_PASS;
+  $('notif-lock').style.display = locked ? 'block' : 'none';
+  $('notif-send-btn').disabled = locked;
+  if(!locked) loadFCMStats();
+}
+async function unlockNotif(){
+  const pass = $('notif-pass').value;
+  if(!pass) return showAlert('notif-alert','error','Scrie parola din Sheets.');
+  showAlert('notif-alert','info','Se verifică…');
+  try{
+    const d = await apiPost({ action:"checkAdmin", password: pass });
+    if(d.error) return showAlert('notif-alert','error', d.error);
+    if(!d.ok) return showAlert('notif-alert','error','Parolă greșită. După 15 încercări greșite accesul se blochează 15 minute.');
+  }catch(e){ return showAlert('notif-alert','error','Eroare de rețea.'); }
+  ADMIN_PASS = pass;
+  sessionStorage.setItem('gw_admin_pw', pass);
+  $('notif-pass').value = '';
+  showAlert('notif-alert','success','🔓 Notificări deblocate.');
+  refreshNotifLock();
+}
 async function loadFCMStats(){
+  if(!ADMIN_PASS) return;
   try{ const d = await apiPost({ action:'getFCMStats', password: ADMIN_PASS }); if(d.ok) $('notif-subscriber-count').textContent = d.subscribers; }catch(e){}
 }
 function fillNotifTemplate(type){
@@ -1083,7 +1172,10 @@ async function sendPushNotification(){
   $('notif-result').classList.remove('show');
   try{
     const d = await apiPost({ action:'sendPushNotification', password: ADMIN_PASS, title, message, url });
-    if(d.error) showAlert('notif-alert','error','Eroare: ' + d.error);
+    if(d.error){
+      showAlert('notif-alert','error','Eroare: ' + d.error);
+      if(/parol|password|unauthor/i.test(d.error)){ sessionStorage.removeItem('gw_admin_pw'); ADMIN_PASS = ''; refreshNotifLock(); }
+    }
     else if(d.ok){
       $('notif-result-num').textContent = d.sent;
       $('notif-result-lbl').textContent = `din ${d.total} trimise${d.failed > 0 ? ` · ${d.failed} eșuate` : ' · 100% livrate'}`;
@@ -1092,7 +1184,7 @@ async function sendPushNotification(){
       $('notif-last-sent').textContent = new Date().toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
     }
   }catch(e){ showAlert('notif-alert','error','Eroare de rețea.'); }
-  finally{ btn.disabled = false; btn.textContent = '🔔 SEND TO ALL SUBSCRIBERS'; }
+  finally{ btn.disabled = !ADMIN_PASS; btn.textContent = '🔔 SEND TO ALL SUBSCRIBERS'; }
 }
 
 /* ═══ UTILE ═════════════════════════════════════════════════ */
@@ -1107,7 +1199,7 @@ function showAlert(id, type, msg){
 document.addEventListener('keydown', e => {
   if(e.key === 'Enter' && $('admin-login-view').style.display !== 'none') doAdminLogin();
 });
-if(ADMIN_PASS) doAdminLogin(true);
+doAdminLogin(true);
 
 </script>
 </body>
