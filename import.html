@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Import Sheets → Supabase · Giveaways</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --bg:#f6f5f2; --card:#fff; --ink:#1c1b19; --muted:#6f6b64; --line:#e4e1da;
+  --ok:#2D7D46; --okbg:#e8f3eb; --warn:#a85a07; --warnbg:#fdf1e2; --err:#b3261e; --errbg:#fbe9e7;
+  --gold:#b8862b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:24px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 24px}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+section.off{opacity:.45;pointer-events:none}
+h2{font-size:17px;margin:0 0 4px;display:flex;gap:10px;align-items:center}
+.step{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:700}
+section.done .step{background:var(--ok)}
+.hint{color:var(--muted);font-size:14px;margin:0 0 14px}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
+input[type=email],input[type=password]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px}
+button{margin-top:14px;padding:11px 18px;border:0;border-radius:9px;background:var(--ink);color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.danger{background:var(--err)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.msg{margin-top:12px;padding:10px 12px;border-radius:9px;font-size:14px;display:none}
+.msg.show{display:block}
+.msg.ok{background:var(--okbg);color:var(--ok)}
+.msg.warn{background:var(--warnbg);color:var(--warn)}
+.msg.err{background:var(--errbg);color:var(--err)}
+.msg.info{background:#eef1f6;color:#33415c}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:6px 0 14px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:22px}
+.stat span{font-size:13px;color:var(--muted)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;max-height:340px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:#faf9f6;position:sticky;top:0}
+td.name{white-space:normal;min-width:200px}
+.tag{display:inline-block;padding:1px 7px;border-radius:20px;font-size:12px;font-weight:600}
+.tag.d{background:var(--warnbg);color:var(--warn)}
+.tag.p{background:var(--okbg);color:var(--ok)}
+ul.issues{margin:6px 0 0;padding-left:20px}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px}
+.check input{margin-top:4px;width:18px;height:18px}
+.log{font:13px/1.6 ui-monospace,Consolas,monospace;background:#faf9f6;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:12px;white-space:pre-wrap;display:none}
+.log.show{display:block}
+.who{font-size:13px;color:var(--muted);margin-top:8px}
+.who a{color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Import Sheets → Supabase</h1>
+  <p class="sub">Copiază tombolele și câștigătorii din Google Sheets în Supabase. Sheets-ul nu se modifică.</p>
+
+  <!-- PAS 1 -->
+  <section id="s1">
+    <h2><span class="step">1</span>Intră în contul Supabase</h2>
+    <p class="hint">Emailul și parola contului creat în Supabase → Authentication.</p>
+    <label for="sb-email">Email</label>
+    <input type="email" id="sb-email" autocomplete="username">
+    <label for="sb-pass">Parolă Supabase</label>
+    <input type="password" id="sb-pass" autocomplete="current-password">
+    <button id="btn-login">Intră</button>
+    <div class="who" id="who"></div>
+    <div class="msg" id="m1"></div>
+  </section>
+
+  <!-- PAS 2 -->
+  <section id="s2" class="off">
+    <h2><span class="step">2</span>Citește datele din Sheets</h2>
+    <p class="hint">Parola de admin din Apps Script (cea din Script Properties). E nevoie de ea ca să vină și ciornele.</p>
+    <label for="gs-pass">Parolă admin Sheets</label>
+    <input type="password" id="gs-pass" autocomplete="off">
+    <button id="btn-read">Citește din Sheets</button>
+    <div class="msg" id="m2"></div>
+  </section>
+
+  <!-- PAS 3 -->
+  <section id="s3" class="off">
+    <h2><span class="step">3</span>Verifică</h2>
+    <p class="hint">Asta se va copia. Uită-te pe listă înainte de import.</p>
+    <div class="stats" id="stats"></div>
+    <div class="tablewrap"><table id="preview"></table></div>
+    <div class="msg" id="m3"></div>
+  </section>
+
+  <!-- PAS 4 -->
+  <section id="s4" class="off">
+    <h2><span class="step">4</span>Importă</h2>
+    <p class="hint" id="s4-hint"></p>
+    <label class="check" id="wipe-wrap" style="display:none">
+      <input type="checkbox" id="wipe">
+      <span>Șterge ce e acum în Supabase și importă din nou. Sheets-ul rămâne neatins.</span>
+    </label>
+    <button id="btn-import">Importă în Supabase</button>
+    <div class="msg" id="m4"></div>
+    <div class="log" id="log"></div>
+  </section>
+</main>
+
+<script>
+/* ═══ CONFIG ═══════════════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://bgbsfufelueubbnxsdsy.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnYnNmdWZlbHVldWJibnhzZHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzgwNDksImV4cCI6MjEwNjg1NDA0OX0.CU6Ka5jWd6xeh-jdlNaH8_IR3xGWcX3-oLdBsaWiR8s';
+const SHEETS_API    = 'https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const nkey = s => String(s ?? '').trim().toLowerCase();
+
+let sheetRaffles = [], sheetWinners = [];
+let rafflesRows = [], winnersRows = [];
+let existing = { raffles: 0, winners: 0 };
+let blocking = false;
+
+function msg(id, type, html){
+  const el = $(id);
+  el.className = 'msg show ' + type;
+  el.innerHTML = html;
+}
+function clearMsg(id){ $(id).className = 'msg'; $(id).innerHTML = ''; }
+function enable(id){ $(id).classList.remove('off'); }
+function done(id){ $(id).classList.add('done'); }
+function log(line){ const l = $('log'); l.classList.add('show'); l.textContent += line + '\n'; }
+
+/* ═══ CONVERSII ════════════════════════════════════════════════ */
+function toISO(v){
+  if(v === null || v === undefined || String(v).trim() === '') return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? undefined : d.toISOString();   // undefined = dată invalidă
+}
+function toNum(v){ const n = parseFloat(String(v ?? '').replace(',', '.')); return isNaN(n) ? 0 : n; }
+function toInt(v){ const n = parseInt(v); return isNaN(n) ? 0 : n; }
+function toText(v){ const s = String(v ?? '').trim(); return s === '' ? null : s; }
+function toArray(v){
+  if(Array.isArray(v)) return v;
+  if(typeof v === 'string' && v.trim()){
+    try{ const p = JSON.parse(v); return Array.isArray(p) ? p : []; }catch(e){ return []; }
+  }
+  return [];
+}
+function isDraft(r){
+  return r.draft === true || r.draft === 'true' || nkey(r.status) === 'draft';
+}
+function fmt(iso){
+  if(!iso) return '—';
+  return new Date(iso).toLocaleString('ro-RO', { timeZone:'Europe/London', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) + ' UK';
+}
+
+/* ═══ PAS 1 — LOGIN SUPABASE ═══════════════════════════════════ */
+async function showSession(){
+  const { data } = await sb.auth.getSession();
+  if(data.session){
+    $('who').innerHTML = `Conectat ca <b>${esc(data.session.user.email)}</b> · <a href="#" id="logout">ieși</a>`;
+    $('logout').onclick = async e => { e.preventDefault(); await sb.auth.signOut(); location.reload(); };
+    done('s1'); enable('s2');
+    $('sb-email').value = data.session.user.email;
+    return true;
+  }
+  return false;
+}
+
+$('btn-login').onclick = async () => {
+  clearMsg('m1');
+  const email = $('sb-email').value.trim(), password = $('sb-pass').value;
+  if(!email || !password) return msg('m1','err','Completează emailul și parola.');
+  $('btn-login').disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  $('btn-login').disabled = false;
+  if(error){
+    const t = /invalid/i.test(error.message) ? 'Email sau parolă greșită.' :
+              /confirm/i.test(error.message) ? 'Contul nu e confirmat. În Supabase → Authentication → Users, confirmă utilizatorul.' :
+              esc(error.message);
+    return msg('m1','err', t);
+  }
+  $('sb-pass').value = '';
+  await showSession();
+  msg('m1','ok','Conectat.');
+};
+
+/* ═══ PAS 2 — CITIRE DIN SHEETS ════════════════════════════════ */
+async function sheets(params){
+  const r = await fetch(SHEETS_API + '?' + new URLSearchParams(params));
+  return r.json();
+}
+
+$('btn-read').onclick = async () => {
+  clearMsg('m2');
+  const password = $('gs-pass').value;
+  if(!password) return msg('m2','err','Scrie parola de admin din Sheets.');
+  $('btn-read').disabled = true;
+  msg('m2','info','Se citește din Sheets… (durează câteva secunde)');
+  try{
+    const chk = await sheets({ action:'checkAdmin', body: JSON.stringify({ action:'checkAdmin', password }) });
+    if(!chk || chk.error || !chk.ok){
+      $('btn-read').disabled = false;
+      return msg('m2','err', esc((chk && chk.error) || 'Parola de Sheets nu e corectă.'));
+    }
+    const [r, w] = await Promise.all([
+      sheets({ action:'getHomeRaffles', body: JSON.stringify({ password }) }),
+      sheets({ action:'getHomeWinners' })
+    ]);
+    sheetRaffles = (r && r.raffles) || [];
+    sheetWinners = (w && w.winners) || [];
+  }catch(e){
+    $('btn-read').disabled = false;
+    return msg('m2','err','Nu am putut citi din Sheets: ' + esc(e.message));
+  }
+  $('btn-read').disabled = false;
+  $('gs-pass').value = '';
+
+  const drafts = sheetRaffles.filter(isDraft).length;
+  if(!drafts && sheetRaffles.length){
+    msg('m2','warn',`Am citit ${sheetRaffles.length} tombole și ${sheetWinners.length} câștigători. <b>Nicio ciornă</b> — dacă știi că ai ciorne în Sheets, parola n-a fost acceptată pentru ele și ar lipsi din import.`);
+  }else{
+    msg('m2','ok',`Am citit ${sheetRaffles.length} tombole (${drafts} ciorne) și ${sheetWinners.length} câștigători.`);
+  }
+  done('s2');
+  buildPreview();
+  await checkExisting();
+};
+
+/* ═══ PAS 3 — PREGĂTIRE + VERIFICARE ═══════════════════════════ */
+function buildPreview(){
+  const issues = [], notes = [];
+  blocking = false;
+
+  rafflesRows = sheetRaffles.map(r => {
+    const name = String(r.name ?? '').trim();
+    const opens = toISO(r.opensAt), draw = toISO(r.drawDate), created = toISO(r.createdAt);
+    if(!name){ issues.push('O tombolă fără nume (ID Sheets: ' + esc(r.id) + ').'); blocking = true; }
+    if(opens === undefined) notes.push(`<b>${esc(name)}</b>: data de deschidere „${esc(r.opensAt)}” nu e validă — rămâne goală.`);
+    if(draw === undefined)  notes.push(`<b>${esc(name)}</b>: data extragerii „${esc(r.drawDate)}” nu e validă — rămâne goală.`);
+    const row = {
+      name,
+      type: toText(r.type) || 'pool',
+      price: toText(r.price),
+      link: toText(r.link),
+      description: toText(r.fixedPrize),          // FixedPrize din Sheets = textul de sub titlu pe card
+      pool: toNum(r.pool),
+      sold: toInt(r.sold),
+      total: toInt(r.total),
+      instants: toText(r.instants),
+      promos: toArray(r.promos).map(p => ({ code: String(p.code ?? '').trim(), uses: toInt(p.uses) })).filter(p => p.code),
+      cover_image: toText(r.coverImage),
+      images: toArray(r.images).map(u => String(u).trim()).filter(Boolean),
+      opens_at: opens || null,
+      draw_date: draw || null,
+      display_order: toInt(r.order) || 999,
+      draft: isDraft(r)
+    };
+    if(created) row.created_at = created;
+    return row;
+  });
+
+  // Nume duplicate — baza de date le refuză (câștigătorul se leagă prin nume)
+  const seen = {};
+  rafflesRows.forEach(r => { const k = nkey(r.name); if(k) seen[k] = (seen[k] || 0) + 1; });
+  Object.entries(seen).filter(([,n]) => n > 1).forEach(([k,n]) => {
+    const real = rafflesRows.find(r => nkey(r.name) === k).name;
+    issues.push(`Numele „${esc(real)}” apare de ${n} ori. Redenumește una dintre ele în admin-ul vechi, apoi apasă din nou „Citește din Sheets”.`);
+    blocking = true;
+  });
+
+  const names = new Set(rafflesRows.map(r => nkey(r.name)));
+  winnersRows = sheetWinners.map(w => {
+    const won = toISO(w.date);
+    if(won === undefined) notes.push(`Câștigătorul <b>${esc(w.username)}</b>: data „${esc(w.date)}” nu e validă — primește data de azi.`);
+    return {
+      username: String(w.username ?? '').trim(),
+      prize: String(w.prize ?? '').trim(),
+      raffle_name: toText(w.raffle),
+      won_at: won || new Date().toISOString()
+    };
+  }).filter(w => {
+    if(!w.username || !w.prize){ notes.push(`Un rând de câștigător fără username sau premiu a fost sărit.`); return false; }
+    return true;
+  });
+  const orphan = winnersRows.filter(w => w.raffle_name && !names.has(nkey(w.raffle_name))).length;
+  if(orphan) notes.push(`${orphan} câștigători au o tombolă care nu mai există în listă (de ex. tombole vechi șterse). Se importă oricum, la fel ca acum.`);
+
+  const pub = rafflesRows.filter(r => !r.draft).length;
+  $('stats').innerHTML = `
+    <div class="stat"><b>${pub}</b><span>tombole publicate</span></div>
+    <div class="stat"><b>${rafflesRows.length - pub}</b><span>ciorne</span></div>
+    <div class="stat"><b>${winnersRows.length}</b><span>câștigători</span></div>`;
+
+  const sorted = [...rafflesRows].sort((a,b) => a.display_order - b.display_order);
+  $('preview').innerHTML = `<thead><tr><th>Tombolă</th><th>Stare</th><th>Ordine</th><th>Extragere</th><th>Vândute</th></tr></thead><tbody>` +
+    sorted.map(r => `<tr>
+      <td class="name">${esc(r.name)}</td>
+      <td>${r.draft ? '<span class="tag d">ciornă</span>' : '<span class="tag p">publicată</span>'}</td>
+      <td>${r.display_order === 999 ? '—' : r.display_order}</td>
+      <td>${fmt(r.draw_date)}</td>
+      <td>${r.total > 0 ? r.sold + '/' + r.total : r.sold}</td>
+    </tr>`).join('') + '</tbody>';
+
+  if(issues.length){
+    msg('m3','err','<b>Importul e blocat până rezolvi:</b><ul class="issues"><li>' + issues.join('</li><li>') + '</li></ul>');
+  }else if(notes.length){
+    msg('m3','warn','<b>De știut (nu blochează):</b><ul class="issues"><li>' + notes.join('</li><li>') + '</li></ul>');
+  }else{
+    msg('m3','ok','Totul arată în regulă.');
+  }
+  enable('s3'); if(!blocking) done('s3');
+}
+
+async function checkExisting(){
+  const [a, b] = await Promise.all([
+    sb.from('raffles').select('id', { count:'exact', head:true }),
+    sb.from('winners').select('id', { count:'exact', head:true })
+  ]);
+  if(a.error || b.error){
+    enable('s4');
+    $('btn-import').disabled = true;
+    return msg('m4','err','Nu pot citi din Supabase: ' + esc((a.error || b.error).message));
+  }
+  existing = { raffles: a.count || 0, winners: b.count || 0 };
+  enable('s4');
+  if(existing.raffles || existing.winners){
+    $('s4-hint').innerHTML = `Supabase are deja <b>${existing.raffles}</b> tombole și <b>${existing.winners}</b> câștigători (probabil de la un import anterior). Ca să nu se dubleze, bifează mai jos ca să le înlocuiești.`;
+    $('wipe-wrap').style.display = 'flex';
+    $('btn-import').classList.add('danger');
+    $('btn-import').textContent = 'Înlocuiește și importă';
+  }else{
+    $('s4-hint').textContent = 'Supabase e gol. Importul pune totul dintr-o dată.';
+    $('wipe-wrap').style.display = 'none';
+    $('btn-import').classList.remove('danger');
+    $('btn-import').textContent = 'Importă în Supabase';
+  }
+  $('btn-import').disabled = blocking;
+}
+
+/* ═══ PAS 4 — IMPORT ═══════════════════════════════════════════ */
+$('btn-import').onclick = async () => {
+  clearMsg('m4'); $('log').textContent = ''; $('log').classList.remove('show');
+  if(blocking) return msg('m4','err','Rezolvă întâi problemele de la pasul 3.');
+  const hasData = existing.raffles || existing.winners;
+  if(hasData && !$('wipe').checked) return msg('m4','err','Supabase nu e gol. Bifează căsuța ca să înlocuiești datele existente.');
+  if(hasData && !confirm(`Ștergi cele ${existing.raffles} tombole și ${existing.winners} câștigători din Supabase și pui în loc datele din Sheets?`)) return;
+
+  $('btn-import').disabled = true;
+  try{
+    if(hasData){
+      log('Șterg câștigătorii existenți din Supabase…');
+      let r = await sb.from('winners').delete().gt('id', 0);
+      if(r.error) throw r.error;
+      log('Șterg tombolele existente din Supabase…');
+      r = await sb.from('raffles').delete().gt('id', 0);
+      if(r.error) throw r.error;
+    }
+
+    log(`Copiez ${rafflesRows.length} tombole…`);
+    if(rafflesRows.length){
+      const r = await sb.from('raffles').insert(rafflesRows);
+      if(r.error) throw r.error;
+    }
+
+    log(`Copiez ${winnersRows.length} câștigători…`);
+    if(winnersRows.length){
+      const r = await sb.from('winners').insert(winnersRows);
+      if(r.error) throw r.error;
+    }
+
+    log('Verific numărătoarea…');
+    const [a, b] = await Promise.all([
+      sb.from('raffles').select('id', { count:'exact', head:true }),
+      sb.from('winners').select('id', { count:'exact', head:true })
+    ]);
+    const okR = a.count === rafflesRows.length, okW = b.count === winnersRows.length;
+    log(`Supabase: ${a.count} tombole (așteptat ${rafflesRows.length}), ${b.count} câștigători (așteptat ${winnersRows.length}).`);
+
+    if(okR && okW){
+      done('s4');
+      msg('m4','ok',`<b>Import reușit.</b> ${a.count} tombole și ${b.count} câștigători sunt acum în Supabase. Poți verifica în Supabase → Table Editor.`);
+    }else{
+      msg('m4','warn','Importul a rulat, dar numerele nu se potrivesc. Trimite-mi ce scrie în chenarul de mai jos.');
+    }
+    existing = { raffles: a.count || 0, winners: b.count || 0 };
+  }catch(e){
+    const m = e.message || String(e);
+    log('EROARE: ' + m + (e.details ? ' — ' + e.details : ''));
+    const t = /duplicate key|unique/i.test(m) ? 'Există deja o tombolă cu același nume în Supabase. Bifează înlocuirea și reîncearcă.' :
+              /row-level security|permission|JWT/i.test(m) ? 'Supabase a refuzat scrierea — sesiunea a expirat. Reîncarcă pagina și intră din nou.' :
+              'Importul s-a oprit. Trimite-mi ce scrie în chenarul de mai jos.';
+    msg('m4','err', t);
+    await checkExisting();
+  }
+  $('btn-import').disabled = blocking;
+};
+
+/* ═══ PORNIRE ══════════════════════════════════════════════════ */
+showSession();
+</script>
+</body>
+</html>
