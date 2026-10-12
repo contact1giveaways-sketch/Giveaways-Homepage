@@ -200,6 +200,8 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
   .sticky-alert{top:60px}
   .wdate{display:none}
 }
+.inst-toggle{display:flex;align-items:center;gap:10px;font-weight:700;cursor:pointer}
+.inst-toggle input{width:18px;height:18px;margin:0;accent-color:#101010}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
@@ -303,6 +305,14 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
             </div>
           </div>
 
+          <div class="form-group">
+            <label class="inst-toggle"><input type="checkbox" id="u-has-instants" onchange="syncInstField('u')"/> ⚡ Tombola are premii instant</label>
+            <div id="u-inst-wrap" style="display:none;margin-top:8px">
+              <input type="text" id="u-instants" maxlength="60" placeholder="ex: £1,000 in instant prizes"/>
+              <div class="field-note">Când tombola e publicată și bifa e pusă, se creează automat competiția de instante (ciornă), dacă nu există deja.</div>
+            </div>
+          </div>
+
           <div class="form-row">
             <div class="form-group"><label>📝 Descriere pe card</label>
               <input type="text" id="u-fixed-prize" placeholder="gol = text neutru"/>
@@ -370,7 +380,13 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
           <div class="form-group"><label>📍 Ordine</label><input type="number" id="r-order" placeholder="1 = featured"/></div>
         </div>
 
-        <div class="form-group"><label>Premii instant (separate prin virgulă)</label><input type="text" id="r-instants" placeholder="50, 75, 100"/></div>
+        <div class="form-group">
+          <label class="inst-toggle"><input type="checkbox" id="r-has-instants" onchange="syncInstField('r')"/> ⚡ Tombola are premii instant</label>
+          <div id="r-inst-wrap" style="display:none;margin-top:8px">
+            <input type="text" id="r-instants" maxlength="60" placeholder="ex: £1,000 in instant prizes"/>
+            <div class="field-note">Text scurt pe cardul tombolei. La publicare se creează automat competiția în adminul de instante (ca ciornă) — tu adaugi doar premiile și o activezi.</div>
+          </div>
+        </div>
 
         <div class="form-row">
           <div class="form-group"><label>⏳ Deschidere</label>
@@ -493,7 +509,7 @@ let ADMIN_PASS = sessionStorage.getItem('gw_admin_pw') || '';
 const raffleFromRow = x => ({
   id: x.id, name: x.name, type: x.type, price: x.price ?? '', link: x.link ?? '',
   pool: Number(x.pool) || 0, fixedPrize: x.description ?? '',
-  sold: x.sold || 0, total: x.total || 0, instants: x.instants ?? '',
+  sold: x.sold || 0, total: x.total || 0, instants: x.instants ?? '', hasInstants: !!x.has_instants,
   promos: Array.isArray(x.promos) ? x.promos : [],
   coverImage: x.cover_image ?? '', images: Array.isArray(x.images) ? x.images : [],
   opensAt: x.opens_at || '', drawDate: x.draw_date || '',
@@ -795,6 +811,9 @@ function openEditor(id){
   renderTimeHint('update-opensat','update-opensat-hint');
   renderTimeHint('update-drawdate','update-drawdate-hint');
   $('u-fixed-prize').value = r.fixedPrize || '';
+  $('u-has-instants').checked = !!r.hasInstants;
+  $('u-instants').value = r.hasInstants ? (r.instants || '') : '';
+  syncInstField('u');
   $('update-order').value = (r.order && r.order !== 999) ? r.order : '';
   $('u-cover').value = r.coverImage || '';
   previewCover('u-cover-preview', r.coverImage || '');
@@ -841,15 +860,18 @@ async function updateRaffle(draftState){
     opens_at: opensAt || null,
     draw_date: drawDate || null,
     description: emptyToNull($('u-fixed-prize').value.trim()),
+    ...instFields('u'),
     cover_image: emptyToNull($('u-cover').value.trim()),
     images: getImageUrls('u-images-list'),
     display_order: parseInt($('update-order').value) || 999,
     ...(draftState !== undefined ? { draft: !!draftState } : {})
   }).eq('id', id);
   if(error) return showAlert('create-alert','error', sbErr(error));
-  showAlert('create-alert','success',
+  const r0 = homeData.raffles.find(x => String(x.id) === String(id));
+  const instNow = $('u-has-instants').checked && (draftState === false || (draftState === undefined && r0 && !r0.draft)) && !(r0 && r0.hasInstants);
+  showAlert('create-alert','success', (instNow ? '⚡ Competiția de instante e creată (ciornă) în instant.giveawayscommunity.com/admin.html — adaugă premiile și activeaz-o.' + ' ' : '') + (
     draftState === false ? '🚀 Publicată! Apare acum pe site.' :
-    draftState === true  ? '📝 Mutată în ciorne — nu mai apare pe site.' : '✅ Salvat!');
+    draftState === true  ? '📝 Mutată în ciorne — nu mai apare pe site.' : '✅ Salvat!'));
   await reloadAll();
   const r = homeData.raffles.find(x => String(x.id) === String(id));
   if(r){ $('editor-title').textContent = r.name; renderPublishBox(r); }
@@ -899,7 +921,9 @@ function cloneRaffle(id){
   $('r-fixed-prize').value = r.fixedPrize || '';
   $('r-sold').value = '';
   $('r-total').value = r.total || '';
-  $('r-instants').value = r.instants || '';
+  $('r-has-instants').checked = !!r.hasInstants;
+  $('r-instants').value = r.hasInstants ? (r.instants || '') : '';
+  syncInstField('r');
   $('r-order').value = (r.order && r.order !== 999) ? r.order : '';
   $('r-cover').value = r.coverImage || '';
   previewCover('r-cover-preview', r.coverImage || '');
@@ -953,6 +977,7 @@ function resetAddForm(keepBanner){
   ['r-name','r-price','r-link','r-pool','r-fixed-prize','r-sold','r-total','r-instants','r-drawdate','r-opensat','r-cover','r-order']
     .forEach(id => { const el = $(id); if(el){ el.value = ''; el.classList.remove('need'); } });
   $('r-type').value = 'pool'; togglePoolField();
+  $('r-has-instants').checked = false; syncInstField('r');
   clearImageFields('r-images-list');
   previewCover('r-cover-preview','');
   renderTimeHint('r-opensat','r-opensat-hint');
@@ -960,6 +985,16 @@ function resetAddForm(keepBanner){
   if(!keepBanner) $('clone-banner').style.display = 'none';
 }
 ['r-name','r-link'].forEach(id => document.addEventListener('input', e => { if(e.target.id === id) e.target.classList.remove('need'); }));
+
+/* Bifa „premii instant” arată/ascunde textul scurt */
+function syncInstField(p){
+  const on = $(p + '-has-instants').checked;
+  $(p + '-inst-wrap').style.display = on ? 'block' : 'none';
+}
+function instFields(p){
+  const on = $(p + '-has-instants').checked;
+  return { has_instants: on, instants: on ? emptyToNull($(p + '-instants').value.trim()) : null };
+}
 
 /* ═══ ADAUGĂ TOMBOLĂ ═══════════════════════════════════════ */
 function togglePoolField(){
@@ -988,7 +1023,7 @@ async function addRaffle(draft){
     description: emptyToNull($('r-fixed-prize').value.trim()),
     sold: parseInt($('r-sold').value) || 0,
     total: parseInt($('r-total').value) || 0,
-    instants: emptyToNull($('r-instants').value.trim()),
+    ...instFields('r'),
     opens_at: opensAt || null,
     draw_date: drawDate || null,
     promos: [],
@@ -1000,7 +1035,8 @@ async function addRaffle(draft){
     if(error.code === '23505') $('r-name').classList.add('need');
     return showAlert('create-alert','error', sbErr(error));
   }
-  showAlert('create-alert','success', draft ? '📝 Salvată ca ciornă — nu apare pe site.' : '🚀 Publicată pe site!');
+  const withInst = !draft && $('r-has-instants').checked;
+  showAlert('create-alert','success', draft ? '📝 Salvată ca ciornă — nu apare pe site.' : '🚀 Publicată pe site!' + (withInst ? '' + ' ⚡ Competiția de instante e creată (ciornă) în instant.giveawayscommunity.com/admin.html — adaugă premiile și activeaz-o.' : ''));
   resetAddForm();
   await reloadAll();
   showTab('raffles');
