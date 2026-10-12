@@ -197,6 +197,25 @@ body.lang-ro .herocopy>.eyebrow{position:relative;top:-16px;margin-bottom:-6px;z
 .inschip{font-size:12px}
 .featured .inschip{color:#f2d38f;border-color:rgba(242,211,143,.35);background:rgba(242,211,143,.08)}
 
+/* Fereastra „Ai bilete?” */
+button.cta{cursor:pointer;font-family:inherit}
+.instmodal{position:fixed;inset:0;z-index:200;background:rgba(16,16,16,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px}
+.instmodal.open{display:flex}
+.instbox{position:relative;background:#fff;color:#101010;border-radius:28px;padding:28px 24px 22px;width:100%;max-width:460px;max-height:calc(100vh - 32px);overflow-y:auto;box-shadow:0 30px 90px rgba(0,0,0,.25)}
+.instbox h3{font:800 25px/1.12 'Manrope',sans-serif;letter-spacing:-.03em;margin:10px 0 6px;padding-right:30px}
+.instname{font-size:13px;color:#706d67;margin-bottom:16px}
+.instx{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:1px solid #e7e0d5;background:#fff;cursor:pointer;font-size:14px;color:#706d67}
+.inststeps{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:10px}
+.inststeps li{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;background:#f7f4ed;border:1px solid #e7e0d5;border-radius:16px;padding:12px;font-size:14px;line-height:1.5}
+.inststeps li span{font-size:18px;line-height:22px;text-align:center}
+.instbtn{display:flex;align-items:center;justify-content:center;width:100%;padding:15px 18px;border-radius:999px;font-weight:800;font-size:14px;text-decoration:none;margin-top:10px;text-align:center}
+.instbtn.yes{background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c}
+.instbtn.no{background:#101010;color:#fff}
+.instsupport{margin-top:16px;font-size:13px;color:#706d67;text-align:center;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.instsupport a{color:#101010;font-weight:800;border:1px solid #e7e0d5;border-radius:999px;padding:6px 14px;text-decoration:none}
+.instbox:focus{outline:none}
+.instbtn:focus-visible,.instx:focus-visible,.instsupport a:focus-visible{outline:2px solid #c9962d;outline-offset:2px}
+
 /* Etichetă deasupra listelor de coduri promo / premii instant */
 .blocklabel{font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
   color:var(--muted);margin:16px 0 8px}
@@ -273,6 +292,15 @@ en: {
   tickets_sold:'tickets sold', sold_short:'sold', unlimited:'Unlimited entries',
   instant_prizes:'instant prizes', uses_left:'left',
   promo_codes:'Promo codes', instant_prizes_label:'Instant prizes', play_instant:'Play instant prizes',
+  iq_title:'Before you play',
+  iq_q:'Have you bought tickets for this competition on Raffall?',
+  iq_p1:'Instant prizes are only for people who bought tickets in <b>this</b> competition on Raffall.',
+  iq_p2:'Create your account with your <b>Raffall name</b> — the name shown in the entrants list (e.g. <i>James Walker</i>), not your username.',
+  iq_p3:'We update the buyer list every day at 1:00 PM UK time. If you can’t spin yet, you’re probably not on the list yet — come back after the update.',
+  iq_p4:'Problems? Message our support:',
+  iq_yes:'Yes, I have tickets — let me play',
+  iq_no:'Not yet — buy tickets first',
+  iq_close:'Close',
   enter_comp:'Buy tickets', view_comp:'View on Raffall', view_result:'View result',
 
   /* extrageri recente */
@@ -373,6 +401,15 @@ ro: {
   tickets_sold:'bilete vândute', sold_short:'vândute', unlimited:'Intrări nelimitate',
   instant_prizes:'premii instant', uses_left:'rămase',
   promo_codes:'Coduri promo', instant_prizes_label:'Premii instant', play_instant:'Joacă premiile instant',
+  iq_title:'Înainte să joci',
+  iq_q:'Ai cumpărat bilete pe Raffall la această competiție?',
+  iq_p1:'Premiile instant sunt doar pentru cei care au cumpărat bilete pe Raffall la <b>această</b> competiție.',
+  iq_p2:'Fă-ți contul cu <b>numele de pe Raffall</b> — numele care apare în lista de participanți (ex: <i>James Walker</i>), nu username-ul.',
+  iq_p3:'Actualizăm lista de cumpărători zilnic la ora 13:00 UK (15:00 ora României). Dacă nu poți încă da spin, probabil nu ești încă în listă — revino după actualizare.',
+  iq_p4:'Ai probleme? Scrie-ne la suport:',
+  iq_yes:'Da, am bilete — vreau să joc',
+  iq_no:'Nu încă — cumpără bilete întâi',
+  iq_close:'Închide',
   enter_comp:'Cumpără bilete', view_comp:'Vezi pe Raffall', view_result:'Vezi rezultatul',
 
   rd_tag:'Dovezi, nu promisiuni', rd_title:'Extrageri recente.',
@@ -467,6 +504,15 @@ it: {
   tickets_sold:'biglietti venduti', sold_short:'venduti', unlimited:'Partecipazioni illimitate',
   instant_prizes:'premi istantanei', uses_left:'rimasti',
   promo_codes:'Codici promo', instant_prizes_label:'Premi istantanei', play_instant:'Gioca i premi istantanei',
+  iq_title:'Prima di giocare',
+  iq_q:'Hai acquistato biglietti per questa competizione su Raffall?',
+  iq_p1:'I premi istantanei sono solo per chi ha acquistato biglietti per <b>questa</b> competizione su Raffall.',
+  iq_p2:'Crea il tuo account con il tuo <b>nome Raffall</b> — il nome che appare nella lista dei partecipanti (es. <i>James Walker</i>), non lo username.',
+  iq_p3:'Aggiorniamo la lista degli acquirenti ogni giorno alle 13:00 ora UK. Se non puoi ancora giocare, probabilmente non sei ancora nella lista — torna dopo l’aggiornamento.',
+  iq_p4:'Problemi? Scrivi al nostro supporto:',
+  iq_yes:'Sì, ho i biglietti — voglio giocare',
+  iq_no:'Non ancora — prima acquista i biglietti',
+  iq_close:'Chiudi',
   enter_comp:'Acquista biglietti', view_comp:'Vedi su Raffall', view_result:'Vedi il risultato',
 
   rd_tag:'Fatti, non promesse', rd_title:'Estrazioni recenti.',
@@ -842,7 +888,51 @@ function instantsHTML(r){
 function instantCTA(r){
   const cid = r.hasInstants && homeData.instantLinks ? homeData.instantLinks[r.id] : null;
   if(!cid) return '';
-  return `<a class="cta instcta" href="${LINKS.instant}?c=${cid}" target="_blank" rel="noopener">⚡ ${t('play_instant')} →</a>`;
+  return `<button type="button" class="cta instcta" onclick="openInstantInfo(${r.id})">⚡ ${t('play_instant')} →</button>`;
+}
+
+/* Fereastra „Ai bilete?” înainte de platforma de instante */
+function openInstantInfo(rid){
+  const r = (homeData.raffles || []).find(x => x.id === rid);
+  const cid = homeData.instantLinks && homeData.instantLinks[rid];
+  if(!r || !cid) return;
+  let m = document.getElementById('instmodal');
+  if(!m){
+    m = document.createElement('div');
+    m.id = 'instmodal';
+    m.className = 'instmodal';
+    m.setAttribute('role','dialog');
+    m.setAttribute('aria-modal','true');
+    m.addEventListener('click', e => { if(e.target === m) closeInstantInfo(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeInstantInfo(); });
+    document.body.appendChild(m);
+  }
+  m.innerHTML = `<div class="instbox">
+    <button class="instx" onclick="closeInstantInfo()" aria-label="${t('iq_close')}">✕</button>
+    <div class="eyebrow">⚡ ${t('iq_title')}</div>
+    <h3>${t('iq_q')}</h3>
+    <div class="instname">${esc(r.name)}</div>
+    <ul class="inststeps">
+      <li><span>🎟️</span><div>${t('iq_p1')}</div></li>
+      <li><span>👤</span><div>${t('iq_p2')}</div></li>
+      <li><span>🕐</span><div>${t('iq_p3')}</div></li>
+    </ul>
+    <a class="instbtn yes" href="${LINKS.instant}?c=${cid}" target="_blank" rel="noopener" onclick="closeInstantInfo()">${t('iq_yes')} →</a>
+    ${r.link ? `<a class="instbtn no" href="${esc(r.link)}" target="_blank" rel="noopener" onclick="closeInstantInfo()">${t('iq_no')}</a>` : ''}
+    <div class="instsupport">${t('iq_p4')}
+      <a href="${LINKS.supportTelegram}" target="_blank" rel="noopener">Telegram</a>
+      <a href="${LINKS.supportWhatsApp}" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </div>`;
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const box = m.querySelector('.instbox'); box.setAttribute('tabindex','-1'); box.focus();
+}
+function closeInstantInfo(){
+  const m = document.getElementById('instmodal');
+  if(!m || !m.classList.contains('open')) return;
+  m.classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 /* ── CARDURI ─────────────────────────────────────────────────── */
