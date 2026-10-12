@@ -191,6 +191,12 @@ body.lang-ro .herocopy>.eyebrow{position:relative;top:-16px;margin-bottom:-6px;z
 .promos{margin-bottom:18px}
 .inschips{margin-bottom:16px}
 
+/* Butonul spre instante, sub cel de cumpărare */
+.cta.instcta{margin-top:10px;width:100%;background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c;border:0}
+.featured .cta.instcta{background:transparent;border:1px solid rgba(242,211,143,.55);color:#f2d38f}
+.inschip{font-size:12px}
+.featured .inschip{color:#f2d38f;border-color:rgba(242,211,143,.35);background:rgba(242,211,143,.08)}
+
 /* Etichetă deasupra listelor de coduri promo / premii instant */
 .blocklabel{font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
   color:var(--muted);margin:16px 0 8px}
@@ -266,7 +272,7 @@ en: {
   current_pool:'Current pool', tickets_sold_label:'Tickets sold',
   tickets_sold:'tickets sold', sold_short:'sold', unlimited:'Unlimited entries',
   instant_prizes:'instant prizes', uses_left:'left',
-  promo_codes:'Promo codes', instant_prizes_label:'Instant prizes',
+  promo_codes:'Promo codes', instant_prizes_label:'Instant prizes', play_instant:'Play instant prizes',
   enter_comp:'Buy tickets', view_comp:'View on Raffall', view_result:'View result',
 
   /* extrageri recente */
@@ -366,7 +372,7 @@ ro: {
   current_pool:'Pool curent', tickets_sold_label:'Bilete vândute',
   tickets_sold:'bilete vândute', sold_short:'vândute', unlimited:'Intrări nelimitate',
   instant_prizes:'premii instant', uses_left:'rămase',
-  promo_codes:'Coduri promo', instant_prizes_label:'Premii instant',
+  promo_codes:'Coduri promo', instant_prizes_label:'Premii instant', play_instant:'Joacă premiile instant',
   enter_comp:'Cumpără bilete', view_comp:'Vezi pe Raffall', view_result:'Vezi rezultatul',
 
   rd_tag:'Dovezi, nu promisiuni', rd_title:'Extrageri recente.',
@@ -460,7 +466,7 @@ it: {
   current_pool:'Pool attuale', tickets_sold_label:'Biglietti venduti',
   tickets_sold:'biglietti venduti', sold_short:'venduti', unlimited:'Partecipazioni illimitate',
   instant_prizes:'premi istantanei', uses_left:'rimasti',
-  promo_codes:'Codici promo', instant_prizes_label:'Premi istantanei',
+  promo_codes:'Codici promo', instant_prizes_label:'Premi istantanei', play_instant:'Gioca i premi istantanei',
   enter_comp:'Acquista biglietti', view_comp:'Vedi su Raffall', view_result:'Vedi il risultato',
 
   rd_tag:'Fatti, non promesse', rd_title:'Estrazioni recenti.',
@@ -569,7 +575,7 @@ async function sbGet(path){
 const raffleFromRow = x => ({
   id: x.id, name: x.name, type: x.type, price: x.price ?? '', link: x.link ?? '',
   pool: Number(x.pool) || 0, fixedPrize: x.description ?? '',
-  sold: x.sold || 0, total: x.total || 0, instants: x.instants ?? '',
+  sold: x.sold || 0, total: x.total || 0, instants: x.instants ?? '', hasInstants: !!x.has_instants,
   promos: Array.isArray(x.promos) ? x.promos : [],
   coverImage: x.cover_image ?? '', images: Array.isArray(x.images) ? x.images : [],
   opensAt: x.opens_at || '', drawDate: x.draw_date || '',
@@ -580,6 +586,14 @@ const winnerFromRow = x => ({
 });
 async function loadRaffles(){
   return (await sbGet('raffles?select=*&draft=eq.false&order=display_order.asc,id.asc')).map(raffleFromRow);
+}
+/* Competițiile de instante legate de tombole: raffle_id → id competiție.
+   Ciornele nu vin (RLS), deci butonul apare doar după ce o activezi. */
+async function loadInstantLinks(){
+  try{
+    const rows = await sbGet('instant_competitions?select=id,raffle_id,status&raffle_id=not.is.null');
+    return Object.fromEntries(rows.filter(x => x.status === 'active' || x.status === 'paused').map(x => [x.raffle_id, x.id]));
+  }catch(e){ return {}; }
 }
 async function loadWinners(){
   // ordinea de adăugare: cel mai nou e ultimul (la fel ca rândurile din Sheets)
@@ -640,7 +654,7 @@ function raffleDescription(r){
 }
 
 function instants(r){
-  return r.instants ? String(r.instants).split(',').map(x => x.trim()).filter(Boolean) : [];
+  return r.hasInstants && r.instants ? [String(r.instants).trim()] : [];
 }
 function promos(r){
   return (r.promos || []).filter(p => p && Number(p.uses) > 0);
@@ -820,15 +834,20 @@ function promosHTML(r){
 
 /* Premiile instant, tot cu titlu */
 function instantsHTML(r){
-  const ins = instants(r);
-  if(!ins.length) return '';
-  return blockLabel('⚡ ' + t('instant_prizes_label'))
-    + `<div class="inschips">${ins.map(x=>`<span class="inschip">${esc(money(x))}</span>`).join('')}</div>`;
+  if(!r.hasInstants) return '';
+  const txt = r.instants ? `<div class="inschips"><span class="inschip">${esc(r.instants)}</span></div>` : '';
+  return blockLabel('⚡ ' + t('instant_prizes_label')) + txt;
+}
+/* Buton direct spre competiția de instante a tombolei */
+function instantCTA(r){
+  const cid = r.hasInstants && homeData.instantLinks ? homeData.instantLinks[r.id] : null;
+  if(!cid) return '';
+  return `<a class="cta instcta" href="${LINKS.instant}?c=${cid}" target="_blank" rel="noopener">⚡ ${t('play_instant')} →</a>`;
 }
 
 /* ── CARDURI ─────────────────────────────────────────────────── */
 function featuredMetaHTML(r){
-  const ins = instants(r).length;
+  const ins = 0;
   const cells = [`<div class="meta"><b>${esc(money(r.price))}</b><span>${t('per_ticket')}</span></div>`];
   const val = r.total > 0 ? `${r.sold||0}/${r.total}` : String(r.sold||0);
   cells.push(`<div class="meta"><b>${esc(val)}</b><span>${t('tickets_sold')}</span></div>`);
@@ -854,6 +873,7 @@ function renderFeatured(r){
       ${instantsHTML(r)}
       ${promosHTML(r)}
       ${r.link ? `<a class="cta" href="${esc(r.link)}" target="_blank" rel="noopener">${s === 'upcoming' ? t('view_comp') : t('enter_comp')} →</a>` : ''}
+      ${instantCTA(r)}
     </div>`;
 }
 
@@ -871,6 +891,7 @@ function liveCardHTML(r){
       ${instantsHTML(r)}
       ${promosHTML(r)}
       ${r.link ? `<a class="cta" href="${esc(r.link)}" target="_blank" rel="noopener">${s === 'upcoming' ? t('view_comp') : t('enter_comp')} →</a>` : ''}
+      ${instantCTA(r)}
     </div></article>`;
 }
 
@@ -942,7 +963,8 @@ function renderAll(){
 applyTranslations();
 (async () => {
   try{
-    const [r, w] = await Promise.all([ loadRaffles(), loadWinners() ]);
+    const [r, w, il] = await Promise.all([ loadRaffles(), loadWinners(), loadInstantLinks() ]);
+    homeData.instantLinks = il;
     homeData.raffles = r.sort((a,b) => (Number(a.order)||999) - (Number(b.order)||999));
     homeData.winners = w;
     renderAll();
