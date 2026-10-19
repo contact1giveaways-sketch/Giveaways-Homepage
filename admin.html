@@ -292,6 +292,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 
           <div class="form-group"><label>Coduri promo (unul pe linie: COD | utilizări rămase)</label>
             <textarea id="update-promos" rows="3" placeholder="X5 | 5&#10;FIRST10 | 10"></textarea>
+            <label class="inst-toggle" style="margin-top:8px;font-weight:600"><input type="checkbox" id="u-promo-notify" checked/> 🔔 La salvare, trimite notificare pentru codurile <b>noi</b></label>
           </div>
 
           <div class="form-row">
@@ -382,6 +383,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 
         <div class="form-group">
           <label class="inst-toggle"><input type="checkbox" id="r-has-instants" onchange="syncInstField('r')"/> ⚡ Tombola are premii instant</label>
+          <label class="inst-toggle" style="margin-top:10px"><input type="checkbox" id="r-notify" checked/> 🔔 La publicare, anunță tombola prin notificare</label>
           <div id="r-inst-wrap" style="display:none;margin-top:8px">
             <input type="text" id="r-instants" maxlength="60" placeholder="ex: £1,000 in instant prizes"/>
             <div class="field-note">Text scurt pe cardul tombolei. La publicare se creează automat competiția în adminul de instante (ca ciornă) — tu adaugi doar premiile și o activezi.</div>
@@ -450,14 +452,9 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 
       <!-- ─────────────── TAB: NOTIFICĂRI ─────────────── -->
       <section class="tabpane" id="tab-notif">
-        <div id="notif-lock" class="form-group" style="display:none;background:var(--gold-pale);border:1px solid var(--gold-line);border-radius:12px;padding:16px;margin-bottom:20px">
-          <label>Parola din Sheets (doar pentru notificări)</label>
-          <div class="field-note" style="margin-bottom:8px">Notificările rămân pe Apps Script, deci cer parola veche din Script Properties. O ceri o dată pe sesiune.</div>
-          <input type="password" id="notif-pass" placeholder="Parola admin Sheets" autocomplete="off"/>
-          <button class="admin-btn" onclick="unlockNotif()">🔓 Deblochează notificările</button>
-        </div>
         <div class="notif-stats-bar">
           <div class="notif-stat"><div class="notif-stat-val" id="notif-subscriber-count">—</div><div class="notif-stat-lbl">Abonați</div></div>
+          <div class="notif-stat"><div class="notif-stat-val" id="notif-instant-count">—</div><div class="notif-stat-lbl">Cu cont pe instante</div></div>
           <div class="notif-stat"><div class="notif-stat-val" id="notif-last-sent">—</div><div class="notif-stat-lbl">Ultimul trimis</div></div>
           <button class="refresh-btn" onclick="loadFCMStats()">↻ Refresh</button>
         </div>
@@ -479,10 +476,26 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
           <button class="tpl" onclick="fillNotifTemplate('pot_open')">💰 Daily Pot Open</button>
         </div>
         <button class="notif-send-btn" id="notif-send-btn" onclick="sendPushNotification()">🔔 SEND TO ALL SUBSCRIBERS</button>
+        <button class="ghost-btn" style="width:100%;margin-top:8px" onclick="sendPushTest()">🧪 Trimite doar mie (test)</button>
+        <div class="field-note">„Doar mie” ajunge pe telefoanele unde ești logat cu contul de admin pe instant.giveawayscommunity.com și ai apăsat „Turn on notifications”.</div>
         <div class="notif-result" id="notif-result">
           <div class="notif-result-num" id="notif-result-num">0</div>
           <div class="notif-result-lbl" id="notif-result-lbl">notifications sent</div>
         </div>
+
+        <details class="group" style="margin-top:22px">
+          <summary><span>📜 Ultimele notificări trimise</span></summary>
+          <div class="group-body" id="notif-log"><div class="group-empty">Nimic încă.</div></div>
+        </details>
+
+        <details class="group" id="notif-import-box">
+          <summary><span>📥 Importă abonații vechi din Sheets (o singură dată)</span></summary>
+          <div class="group-body">
+            <div class="field-note" style="margin-bottom:8px">În Sheet-ul „Instant win Giveaways”, tabul <b>FCMTokens</b>: selectează coloana A (fără titlul „Token”), copiază și lipește aici.</div>
+            <textarea id="notif-import" rows="5" placeholder="cqcoY-1ci_oopGtHq5fXLf:APA91bERMGa…"></textarea>
+            <button class="admin-btn" onclick="importOldTokens()">📥 Importă</button>
+          </div>
+        </details>
       </section>
 
     </div>
@@ -496,8 +509,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC
    Tombolele și câștigătorii stau în Supabase. Intri cu email +
    parolă (Supabase Auth). Regulile din baza de date (RLS) lasă
    doar utilizatorul logat să scrie și să vadă ciornele.
-   Apps Script rămâne DOAR pentru notificările push — de aceea
-   tabul Notificări cere separat parola din Sheets.            */
+   Notificările merg prin Supabase (funcția send-push).            */
 const SUPABASE_URL  = 'https://bgbsfufelueubbnxsdsy.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnYnNmdWZlbHVldWJibnhzZHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzgwNDksImV4cCI6MjEwNjg1NDA0OX0.CU6Ka5jWd6xeh-jdlNaH8_IR3xGWcX3-oLdBsaWiR8s';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -846,6 +858,8 @@ function updateProgressPreview(){
 async function updateRaffle(draftState){
   const id = $('edit-id').value;
   if(!id) return;
+  const before = homeData.raffles.find(x => String(x.id) === String(id));
+  const oldCodes = new Set(((before && before.promos) || []).map(p => String(p.code).trim().toUpperCase()));
   const raw = $('update-promos').value.trim();
   const promos = raw ? raw.split('\n').filter(l => l.trim()).map(l => { const p = l.split('|').map(x => x.trim()); return { code: p[0]||'', uses: parseInt(p[1])||0 }; }) : [];
   const opensAt = inputToISO($('update-opensat').value), drawDate = inputToISO($('update-drawdate').value);
@@ -875,6 +889,33 @@ async function updateRaffle(draftState){
   await reloadAll();
   const r = homeData.raffles.find(x => String(x.id) === String(id));
   if(r){ $('editor-title').textContent = r.name; renderPublishBox(r); }
+
+  // 🔔 coduri promo NOI → notificare (doar pe tombole publicate)
+  if(r && !r.draft && $('u-promo-notify').checked){
+    const fresh = (r.promos || []).filter(p => p.code && Number(p.uses) > 0 && !oldCodes.has(String(p.code).trim().toUpperCase()));
+    if(fresh.length){
+      const codes = fresh.map(p => p.code).join(', ');
+      const p0 = fresh[0];
+      await autoPush({
+        title: fresh.length === 1 ? `🔥 New promo code: ${p0.code}` : `🔥 New promo codes: ${codes}`,
+        body: `${r.name} — only ${fresh.reduce((a,p) => a + Number(p.uses), 0)} uses. Be quick!`,
+        url: r.link || SITE_URL, trigger: 'promo'
+      }, 'Cod promo');
+    }
+  }
+  // 🔔 ciornă publicată acum → întrebăm dacă anunțăm
+  if(r && draftState === false && before && before.draft &&
+     confirm('Tombola e publicată. Trimit și notificare la abonați?')){
+    await autoPush(raffleAnnouncement(r), 'Tombolă nouă');
+  }
+}
+function raffleAnnouncement(r){
+  const price = r.price ? (/^\d/.test(r.price) ? '£' + r.price : r.price) : '';
+  return {
+    title: `🎟️ New: ${r.name}`.slice(0, 80),
+    body: (r.fixedPrize || 'A new competition is live') + (price ? ` — tickets ${price}.` : '.'),
+    url: r.link || SITE_URL, trigger: 'raffle'
+  };
 }
 
 
@@ -1036,10 +1077,23 @@ async function addRaffle(draft){
     return showAlert('create-alert','error', sbErr(error));
   }
   const withInst = !draft && $('r-has-instants').checked;
+  const notifyNew = !draft && $('r-notify').checked;
+  const newName = name;
   showAlert('create-alert','success', draft ? '📝 Salvată ca ciornă — nu apare pe site.' : '🚀 Publicată pe site!' + (withInst ? '' + ' ⚡ Competiția de instante e creată (ciornă) în instant.giveawayscommunity.com/admin.html — adaugă premiile și activeaz-o.' : ''));
   resetAddForm();
   await reloadAll();
   showTab('raffles');
+  if(notifyNew){
+    const r = homeData.raffles.find(x => nkey(x.name) === nkey(newName));
+    if(r){
+      try{
+        const d = await sendPush(raffleAnnouncement(r));
+        showAlert('create-alert','success', `🚀 Publicată pe site! 🔔 Notificare trimisă la ${d.sent} abonați.` + (withInst ? ' ⚡ Competiția de instante e creată (ciornă) — adaugă premiile și activeaz-o.' : ''));
+      }catch(e){
+        showAlert('create-alert','error', `Publicată, dar notificarea nu a plecat: ${e.message}`);
+      }
+    }
+  }
 }
 async function deleteRaffle(id){
   const r = homeData.raffles.find(x => String(x.id) === String(id));
@@ -1158,31 +1212,59 @@ async function deleteWinner(id){
   await reloadAll();
 }
 
-/* ═══ NOTIFICĂRI PUSH (rămân pe Apps Script) ══════════════════ */
-function refreshNotifLock(){
-  const locked = !ADMIN_PASS;
-  $('notif-lock').style.display = locked ? 'block' : 'none';
-  $('notif-send-btn').disabled = locked;
-  if(!locked) loadFCMStats();
+/* ═══ NOTIFICĂRI PUSH (Supabase + Firebase) ══════════════════
+   Abonații stau în tabelul push_tokens; trimiterea o face funcția
+   send-push din Supabase. Nu mai e nevoie de parola din Sheets. */
+const SITE_URL = 'https://giveawayscommunity.com';
+async function sendPush({ title, body, url, trigger, only_me }){
+  const { data, error } = await sb.functions.invoke('send-push', { body: { title, body, url: url || SITE_URL, trigger: trigger || 'manual', only_me: !!only_me } });
+  if(error){
+    let msg = error.message || 'Eroare';
+    try{ const j = await error.context.json(); if(j && j.error) msg = j.error; }catch(e){}
+    if(/Failed to send|not found|404/i.test(msg)) msg = 'Funcția send-push nu e instalată încă în Supabase.';
+    throw new Error(msg);
+  }
+  loadFCMStats();
+  return data;
 }
-async function unlockNotif(){
-  const pass = $('notif-pass').value;
-  if(!pass) return showAlert('notif-alert','error','Scrie parola din Sheets.');
-  showAlert('notif-alert','info','Se verifică…');
+/* Notificare automată — nu blochează salvarea dacă eșuează */
+async function autoPush(opts, label){
   try{
-    const d = await apiPost({ action:"checkAdmin", password: pass });
-    if(d.error) return showAlert('notif-alert','error', d.error);
-    if(!d.ok) return showAlert('notif-alert','error','Parolă greșită. După 15 încercări greșite accesul se blochează 15 minute.');
-  }catch(e){ return showAlert('notif-alert','error','Eroare de rețea.'); }
-  ADMIN_PASS = pass;
-  sessionStorage.setItem('gw_admin_pw', pass);
-  $('notif-pass').value = '';
-  showAlert('notif-alert','success','🔓 Notificări deblocate.');
-  refreshNotifLock();
+    const d = await sendPush(opts);
+    showAlert('create-alert','success', `🔔 ${label}: notificare trimisă la ${d.sent} abonați.`);
+  }catch(e){
+    showAlert('create-alert','error', `Salvat, dar notificarea nu a plecat: ${e.message}`);
+  }
 }
+function refreshNotifLock(){ loadFCMStats(); }
 async function loadFCMStats(){
-  if(!ADMIN_PASS) return;
-  try{ const d = await apiPost({ action:'getFCMStats', password: ADMIN_PASS }); if(d.ok) $('notif-subscriber-count').textContent = d.subscribers; }catch(e){}
+  const [all, inst, last] = await Promise.all([
+    sb.from('push_tokens').select('token', { count:'exact', head:true }),
+    sb.from('push_tokens').select('token', { count:'exact', head:true }).not('user_id', 'is', null),
+    sb.from('push_log').select('*').order('created_at', { ascending:false }).limit(15)
+  ]);
+  if(all.error){ $('notif-subscriber-count').textContent = '—'; return; }
+  $('notif-subscriber-count').textContent = all.count ?? 0;
+  $('notif-instant-count').textContent = inst.count ?? 0;
+  const rows = last.data || [];
+  $('notif-last-sent').textContent = rows[0] ? new Date(rows[0].created_at).toLocaleString('ro-RO',{ day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '—';
+  const why = { manual:'manual', promo:'cod promo', raffle:'tombolă nouă', instant_open:'instante deschise', instant:'instante' };
+  $('notif-log').innerHTML = rows.length ? rows.map(r => `<div class="wrow" style="grid-template-columns:1fr auto">
+      <div class="winfo"><div class="wname">${esc(r.title)}</div><div class="wraffle">${esc(r.body || '')}</div></div>
+      <div style="text-align:right;font-size:12px;color:var(--gray)">${new Date(r.created_at).toLocaleString('ro-RO',{ day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}<br>${r.sent}/${r.total} · ${why[r.trigger] || esc(r.trigger || '')}</div>
+    </div>`).join('') : '<div class="group-empty">Nimic încă.</div>';
+  // ascundem importul după ce există abonați importați
+  const imp = await sb.from('push_tokens').select('token', { count:'exact', head:true }).eq('source','import');
+  if(imp.count) $('notif-import-box').style.display = 'none';
+}
+async function importOldTokens(){
+  const tokens = [...new Set($('notif-import').value.split(/\s+/).map(x => x.trim()).filter(x => x.length > 40 && !/^token$/i.test(x)))];
+  if(!tokens.length) return showAlert('notif-alert','error','Lipește coloana cu token-uri din tabul FCMTokens.');
+  const { error } = await sb.from('push_tokens').upsert(tokens.map(t => ({ token: t, source: 'import' })), { onConflict:'token', ignoreDuplicates:true });
+  if(error) return showAlert('notif-alert','error', sbErr(error));
+  $('notif-import').value = '';
+  showAlert('notif-alert','success', `📥 ${tokens.length} abonați importați.`);
+  loadFCMStats();
 }
 function fillNotifTemplate(type){
   const t = {
@@ -1195,9 +1277,16 @@ function fillNotifTemplate(type){
   if(!t) return;
   $('notif-title').value = t.title; $('notif-body').value = t.body;
 }
+async function sendPushTest(){
+  const title = $('notif-title').value.trim() || '🧪 Test notification', message = $('notif-body').value.trim() || 'If you see this, notifications work.';
+  try{
+    const d = await sendPush({ title, body: message, url: $('notif-url').value.trim() || SITE_URL, trigger:'test', only_me: true });
+    showAlert('notif-alert','success', `🧪 Test trimis pe ${d.sent} dispozitiv(e) ale tale.`);
+  }catch(e){ showAlert('notif-alert','error', e.message); }
+}
 async function sendPushNotification(){
   const title = $('notif-title').value.trim(), message = $('notif-body').value.trim();
-  const url = $('notif-url').value.trim() || 'https://giveawayscommunity.com';
+  const url = $('notif-url').value.trim() || SITE_URL;
   if(!title) return showAlert('notif-alert','error','Adaugă un titlu.');
   if(!message) return showAlert('notif-alert','error','Adaugă un mesaj.');
   const n = parseInt($('notif-subscriber-count').textContent) || 0;
@@ -1207,20 +1296,13 @@ async function sendPushNotification(){
   btn.disabled = true; btn.textContent = '⏳ SE TRIMITE...';
   $('notif-result').classList.remove('show');
   try{
-    const d = await apiPost({ action:'sendPushNotification', password: ADMIN_PASS, title, message, url });
-    if(d.error){
-      showAlert('notif-alert','error','Eroare: ' + d.error);
-      if(/parol|password|unauthor/i.test(d.error)){ sessionStorage.removeItem('gw_admin_pw'); ADMIN_PASS = ''; refreshNotifLock(); }
-    }
-    else if(d.ok){
-      $('notif-result-num').textContent = d.sent;
-      $('notif-result-lbl').textContent = `din ${d.total} trimise${d.failed > 0 ? ` · ${d.failed} eșuate` : ' · 100% livrate'}`;
-      $('notif-result').classList.add('show');
-      showAlert('notif-alert','success',`✅ ${d.sent} notificări trimise!`);
-      $('notif-last-sent').textContent = new Date().toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
-    }
-  }catch(e){ showAlert('notif-alert','error','Eroare de rețea.'); }
-  finally{ btn.disabled = !ADMIN_PASS; btn.textContent = '🔔 SEND TO ALL SUBSCRIBERS'; }
+    const d = await sendPush({ title, body: message, url, trigger:'manual' });
+    $('notif-result-num').textContent = d.sent;
+    $('notif-result-lbl').textContent = `din ${d.total} trimise${d.failed > 0 ? ` · ${d.failed} eșuate (abonamente expirate, șterse automat)` : ' · 100% livrate'}`;
+    $('notif-result').classList.add('show');
+    showAlert('notif-alert','success',`✅ ${d.sent} notificări trimise!`);
+  }catch(e){ showAlert('notif-alert','error', e.message); }
+  finally{ btn.disabled = false; btn.textContent = '🔔 SEND TO ALL SUBSCRIBERS'; }
 }
 
 /* ═══ UTILE ═════════════════════════════════════════════════ */
