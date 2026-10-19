@@ -344,7 +344,7 @@ en: {
   pwa_and2:'Tap the <b>three dots</b> menu in the top right corner',
   pwa_and3:'Tap <b>Add to Home screen</b>',
   pwa_and4:'Tap <b>Add</b> — the Giveaways icon appears on your home screen',
-  notif_text:'<b>Never miss a draw</b> — get instant push notifications',
+  notif_text:'<b>Never miss an opening</b> — get notified when instant spins and promo codes go live',
   notif_btn:'Enable notifications',
   notif_on:"Notifications enabled! You'll hear from us first. 🦁",
   notif_registering:'Registering…',
@@ -447,7 +447,7 @@ ro: {
   pwa_and2:'Apasă meniul cu <b>trei puncte</b> din colțul dreapta sus',
   pwa_and3:'Apasă <b>Add to Home screen</b>',
   pwa_and4:'Apasă <b>Add</b> — iconița Giveaways apare pe ecranul principal',
-  notif_text:'<b>Nu rata nicio extragere</b> — primești notificări instant',
+  notif_text:'<b>Nu rata nicio deschidere</b> — primești notificare când pornesc spin-urile și codurile promo',
   notif_btn:'Activează notificările',
   notif_on:'Notificări activate! Afli primul. 🦁',
   notif_registering:'Se înregistrează…',
@@ -550,7 +550,7 @@ it: {
   pwa_and2:'Tocca il menu <b>tre puntini</b> in alto a destra',
   pwa_and3:'Tocca <b>Aggiungi a schermata Home</b>',
   pwa_and4:"Tocca <b>Aggiungi</b> — l'icona Giveaways appare sulla Home",
-  notif_text:'<b>Non perdere nessuna estrazione</b> — ricevi notifiche istantanee',
+  notif_text:'<b>Non perdere nessuna apertura</b> — ricevi una notifica quando partono gli spin e i codici promo',
   notif_btn:'Attiva le notifiche',
   notif_on:'Notifiche attive! Sarai il primo a saperlo. 🦁',
   notif_registering:'Registrazione…',
@@ -1122,8 +1122,9 @@ function toast(msg, isErr){
 }
 
 function initNotifBar(){
-  if(!('Notification' in window)) return;
-  if(Notification.permission === 'granted'){ getFCMToken().then(saveFCMToken); return; }
+  // abonații vechi de pe site rămân activi
+  if('Notification' in window && Notification.permission === 'granted'){ getFCMToken().then(saveFCMToken); return; }
+  // pe iPhone, în Safari, nu există notificări — bara îi trimite oricum pe platforma de instante
   const standalone = isStandalone();
   if(!standalone && localStorage.getItem('gw_notif_asked')) return;
   const bar = document.createElement('div');
@@ -1131,18 +1132,12 @@ function initNotifBar(){
   bar.innerHTML = `<span style="flex:1;min-width:200px">🔔 ${t('notif_text')}</span><button class="nbtn" onclick="enableNotifs()">${t('notif_btn')}</button><button class="nclose" onclick="dismissNotifBar()">✕</button>`;
   document.body.appendChild(bar);
 }
-async function enableNotifs(){
+/* Abonarea se face pe platforma de instante (o singură aplicație,
+   legată de contul jucătorului). Cine e deja abonat aici rămâne. */
+function enableNotifs(){
   localStorage.setItem('gw_notif_asked','1');
   document.getElementById('notifbar')?.remove();
-  if(!('Notification' in window)) return toast(t('notif_unsupported'), true);
-  try{
-    const perm = await Notification.requestPermission();
-    if(perm !== 'granted') return toast(t('notif_blocked'), true);
-    toast('⏳ ' + t('notif_registering'));
-    const token = await getFCMToken();
-    if(token){ await saveFCMToken(token); toast('🔔 ' + t('notif_on')); }
-    else toast(t('notif_fail'), true);
-  }catch(e){ console.error(e); toast(t('notif_fail'), true); }
+  window.location.href = LINKS.instant + '?notify=1';
 }
 function dismissNotifBar(){
   localStorage.setItem('gw_notif_asked','1');
