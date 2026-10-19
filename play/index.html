@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Instant Prizes — Giveaways Community</title>
+<meta name="description" content="Spin for instant prizes. Every prize is listed from the start, every draw is public.">
+<meta name="theme-color" content="#f7f4ed">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Instant Prizes">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://giveawayscommunity.com/play/">
+<meta property="og:title" content="Instant Prizes — Giveaways Community">
+<meta property="og:description" content="Spin for instant prizes. Every prize is listed from the start, every draw is public.">
+<meta property="og:image" content="https://giveawayscommunity.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://giveawayscommunity.com/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Playfair+Display:ital,wght@1,500&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+<style>
+/* Același sistem vizual ca giveawayscommunity.com */
+:root{--ink:#101010;--muted:#706d67;--paper:#f7f4ed;--white:#fff;--gold:#c9962d;--gold2:#efd48e;--goldtxt:#f0d08a;--line:#e7e0d5;--shadow:0 22px 70px rgba(43,32,13,.09);--green:#1f9d6d;--red:#c0392b;--orange:#c2610c}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);overflow-x:hidden;overscroll-behavior-y:contain;min-height:100vh}
+a{color:inherit}
+.shell{width:min(860px,calc(100% - 40px));margin:auto}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:50;background:rgba(247,244,237,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(231,224,213,.85);padding-top:env(safe-area-inset-top)}
+.navin{height:74px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;font:800 17px/1 'Manrope';letter-spacing:.12em;text-decoration:none}
+.brand-logo{width:40px;height:40px;border-radius:12px;object-fit:cover;box-shadow:0 3px 14px rgba(201,150,45,.18)}
+.brand small{display:block;font:700 10px/1 'Manrope';letter-spacing:.18em;color:var(--gold);margin-top:5px}
+.navright{display:flex;align-items:center;gap:10px}
+.navlink{white-space:nowrap;font-size:12px;font-weight:700;color:#4f4d47;text-decoration:none}
+.user-chip{white-space:nowrap;display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:6px 6px 6px 16px;font:700 12px 'DM Sans';cursor:pointer;min-height:40px}
+.user-chip b{color:var(--goldtxt)}
+.user-chip .av{width:28px;height:28px;border-radius:50%;background:#29251e;color:#e7c774;display:grid;place-items:center;font-weight:900;font-size:12px}
+
+/* HERO */
+.hero{padding:44px 0 26px}
+.eyebrow{font:700 11px/1 'Manrope';letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.hero h1{font:800 clamp(46px,7vw,84px)/.9 'Manrope';letter-spacing:-.06em;margin-top:14px}
+.hero h1 em{font-family:'Playfair Display';font-weight:500;color:var(--gold);letter-spacing:-.03em}
+.hero p{max-width:560px;margin-top:18px;color:var(--muted);font-size:16px;line-height:1.65}
+
+/* TABS */
+.tabs{display:flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.65);margin-bottom:22px;width:max-content;max-width:100%;overflow-x:auto}
+.tab{border:0;background:transparent;padding:10px 18px;border-radius:99px;font:800 12px 'DM Sans';color:#77736c;cursor:pointer;white-space:nowrap}
+.tab.active{background:var(--ink);color:#fff}
+.section{display:none;padding-bottom:60px}
+.section.active{display:block}
+
+/* CARDS / FORMS */
+.card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:26px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-title{font:800 28px/1.05 'Manrope';letter-spacing:-.04em;margin-bottom:8px}
+.card-sub{font-size:14px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:14px 0 6px}
+input,select{width:100%;padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:14px;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:15px;outline:none}
+input:focus,select:focus{border-color:var(--gold);background:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:15px 22px;border-radius:999px;border:1px solid var(--ink);font:800 13px 'DM Sans';cursor:pointer;background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-gold{background:var(--ink);color:#fff}
+.btn-ghost{background:transparent;color:var(--ink)}
+.btn-full{width:100%;margin-top:18px}
+.link-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;text-decoration:underline;margin-top:14px;font-family:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.alert{padding:13px 16px;border-radius:16px;font-size:14px;margin-bottom:14px;display:none;line-height:1.55}
+.alert.show{display:block}
+.alert-success{background:#eaf6ef;border:1px solid #c7e6d4;color:#17734f}
+.alert-error{background:#fbeceb;border:1px solid #f1cdca;color:var(--red)}
+.alert-info{background:#f1efe9;border:1px solid var(--line);color:#4f4d47}
+.alert-warn{background:#fdf3e6;border:1px solid #f3dcbc;color:var(--orange)}
+.auth-switch{display:flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--paper);margin-bottom:18px}
+.auth-switch button{flex:1;padding:11px;border:none;background:transparent;color:#77736c;font:800 12px 'DM Sans';border-radius:999px;cursor:pointer}
+.auth-switch button.active{background:var(--ink);color:#fff}
+.notifcard{background:var(--ink);color:#fff;border:0}
+.notifcard .card-title{color:#fff;font-size:24px}
+.notifcard .card-sub{color:#c8c4bc;margin-bottom:14px}
+.notifcard .btn-gold{background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c;border:0}
+.notifcard ol{margin:6px 0 4px 20px;color:#e9e5dc;font-size:14px;line-height:1.7}
+.notifcard .link-btn{color:#a8a39a}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line);font-size:14px}
+.toggle-row:first-of-type{border-top:0}
+.toggle-row input{width:20px;height:20px;accent-color:var(--ink)}
+.pill-time{background:#fff;border:1px solid var(--line);color:#8d6b26}
+.warn-box{background:rgba(240,208,138,.18);border:1px solid rgba(201,150,45,.35);border-radius:16px;padding:15px;font-size:14px;line-height:1.6;margin-top:14px}
+.warn-box b{color:#8d6b26}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:14px;line-height:1.5;color:var(--ink);font-weight:500}
+.check input{width:20px;height:20px;margin-top:1px;flex-shrink:0;accent-color:var(--ink)}
+
+/* COMPETIȚII */
+.comp{display:flex;align-items:center;gap:14px;padding:16px;background:var(--paper);border:1px solid var(--line);border-radius:22px;margin-bottom:10px;cursor:pointer;width:100%;text-align:left;color:var(--ink);font-family:inherit}
+.comp:hover{border-color:#d6c9b1;background:#fff}
+.comp-icon{width:50px;height:50px;border-radius:16px;background:var(--ink);color:var(--goldtxt);display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.comp-main{flex:1;min-width:0}
+.comp-name{font:800 17px/1.15 'Manrope';letter-spacing:-.02em}
+.comp-sub{font-size:12px;color:var(--muted);margin-top:6px}
+.bar{height:6px;background:#ece5d8;border-radius:6px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.pill{display:inline-block;border-radius:99px;padding:4px 9px;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;margin-right:7px;background:#fff;border:1px solid var(--line)}
+.pill-live{color:var(--green)}
+.pill-paused{color:var(--orange)}
+.pill-closed{color:#8b867d}
+.back-btn{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font:700 13px 'DM Sans';cursor:pointer;border:none;background:none;margin-bottom:16px}
+.back-btn:hover{color:var(--ink)}
+
+/* CARDUL DE JOC — ca un card „featured” de pe site */
+.playcard{background:var(--ink);color:#fff;border-radius:32px;padding:26px 22px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.playcard:before{content:'';position:absolute;width:430px;height:430px;border-radius:50%;right:-150px;top:-140px;background:radial-gradient(circle,rgba(226,191,112,.32),transparent 68%);pointer-events:none}
+.playcard > *{position:relative}
+.playcard .card-title{color:#fff;font-size:32px}
+.playcard .card-sub{color:#c8c4bc}
+.playcard .card-sub a{color:var(--goldtxt);font-weight:700}
+.status-line{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:4px 0 20px}
+.status-line span{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 13px;font-size:10px;color:#9f9a90;text-transform:uppercase;letter-spacing:.1em}
+.status-line b{display:block;font:800 22px/1 'Manrope';color:var(--goldtxt);margin-bottom:6px;letter-spacing:-.02em;text-transform:none}
+.slot-machine{background:rgba(240,208,138,.07);border:1px solid rgba(240,208,138,.25);border-radius:24px;padding:20px 16px;margin:0 auto 18px;max-width:380px}
+.slot-label{font:700 10px/1 'Manrope';color:#9f9a90;letter-spacing:.18em;text-transform:uppercase;text-align:center;margin-bottom:14px}
+.slot-display{display:flex;gap:6px;justify-content:center;background:#0a0a0a;border-radius:16px;padding:16px 10px;border:1px solid rgba(255,255,255,.08)}
+.slot-digit{font-family:'DM Mono',monospace;font-size:44px;font-weight:500;color:var(--goldtxt);width:52px;text-align:center;line-height:1}
+.slot-digit.spinning{animation:digitSpin .08s linear infinite;color:rgba(240,208,138,.55)}
+.slot-display.many .slot-digit{font-size:34px;width:40px}
+.slot-digit.landed{animation:digitLand .3s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes digitSpin{0%{transform:translateY(-4px);opacity:.7}50%{transform:translateY(4px);opacity:1}100%{transform:translateY(-4px);opacity:.7}}
+@keyframes digitLand{0%{transform:scale(1.3);color:#fff}60%{transform:scale(0.95)}100%{transform:scale(1)}}
+.spin-btn{display:block;width:100%;max-width:380px;margin:0 auto 10px;padding:17px;border:0;border-radius:999px;background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c;font:800 15px 'Manrope';letter-spacing:.02em;cursor:pointer;box-shadow:0 12px 34px rgba(201,150,45,.25)}
+.spin-btn.alt{background:transparent;border:1px solid rgba(240,208,138,.45);color:var(--goldtxt);box-shadow:none}
+.spin-btn:disabled{opacity:.4;cursor:not-allowed}
+.result{border-radius:22px;padding:22px;text-align:center;margin:4px auto 16px;max-width:420px;animation:fadeUp .4s ease}
+.result.win{background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c}
+.result.win p{color:#3d3220}
+.result.lose{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03)}
+.result .big{font:800 34px/1.05 'Manrope';letter-spacing:-.04em;margin-top:4px}
+.result p{font-size:14px;color:#a8a39a;margin-top:10px;line-height:1.55}
+.result small{font:700 10px/1 'Manrope';letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.note{font-size:13px;color:#a8a39a;text-align:center;line-height:1.55;margin-top:8px}
+.note a{color:var(--goldtxt);font-weight:700}
+
+/* WALLET — ca un card „cashback” de pe site */
+.wallet{border-radius:28px;padding:30px;background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c;box-shadow:0 22px 55px rgba(201,150,45,.18)}
+.wallet .who{font:700 11px/1 'Manrope';letter-spacing:.18em;text-transform:uppercase;opacity:.75}
+.wallet .bal{font:800 clamp(56px,10vw,86px)/1 'Manrope';letter-spacing:-.07em;margin-top:18px}
+.wallet .val{font-size:15px;font-weight:700;margin-top:6px}
+.wallet .rate{font-size:12px;opacity:.7;margin-top:4px}
+.withdraw{margin-top:24px;display:inline-flex;flex-direction:column;align-items:flex-start;padding:12px 20px;border-radius:999px;border:0;background:rgba(16,16,16,.9);color:#fff;font:800 13px 'DM Sans';cursor:not-allowed}
+.withdraw small{font-weight:600;font-size:11px;color:var(--goldtxt);margin-top:2px}
+.wallet-info{font-size:14px;line-height:1.65;margin-top:18px;max-width:520px}
+
+/* TABELE / LISTE */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;max-height:500px;overflow-y:auto;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font:700 10px 'Manrope';letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0}
+td{padding:12px 14px;border-bottom:1px solid #f0ebe1;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.taken td{color:#a49f96}
+.winnerwall{background:#181818;border:1px solid #262626;border-radius:28px;padding:10px}
+.win-item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:15px;border-bottom:1px solid #262626;color:#fff}
+.win-item:last-child{border:0}
+.win-item .av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#29251e;color:#e7c774;font-weight:900}
+.win-item .main{min-width:0}
+.win-item .name{font-size:13px;font-weight:700}
+.win-item .sub{font-size:12px;color:#88847d;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.win-item .prize{color:var(--goldtxt);font:800 13px 'Manrope';white-space:nowrap}
+.empty{text-align:center;padding:34px 16px;color:var(--muted);font-size:14px}
+.winnerwall .empty{color:#88847d}
+.playcard .empty{color:#a8a39a}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:13px}
+.stat b{display:block;font:800 22px/1 'Manrope';letter-spacing:-.03em}
+.stat span{display:block;font-size:10px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.1em}
+
+footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
+.footerin{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.footerin a{text-decoration:none}
+
+/* BARA DE JOS PE MOBIL — ca pe site */
+.mobilebar{display:none}
+.confetti-piece{position:fixed;top:0;width:9px;height:9px;border-radius:2px;pointer-events:none;z-index:999;animation:cf linear forwards}
+@keyframes cf{0%{transform:translateY(-80px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+@media(max-width:620px){
+  .shell{width:min(100% - 24px,860px)}
+  .navin{height:66px}
+  .brand{font-size:14px}.brand-logo{width:34px;height:34px;border-radius:10px}
+  .navlink .long{display:none}
+  .hero{padding:30px 0 20px}.hero h1{font-size:48px}.hero p{font-size:15px}
+  .tabs{display:none}
+  .card{padding:20px;border-radius:24px}
+  .card-title{font-size:24px}
+  .playcard{border-radius:28px;padding:20px 16px}
+  .playcard .card-title{font-size:26px}
+  .slot-digit{font-size:34px;width:42px}
+  .slot-display.many{gap:4px}
+  .slot-display.many .slot-digit{font-size:26px;width:30px}
+  .wallet{padding:24px}
+  .mobilebar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;right:12px;z-index:80;background:rgba(15,15,15,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid #2b2b2b;border-radius:18px;padding:8px;box-shadow:0 16px 45px rgba(0,0,0,.22)}
+  .mtab{text-decoration:none;background:none;border:0;color:#a8a39a;text-align:center;font:800 9px 'DM Sans';padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:12px;cursor:pointer}
+  .mtab span{font-size:18px;line-height:20px}
+  .mtab.active{color:#fff;background:#1f1f1f}
+  body{padding-bottom:96px}
+}
+@media(prefers-reduced-motion:reduce){.slot-digit.spinning,.result,.confetti-piece{animation:none}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="shell navin">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/icon-192.png" alt="Giveaways logo">
+      <span>GIVEAWAYS<small>INSTANT PRIZES</small></span>
+    </a>
+    <div class="navright">
+      <a class="navlink" href="/">← <span class="long">All </span>raffles</a>
+      <button class="user-chip" id="user-chip">Sign in</button>
+    </div>
+  </div>
+</nav>
+
+<main class="shell">
+  <header class="hero">
+    <div class="eyebrow">Instant Prizes</div>
+    <h1>Spin. <em>Win</em> instantly.</h1>
+    <p>Every prize is listed from the start and every draw is public. Your ticket number decides — no waiting for a draw date.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="play"    onclick="showTab('play')">Play</button>
+    <button class="tab"        data-tab="wallet"  onclick="showTab('wallet')">Wallet</button>
+    <button class="tab"        data-tab="prizes"  onclick="showTab('prizes')">Prizes</button>
+    <button class="tab"        data-tab="winners" onclick="showTab('winners')">Winners</button>
+  </div>
+
+  <!-- ═══ PLAY ═══ -->
+  <section class="section active" id="sec-play">
+    <div id="play-list">
+      <div class="card notifcard" id="notif-card" style="display:none"></div>
+      <div class="card">
+        <div class="card-title">Competitions</div>
+        <div class="card-sub">Pick a competition to see your spins.</div>
+        <div id="comp-list"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+    <div id="play-detail" style="display:none">
+      <button class="back-btn" onclick="backToList()">← All competitions</button>
+      <div class="playcard">
+        <div class="card-title" id="pd-name"></div>
+        <div class="card-sub" id="pd-sub"></div>
+        <div id="play-alert" class="alert"></div>
+        <div class="status-line" id="pd-status"></div>
+        <div class="slot-machine">
+          <div class="slot-label">Your ticket number</div>
+          <div class="slot-display" id="slot-display">
+            <div class="slot-digit">0</div><div class="slot-digit">0</div><div class="slot-digit">0</div><div class="slot-digit">0</div><div class="slot-digit">0</div>
+          </div>
+        </div>
+        <div id="pd-result"></div>
+        <div id="pd-actions"></div>
+        <div class="note" id="pd-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ WALLET ═══ -->
+  <section class="section" id="sec-wallet">
+    <div id="wallet-out" class="card">
+      <div class="card-title">Your wallet</div>
+      <div class="card-sub">Sign in to see your credits.</div>
+      <button class="btn btn-gold btn-full" onclick="showTab('account')">Sign in or create account</button>
+    </div>
+    <div id="wallet-in" style="display:none">
+      <div class="wallet">
+        <div class="who" id="w-user"></div>
+        <div class="bal" id="w-bal">0</div>
+        <div class="val" id="w-val">credits</div>
+        <div class="rate">1 credit = £0.01</div>
+        <button class="withdraw" disabled>Withdraw<small>Coming soon</small></button>
+        <div class="wallet-info">
+          Use your credits for extra spins in any competition that accepts them.
+          Cash withdrawals are on the way — we'll announce it on our channels when they're available.
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title" style="font-size:22px">History</div>
+        <div id="w-ledger"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="font-size:22px">Account</div>
+        <div class="card-sub" id="acc-info"></div>
+        <div class="toggle-row"><span>🔔 Push notifications<br><small style="color:var(--muted)" id="acc-push-state"></small></span><span id="acc-push-btn"></span></div>
+        <label class="toggle-row" style="cursor:pointer"><span>📧 Email me when instant prizes open</span><input type="checkbox" id="acc-email" onchange="toggleEmailAlerts(this.checked)"></label>
+        <a class="btn btn-ghost btn-full" href="/" style="text-decoration:none">← Back to all raffles</a>
+        <button class="btn btn-ghost btn-full" style="margin-top:10px" onclick="signOut()">Sign out</button>
+        <button class="link-btn" style="display:block;margin:18px auto 0;color:var(--red)" onclick="deleteMyAccount()">Delete my account</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CONT (login / înregistrare / username) ═══ -->
+  <section class="section" id="sec-account">
+    <div class="card" id="auth-card">
+      <div class="auth-switch">
+        <button id="sw-in" class="active" onclick="authMode('in')">Sign in</button>
+        <button id="sw-up" onclick="authMode('up')">Create account</button>
+      </div>
+      <div id="auth-alert" class="alert"></div>
+      <label for="a-email">Email</label>
+      <input type="email" id="a-email" autocomplete="email">
+      <label for="a-pass">Password</label>
+      <input type="password" id="a-pass" autocomplete="current-password" onkeydown="if(event.key==='Enter')authSubmit()">
+      <div id="up-hint" style="display:none;font-size:12px;color:var(--muted);margin-top:6px">At least 8 characters.</div>
+      <button class="btn btn-gold btn-full" id="auth-btn" onclick="authSubmit()">Sign in</button>
+      <button class="link-btn" id="forgot-btn" onclick="forgotPassword()">Forgot password?</button>
+    </div>
+
+    <div class="card" id="username-card" style="display:none">
+      <div class="card-title">One last step</div>
+      <div class="card-sub">Tell us your name exactly as it appears on Raffall.</div>
+      <div id="un-alert" class="alert"></div>
+      <label for="un-input">Your name on Raffall</label>
+      <input type="text" id="un-input" placeholder="e.g. James Walker" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="warn-box">
+        ⚠️ <b>Use your Raffall <u>name</u>, not your username.</b><br>
+        On Raffall you have a username (e.g. <i>jwalker88</i>) and a name (e.g. <i>James Walker</i>). The entrants list of every competition shows your <b>name</b> — that's how we find your tickets, so type it exactly the same.<br>
+        That's how we recognise your tickets and pay your prizes. If it doesn't match, we can't find your entries.
+        You can't change it yourself later.
+      </div>
+      <label class="check"><input type="checkbox" id="un-confirm"> <span>I confirm this is my own name as shown on Raffall.</span></label>
+      <label class="check"><input type="checkbox" id="un-email"> <span>Email me when instant prizes open and when there are special promotions. You can turn this off anytime.</span></label>
+      <button class="btn btn-gold btn-full" onclick="saveUsername()">Save my Raffall name</button>
+    </div>
+
+    <div class="card" id="newpass-card" style="display:none">
+      <div class="card-title">Set a new password</div>
+      <div id="np-alert" class="alert"></div>
+      <label for="np-input">New password</label>
+      <input type="password" id="np-input" autocomplete="new-password">
+      <button class="btn btn-gold btn-full" onclick="saveNewPassword()">Save password</button>
+    </div>
+  </section>
+
+  <!-- ═══ PREMII ═══ -->
+  <section class="section" id="sec-prizes">
+    <div class="card">
+      <div class="card-title">Prize list</div>
+      <div class="card-sub">Every prize, the ticket number it sits on, and who has won it so far. Land on that number to win it.</div>
+      <select id="pr-comp" onchange="renderPrizes()"></select>
+      <div class="stats" id="pr-stats" style="margin-top:14px"></div>
+      <div id="pr-list"></div>
+    </div>
+  </section>
+
+  <!-- ═══ CÂȘTIGĂTORI ═══ -->
+  <section class="section" id="sec-winners">
+    <div class="card">
+      <div class="card-title">Latest winners</div>
+      <div class="card-sub">Every win, as it happens.</div>
+      <div class="winnerwall" id="win-list"><div class="empty">Loading…</div></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="shell footerin"><span>© 2026 Giveaways Community</span><a href="/">giveawayscommunity.com</a></div></footer>
+
+<div class="mobilebar">
+  <a class="mtab" href="/"><span>⌂</span>Home</a>
+  <button class="mtab active" data-tab="play"    onclick="showTab('play')"><span>🎰</span>Play</button>
+  <button class="mtab"        data-tab="wallet"  onclick="showTab('wallet')"><span>⭐</span>Wallet</button>
+  <button class="mtab"        data-tab="prizes"  onclick="showTab('prizes')"><span>💰</span>Prizes</button>
+  <button class="mtab"        data-tab="winners" onclick="showTab('winners')"><span>🏆</span>Winners</button>
+</div>
+
+<script>
+/* ═══ CONFIG ═══════════════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://bgbsfufelueubbnxsdsy.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnYnNmdWZlbHVldWJibnhzZHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzgwNDksImV4cCI6MjEwNjg1NDA0OX0.CU6Ka5jWd6xeh-jdlNaH8_IR3xGWcX3-oLdBsaWiR8s';
+/* Venit din linkul de confirmare din email? Citim adresa înainte ca
+   Supabase s-o curețe. Omul nu a apucat să se logheze: îl trimitem la
+   login, cu emailul completat, în loc să-i cerem direct username-ul. */
+const LINK_HASH = new URLSearchParams(location.hash.slice(1));
+const FROM_CONFIRM = LINK_HASH.get('type') === 'signup';
+const LINK_ERROR = LINK_HASH.get('error_description') || new URLSearchParams(location.search).get('error_description');
+let handlingConfirm = FROM_CONFIRM;
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const RAFFALL = 'https://raffall.com/giveaways_community';
+const LIST_UPDATE = 'every day at 1:00 PM UK time';   // când actualizezi lista de cumpărători
+const DEEP_COMP = parseInt(new URLSearchParams(location.search).get('c')) || null;   // ?c=ID de pe site
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+let session = null;   // sesiunea Supabase
+let me = null;        // profilul (username, credite)
+let comps = [], prizeCounts = {};
+let current = null, spinning = false;
+let mode = 'in';
+
+/* ═══ MESAJE ═══════════════════════════════════════════════════ */
+function showAlert(id, type, html){
+  const el = $(id); if(!el) return;
+  el.className = 'alert alert-' + type + ' show';
+  el.innerHTML = html;
+}
+const hideAlert = id => $(id) && $(id).classList.remove('show');
+
+const ERR = {
+  not_logged_in:        'Please sign in first.',
+  no_profile:           'Please set your Raffall name first.',
+  competition_not_active:'This competition is not open for spins right now.',
+  too_many_requests:    'Slow down a little — max 5 spins a minute. Try again in a moment.',
+  already_won:          "You've already won in this competition — congratulations! Winners can't spin again here.",
+  no_free_spins:        "You don't have any free spins left in this competition.",
+  credits_not_enabled:  "This competition doesn't accept credits.",
+  no_credit_spins:      "You've used all the credit spins allowed in this competition.",
+  not_enough_credits:   "You don't have enough credits for this spin.",
+  sold_out:             'All tickets in this competition have been drawn.',
+  username_taken:       'That name is already linked to another account. If it is yours, contact us on Telegram @suportGiveaways and we will sort it out.',
+  invalid_username:     'Your name must be 2–40 characters.',
+  profile_exists:       'Your Raffall name is already set.',
+  has_prizes:           "You've won prizes with this account, so it can't be deleted here. Message us on Telegram @suportGiveaways and we'll help."
+};
+function errText(e){
+  const m = (e && (e.message || e.error_description)) || String(e);
+  for(const k in ERR) if(m.includes(k)) return ERR[k];
+  if(/Failed to fetch|NetworkError/i.test(m)) return 'Connection problem. Check your internet and try again.';
+  if(/JWT|expired/i.test(m)) return 'Your session expired. Please sign in again.';
+  return 'Something went wrong. Please try again. <small style="opacity:.7">(' + esc(m) + ')</small>';
+}
+
+/* ═══ FORMAT ═══════════════════════════════════════════════════ */
+const nf = n => Number(n).toLocaleString('en-GB');
+function prizeText(p){
+  if(!p) return '';
+  if(p.label) return esc(p.label);
+  return p.kind === 'credits' ? `${nf(p.amount)} credits` : `£${Number(p.amount).toFixed(2).replace(/\.00$/, '')}`;
+}
+/* Câte cifre are biletul: 5 pentru max 99.999, 6 pentru 300.000 etc. */
+const digitsFor = c => Math.max(5, String(c ? c.total_tickets : 0).length);
+function ticketStr(t, compId){
+  const c = compId ? comps.find(x => x.id === compId) : current;
+  return String(t).padStart(digitsFor(c), '0');
+}
+const ago = iso => {
+  const s = (Date.now() - new Date(iso)) / 1000;
+  if(s < 60) return 'just now';
+  if(s < 3600) return Math.floor(s / 60) + ' min ago';
+  if(s < 86400) return Math.floor(s / 3600) + ' h ago';
+  return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+};
+
+/* ═══ TABS ═════════════════════════════════════════════════════ */
+function showTab(name){
+  if(name === 'account' && me && $('newpass-card').style.display !== 'block') name = 'wallet';
+  document.querySelectorAll('.tab, .mtab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === 'sec-' + name));
+  if(name === 'wallet')  renderWallet();
+  if(name === 'prizes')  renderPrizes();
+  if(name === 'winners') renderWinners();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ═══ CONT ═════════════════════════════════════════════════════ */
+function authMode(m){
+  mode = m;
+  $('sw-in').classList.toggle('active', m === 'in');
+  $('sw-up').classList.toggle('active', m === 'up');
+  $('auth-btn').textContent = m === 'in' ? 'Sign in' : 'Create account';
+  $('a-pass').autocomplete = m === 'in' ? 'current-password' : 'new-password';
+  $('up-hint').style.display = m === 'up' ? 'block' : 'none';
+  $('forgot-btn').style.display = m === 'in' ? 'inline' : 'none';
+  hideAlert('auth-alert');
+}
+const redirectURL = () => location.origin + location.pathname;
+
+async function authSubmit(){
+  const email = $('a-email').value.trim(), password = $('a-pass').value;
+  if(!email || !password) return showAlert('auth-alert','error','Enter your email and password.');
+  $('auth-btn').disabled = true;
+  if(mode === 'in'){
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    $('auth-btn').disabled = false;
+    if(error){
+      return showAlert('auth-alert','error',
+        /confirm/i.test(error.message) ? 'Please confirm your email first — check your inbox (and spam folder) for our link.' :
+        /invalid/i.test(error.message) ? 'Wrong email or password.' : esc(error.message));
+    }
+    $('a-pass').value = '';
+  } else {
+    if(password.length < 8){ $('auth-btn').disabled = false; return showAlert('auth-alert','error','Password must be at least 8 characters.'); }
+    const { data, error } = await sb.auth.signUp({ email, password, options:{ emailRedirectTo: redirectURL() } });
+    $('auth-btn').disabled = false;
+    if(error) return showAlert('auth-alert','error', /already/i.test(error.message) ? 'This email already has an account. Sign in instead.' : esc(error.message));
+    $('a-pass').value = '';
+    if(!data.session){
+      showAlert('auth-alert','success',`📧 Almost there! We sent a confirmation link to <b>${esc(email)}</b>. Open it to activate your account, then sign in. Check your spam folder too.`);
+      authMode('in');
+      $('auth-alert').classList.add('show');
+    }
+  }
+}
+async function forgotPassword(){
+  const email = $('a-email').value.trim();
+  if(!email) return showAlert('auth-alert','error','Type your email above first, then tap "Forgot password?".');
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: redirectURL() });
+  if(error) return showAlert('auth-alert','error', esc(error.message));
+  showAlert('auth-alert','success','📧 If an account exists for that email, we sent a link to reset your password.');
+}
+async function saveNewPassword(){
+  const p = $('np-input').value;
+  if(p.length < 8) return showAlert('np-alert','error','Password must be at least 8 characters.');
+  const { error } = await sb.auth.updateUser({ password: p });
+  if(error) return showAlert('np-alert','error', esc(error.message));
+  $('np-input').value = '';
+  $('newpass-card').style.display = 'none';
+  await refreshUser();
+  showTab(me ? 'play' : 'account');
+}
+async function saveUsername(){
+  const raw = $('un-input').value.trim().replace(/^@+/, '').trim();
+  if(raw.length < 2) return showAlert('un-alert','error','Enter your name as it appears on Raffall.');
+  if(!$('un-confirm').checked) return showAlert('un-alert','error','Please tick the box to confirm it is your own Raffall name.');
+  if(!confirm(`Your name on Raffall is "${raw}"?\n\nIt must match the entrants list on Raffall exactly — your name, not your username. You can't change it later.`)) return;
+  const { error } = await sb.rpc('create_profile', { p_username: raw });
+  if(error) return showAlert('un-alert','error', errText(error));
+  if($('un-email').checked) await sb.rpc('set_email_alerts', { p_on: true });
+  await refreshUser();
+  showTab('play');
+  if(current) openComp(current.id);
+}
+async function signOut(){
+  await sb.auth.signOut();
+  me = null; session = null;
+  renderChip();
+  showTab('play');
+  if(current) openComp(current.id);
+}
+
+async function deleteMyAccount(){
+  if(!me) return;
+  const msg = `Delete your account "${me.username}"?\n\n`
+    + `This permanently removes your account, your ${nf(me.credits)} credits and your spin history. `
+
+    + `This cannot be undone.`;
+  if(!confirm(msg)) return;
+  const typed = prompt('To confirm, type DELETE in capital letters:');
+  if(typed === null) return;
+  if(typed.trim() !== 'DELETE') return alert('Account not deleted — you didn\'t type DELETE.');
+  const { error } = await sb.rpc('delete_my_account');
+  if(error) return alert(errText(error));
+  await sb.auth.signOut({ scope: 'local' });
+  me = null; session = null;
+  renderChip();
+  await refreshUser();
+  showTab('play');
+  alert('Your account has been deleted.');
+}
+
+/* Starea contului: fără sesiune → login; sesiune fără profil → username */
+async function refreshUser(){
+  const { data } = await sb.auth.getSession();
+  session = data.session;
+  me = null;
+  if(session){
+    const { data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    me = prof || null;
+  }
+  $('auth-card').style.display = session ? 'none' : 'block';
+  $('username-card').style.display = (session && !me) ? 'block' : 'none';
+  renderChip();
+  if(me && pushGranted()) getPushToken().then(savePushToken);
+  renderNotifCard();
+}
+function renderChip(){
+  const chip = $('user-chip');
+  if(me) chip.innerHTML = `<span><b>${nf(me.credits)}</b> credits</span><span class="av">${esc(me.username.slice(0,1).toUpperCase())}</span>`;
+  else if(session) chip.textContent = 'Finish sign-up';
+  else chip.textContent = 'Sign in';
+  chip.onclick = () => showTab(me ? 'wallet' : 'account');
+}
+
+/* ═══ COMPETIȚII ═══════════════════════════════════════════════ */
+async function loadComps(){
+  const [c, p] = await Promise.all([
+    sb.from('instant_competitions').select('*').in('status', ['active','paused']).order('created_at', { ascending:false }),
+    sb.from('instant_prizes').select('competition_id,won_by')
+  ]);
+  if(c.error){ $('comp-list').innerHTML = `<div class="empty">${errText(c.error)}</div>`; return; }
+  comps = c.data;
+  prizeCounts = {};
+  (p.data || []).forEach(x => {
+    const k = x.competition_id;
+    prizeCounts[k] = prizeCounts[k] || { total:0, won:0 };
+    prizeCounts[k].total++;
+    if(x.won_by) prizeCounts[k].won++;
+  });
+  renderComps();
+  fillPrizeSelect();
+}
+/* „Open until 14:30” — în ora telefonului vizitatorului */
+const fmtClock = iso => new Date(iso).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+function closesPill(c){
+  if(c.status !== 'active' || !c.closes_at) return '';
+  const left = Math.round((new Date(c.closes_at) - Date.now()) / 60000);
+  if(left <= 0) return '<span class="pill pill-paused">Closing…</span>';
+  return `<span class="pill pill-time">⏱ Open until ${fmtClock(c.closes_at)}${left <= 90 ? ` · ${left} min left` : ''}</span>`;
+}
+function statusPill(s){
+  return s === 'active' ? '<span class="pill pill-live">● Live</span>'
+       : s === 'paused' ? '<span class="pill pill-paused">Paused</span>'
+       : '<span class="pill pill-closed">Ended</span>';
+}
+function renderComps(){
+  const order = { active:0, paused:1, closed:2 };
+  const list = comps.slice().sort((a,b) => (order[a.status] ?? 3) - (order[b.status] ?? 3));
+  if(!list.length){ $('comp-list').innerHTML = '<div class="empty">No competitions right now. Follow our channels to hear about the next one.</div>'; return; }
+  $('comp-list').innerHTML = list.map(c => {
+    const pc = prizeCounts[c.id] || { total:0, won:0 };
+    const left = pc.total - pc.won;
+    const pct = pc.total ? Math.round(pc.won / pc.total * 100) : 0;
+    return `<button class="comp" onclick="openComp(${c.id})">
+      <div class="comp-icon">${c.status === 'closed' ? '🏁' : '🎰'}</div>
+      <div class="comp-main">
+        <div class="comp-name">${esc(c.name)}</div>
+        <div class="comp-sub">${statusPill(c.status)}${closesPill(c)}${left} of ${pc.total} prizes left · ${nf(c.total_tickets)} tickets</div>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+      </div>
+    </button>`;
+  }).join('');
+}
+function backToList(){
+  current = null;
+  $('play-detail').style.display = 'none';
+  $('play-list').style.display = 'block';
+  loadComps();
+}
+function resetSlot(){
+  const n = digitsFor(current);
+  const box = $('slot-display');
+  box.classList.toggle('many', n > 5);
+  box.innerHTML = Array.from({ length:n }, () => '<div class="slot-digit">0</div>').join('');
+}
+
+async function openComp(id){
+  const c = comps.find(x => x.id === id); if(!c) return;
+  current = c;
+  $('play-list').style.display = 'none';
+  $('play-detail').style.display = 'block';
+  $('pd-name').textContent = c.name;
+  const pc = prizeCounts[c.id] || { total:0, won:0 };
+  $('pd-sub').innerHTML = `${statusPill(c.status)}${closesPill(c)}${pc.total - pc.won} of ${pc.total} prizes left · <a href="#" onclick="showPrizesFor(${c.id});return false">see all prizes</a>`;
+  $('pd-result').innerHTML = '';
+  hideAlert('play-alert');
+  resetSlot();
+  await renderPlayState();
+}
+function showPrizesFor(id){ $('pr-comp').value = id; showTab('prizes'); }
+
+async function renderPlayState(){
+  const c = current; if(!c) return;
+  const actions = $('pd-actions'), status = $('pd-status'), note = $('pd-note');
+  status.innerHTML = ''; note.innerHTML = '';
+
+  if(c.status !== 'active'){
+    actions.innerHTML = '';
+    note.innerHTML = c.status === 'paused'
+      ? (pushGranted()
+          ? '⏸ Spins are closed right now. We\'ll send you a notification the moment they open.'
+          : '⏸ Spins are closed right now — they open at set times. <a href="#" onclick="showTab(\'play\');backToList();return false">Turn on notifications</a> so you don\'t miss it.')
+      : 'This competition has ended.';
+    return;
+  }
+  if(!session){
+    actions.innerHTML = `<button class="spin-btn" onclick="showTab('account')">Sign in to spin</button>`;
+    note.innerHTML = c.access === 'buyers'
+      ? `Free spins are for everyone who bought a ticket in our <a href="${esc(c.raffall_link || RAFFALL)}" target="_blank" rel="noopener">Raffall competition</a>.`
+      : 'Create a free account and get free spins.';
+    return;
+  }
+  if(!me){
+    actions.innerHTML = `<button class="spin-btn" onclick="showTab('account')">Set your Raffall name</button>`;
+    return;
+  }
+  const { data: st, error } = await sb.rpc('get_my_status', { p_comp: c.id });
+  if(error){ actions.innerHTML = ''; return showAlert('play-alert','error', errText(error)); }
+  me.credits = st.credits; renderChip();
+
+  const creditOK = st.credit_cost > 0 && (st.max_credit_spins === 0 || st.credit_spins_used < st.max_credit_spins);
+  const chips = [`<span>Free spins left: <b>${st.free_left}</b></span>`];
+  if(st.credit_cost > 0) chips.push(`<span>Your credits: <b>${nf(st.credits)}</b></span>`);
+  status.innerHTML = chips.join('');
+
+  if(st.already_won){
+    actions.innerHTML = '';
+    note.innerHTML = "🏆 You've already won in this competition — winners can't spin again here.";
+    return;
+  }
+  const btns = [];
+  if(st.free_left > 0) btns.push(`<button class="spin-btn" onclick="spin('free')">🎰 Free spin</button>`);
+  if(creditOK) btns.push(`<button class="spin-btn ${st.free_left > 0 ? 'alt' : ''}" onclick="spin('credits')" ${st.credits < st.credit_cost ? 'disabled' : ''}>⭐ Spin for ${nf(st.credit_cost)} credits</button>`);
+  actions.innerHTML = btns.join('');
+
+  if(!btns.length){
+    if(c.access === 'buyers' && st.free_allowed === 0){
+      const buy = `<a href="${esc(c.raffall_link || RAFFALL)}" target="_blank" rel="noopener">Raffall competition</a>`;
+      if(st.requested){
+        note.innerHTML = `✅ <b>We've got your request.</b> We'll look for <b>${esc(me.username)}</b> in the Raffall entrants list — your spins appear here after our next update (${LIST_UPDATE}). Come back then!`;
+      } else {
+        actions.innerHTML = `<button class="spin-btn alt" onclick="requestSpins()">🎟️ I bought a ticket — check me</button>`;
+        note.innerHTML = `<b>${esc(me.username)}</b> isn't on the buyer list yet — we match the name shown in the Raffall entrants list. We add new ticket buyers ${LIST_UPDATE}.<br>
+          Bought a ticket in our ${buy}? Tap the button and we'll check you first. Not yet? Buy a ticket, then tap it.`;
+      }
+    } else {
+      note.innerHTML = "You've used all your spins in this competition. Thanks for playing!";
+    }
+  } else if(creditOK && st.credits < st.credit_cost){
+    note.textContent = `You need ${nf(st.credit_cost)} credits for a credit spin.`;
+  } else if(st.free_left === 0 && c.access === 'buyers' && st.free_allowed === 0){
+    note.innerHTML = `Free spins are for ticket buyers in our <a href="${esc(c.raffall_link || RAFFALL)}" target="_blank" rel="noopener">Raffall competition</a>.`;
+  }
+}
+
+async function requestSpins(){
+  if(!current) return;
+  const { data, error } = await sb.rpc('request_spins', { p_comp: current.id });
+  if(error) return showAlert('play-alert','error', errText(error));
+  if(data === 'already_listed') showAlert('play-alert','success','Good news — you are already on the list. Spin away!');
+  renderPlayState();
+}
+
+/* ═══ SPIN ═════════════════════════════════════════════════════ */
+async function spin(pay){
+  if(spinning || !current) return;
+  spinning = true;
+  hideAlert('play-alert');
+  $('pd-result').innerHTML = '';
+  document.querySelectorAll('#pd-actions button').forEach(b => b.disabled = true);
+  const digits = Array.from(document.querySelectorAll('#slot-display .slot-digit'));
+  digits.forEach(d => { d.className = 'slot-digit spinning'; });
+  const ticker = setInterval(() => digits.forEach(d => { if(d.classList.contains('spinning')) d.textContent = Math.floor(Math.random() * 10); }), 70);
+
+  const { data, error } = await sb.rpc('perform_draw', { p_comp: current.id, p_pay: pay });
+  if(error){
+    clearInterval(ticker);
+    resetSlot();
+    spinning = false;
+    showAlert('play-alert','error', errText(error));
+    return renderPlayState();
+  }
+  const target = ticketStr(data.ticket).split('');
+  target.forEach((n, i) => setTimeout(() => {
+    const d = digits[i];
+    d.classList.remove('spinning');
+    d.textContent = n;
+    d.classList.add('landed');
+    if(i === target.length - 1){
+      clearInterval(ticker);
+      setTimeout(() => finishSpin(data), 450);
+    }
+  }, 500 + i * 320));
+}
+function finishSpin(r){
+  spinning = false;
+  if(me){ me.credits = r.credits; renderChip(); }
+  if(r.won){
+    const isCredits = r.kind === 'credits';
+    $('pd-result').innerHTML = `<div class="result win">
+      <small>Ticket #${ticketStr(r.ticket)}</small>
+      <div class="big">🏆 You won ${prizeText(r)}!</div>
+      <p>${isCredits
+        ? `The credits are already in your wallet. New balance: <b>${nf(r.credits)}</b>.`
+        : `We'll contact you to arrange your payment. You can also reach us on Telegram @suportGiveaways.`}</p>
+    </div>`;
+    confetti();
+    if(prizeCounts[current.id]) prizeCounts[current.id].won++;
+  } else {
+    $('pd-result').innerHTML = `<div class="result lose">
+      <small>Ticket #${ticketStr(r.ticket)}</small>
+      <div class="big" style="font-size:28px">No prize this time</div>
+      <p>Every ticket is drawn only once — the prizes left are still out there.</p>
+    </div>`;
+  }
+  renderPlayState();
+}
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors = ['#F5C842','#ffffff','#22C55E','#3B82F6','#F97316'];
+  for(let i = 0; i < 80; i++) setTimeout(() => {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `left:${Math.random()*100}vw;background:${colors[i % colors.length]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-duration:${2+Math.random()*2}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4500);
+  }, Math.random() * 800);
+}
+
+/* ═══ WALLET ═══════════════════════════════════════════════════ */
+async function renderWallet(){
+  if(!me){
+    $('wallet-in').style.display = 'none';
+    $('wallet-out').style.display = 'block';
+    return;
+  }
+  $('wallet-out').style.display = 'none';
+  $('wallet-in').style.display = 'block';
+  const { data: prof } = await sb.from('profiles').select('*').eq('id', me.id).maybeSingle();
+  if(prof){ me = prof; renderChip(); }
+  $('w-user').textContent = me.username;
+  $('w-bal').textContent = nf(me.credits);
+  $('w-val').textContent = `credits · worth £${(me.credits / 100).toFixed(2)}`;
+  $('acc-email').checked = !!me.email_alerts;
+  renderPushState();
+  $('acc-info').innerHTML = `Raffall name: <b>${esc(me.username)}</b><br>Email: ${esc(session.user.email)}<br>Wrong name? Message us on Telegram @suportGiveaways.`;
+  const { data, error } = await sb.from('credit_ledger').select('*').eq('user_id', me.id).order('created_at', { ascending:false }).limit(50);
+  if(error) return $('w-ledger').innerHTML = `<div class="empty">${errText(error)}</div>`;
+  if(!data.length) return $('w-ledger').innerHTML = '<div class="empty">No credit activity yet. Win credits in instant draws.</div>';
+  const why = r => r === 'prize' ? 'Prize won' : r === 'spin' ? 'Spin' : r.startsWith('admin: ') ? esc(r.slice(7).replace(/^./, x => x.toUpperCase())) : esc(r);
+  $('w-ledger').innerHTML = `<div class="table-wrap"><table><thead><tr><th>When</th><th>What</th><th>Credits</th><th>Balance</th></tr></thead><tbody>` +
+    data.map(r => `<tr><td>${ago(r.created_at)}</td><td>${why(r.reason)}</td><td style="color:${r.delta > 0 ? 'var(--green)' : 'var(--red)'}">${r.delta > 0 ? '+' : ''}${nf(r.delta)}</td><td>${nf(r.balance_after)}</td></tr>`).join('') +
+    '</tbody></table></div>';
+}
+
+/* ═══ PREMII ═══════════════════════════════════════════════════ */
+function fillPrizeSelect(){
+  const el = $('pr-comp'), prev = el.value;
+  el.innerHTML = comps.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('') || '<option value="">No competitions</option>';
+  if(prev && comps.some(c => String(c.id) === prev)) el.value = prev;
+}
+async function renderPrizes(){
+  const id = parseInt($('pr-comp').value);
+  if(!id){ $('pr-list').innerHTML = '<div class="empty">No competitions yet.</div>'; $('pr-stats').innerHTML = ''; return; }
+  const [p, d] = await Promise.all([
+    sb.from('instant_prizes').select('id,ticket,kind,amount,label,won_by,won_at').eq('competition_id', id).order('amount', { ascending:false }),
+    sb.from('instant_draws').select('username,prize_id').eq('competition_id', id).not('prize_id', 'is', null)
+  ]);
+  if(p.error) return $('pr-list').innerHTML = `<div class="empty">${errText(p.error)}</div>`;
+  const who = Object.fromEntries((d.data || []).map(x => [x.prize_id, x.username]));
+  const list = p.data.slice().sort((a,b) => (!!a.won_by - !!b.won_by) || (a.kind === b.kind ? b.amount - a.amount : a.kind === 'cash' ? -1 : 1));
+  const won = list.filter(x => x.won_by).length;
+  $('pr-stats').innerHTML = `<div class="stat"><b>${list.length}</b><span>prizes</span></div><div class="stat"><b>${won}</b><span>won</span></div><div class="stat"><b>${list.length - won}</b><span>still to win</span></div>`;
+  if(!list.length) return $('pr-list').innerHTML = '<div class="empty">Prizes coming soon.</div>';
+  $('pr-list').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Prize</th><th>Winning ticket</th><th>Status</th></tr></thead><tbody>` +
+    list.map(x => `<tr class="${x.won_by ? 'taken' : ''}"><td><b style="color:${x.won_by ? 'inherit' : 'var(--gold)'}">${prizeText(x)}</b></td>
+      <td style="font-family:'DM Mono',monospace">#${ticketStr(x.ticket, id)}</td>
+      <td>${x.won_by ? `Won by ${esc(who[x.id] || '—')}` : 'Still to win'}</td></tr>`).join('') +
+    '</tbody></table></div>';
+}
+
+/* ═══ CÂȘTIGĂTORI ══════════════════════════════════════════════ */
+async function renderWinners(){
+  const { data, error } = await sb.from('instant_draws')
+    .select('username,ticket,created_at,instant_prizes(kind,amount,label),instant_competitions(name)')
+    .not('prize_id', 'is', null).order('created_at', { ascending:false }).limit(40);
+  if(error) return $('win-list').innerHTML = `<div class="empty">${errText(error)}</div>`;
+  if(!data.length) return $('win-list').innerHTML = '<div class="empty">No winners yet — could be you!</div>';
+  $('win-list').innerHTML = data.map(w => `<div class="win-item">
+    <div class="av">${esc((w.username || '?').slice(0,1).toUpperCase())}</div>
+    <div class="main"><div class="name">${esc(w.username)}</div><div class="sub">${esc(w.instant_competitions ? w.instant_competitions.name : '')} · #${String(w.ticket).padStart(5,'0')} · ${ago(w.created_at)}</div></div>
+    <div class="prize">${prizeText(w.instant_prizes)}</div>
+  </div>`).join('');
+}
+
+/* ═══ NOTIFICĂRI PUSH ══════════════════════════════════════════
+   Același proiect Firebase ca site-ul; abonamentul se salvează în
+   Supabase și se leagă de cont dacă omul e logat.               */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDGv3TtfD2XgA-PWjImMgyY_5CLOFawMSI",
+  authDomain: "giveaways-community.firebaseapp.com",
+  projectId: "giveaways-community",
+  storageBucket: "giveaways-community.firebasestorage.app",
+  messagingSenderId: "335882371621",
+  appId: "1:335882371621:web:2ab7ceb418b1524b1e75cc"
+};
+const VAPID_KEY = "BNfB_MPBOLh3eFn60Xvadi5B_sRtqpU1wLqHps-fz_9Js5BaI8B95IdPrzfnlaOupqW4iJ1cfOUQ9bxbBGLE23I";
+let _messaging = null;
+
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = () => window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+const pushSupported = () => 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
+const pushGranted = () => pushSupported() && Notification.permission === 'granted';
+
+function initFCM(){
+  if(_messaging) return _messaging;
+  try{
+    if(typeof firebase === 'undefined') return null;
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    _messaging = firebase.messaging();
+    _messaging.onMessage(p => {
+      const d = p.data || {}, n = p.notification || {};
+      showAlert('play-alert','success', '🔔 ' + esc(d.title || n.title || 'Giveaways') + (d.body || n.body ? ' — ' + esc(d.body || n.body) : ''));
+      loadComps().then(() => { if(current) openComp(current.id); });
+    });
+  }catch(e){ console.warn('Firebase:', e); }
+  return _messaging;
+}
+async function getPushToken(){
+  try{
+    const m = initFCM(); if(!m) return null;
+    const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    return await m.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+  }catch(e){ console.warn('getToken:', e); return null; }
+}
+async function savePushToken(token){
+  if(!token) return false;
+  const { error } = await sb.rpc('save_push_token', { p_token: token, p_source: 'instant' });
+  if(error){ console.warn('save token:', error); return false; }
+  return true;
+}
+async function enablePush(){
+  if(!pushSupported()) return alert(isIOS() ? 'On iPhone, add this page to your Home Screen first, then open it from there and tap the button again.' : 'Your browser does not support notifications.');
+  const perm = await Notification.requestPermission();
+  if(perm !== 'granted'){
+    alert('Notifications are blocked. You can allow them in your phone or browser settings for this site.');
+    return renderNotifCard();
+  }
+  const ok = await savePushToken(await getPushToken());
+  if(ok) showAlert('play-alert','success','🔔 Notifications are on — we\'ll tell you when spins open.');
+  else alert('Something went wrong turning on notifications. Please try again.');
+  renderNotifCard();
+  renderPushState();
+}
+function dismissNotifCard(){
+  try{ localStorage.setItem('ip_notif_dismissed', String(Date.now())); }catch(e){}
+  renderNotifCard();
+}
+function renderNotifCard(){
+  const card = $('notif-card'); if(!card) return;
+  let dismissed = 0;
+  try{ dismissed = parseInt(localStorage.getItem('ip_notif_dismissed')) || 0; }catch(e){}
+  const recentlyDismissed = Date.now() - dismissed < 3 * 864e5;
+  const asked = new URLSearchParams(location.search).get('notify') === '1';
+  if(pushGranted() || (recentlyDismissed && !asked) || (pushSupported() && Notification.permission === 'denied')){ card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  if(isIOS() && !isStandalone()){
+    card.innerHTML = `<div class="card-title">🔔 Don't miss the next opening</div>
+      <div class="card-sub">Some competitions open only at set times — like <b style="color:#fff">every-ticket-wins</b> spins for a short window. Get a notification the moment they open.</div>
+      <div style="font-size:14px;color:#fff;font-weight:700">On iPhone, 2 quick steps:</div>
+      <ol>
+        <li>Tap the <b>Share</b> button in Safari, then <b>Add to Home Screen</b>.</li>
+        <li>Open <b>Instant Prizes</b> from your Home Screen and tap <b>Turn on notifications</b>.</li>
+      </ol>
+      <button class="link-btn" onclick="dismissNotifCard()">Not now</button>`;
+  } else {
+    card.innerHTML = `<div class="card-title">🔔 Don't miss the next opening</div>
+      <div class="card-sub">Some competitions open only at set times — like <b style="color:#fff">every-ticket-wins</b> spins for a short window. Get a notification the moment they open.</div>
+      <button class="btn btn-gold btn-full" style="margin-top:0" onclick="enablePush()">🔔 Turn on notifications</button>
+      <button class="link-btn" style="display:block;margin:12px auto 0" onclick="dismissNotifCard()">Not now</button>`;
+  }
+}
+function renderPushState(){
+  const st = $('acc-push-state'), btn = $('acc-push-btn'); if(!st) return;
+  if(pushGranted()){ st.textContent = 'On for this device'; btn.innerHTML = '✅'; return; }
+  if(!pushSupported()){
+    st.textContent = isIOS() ? 'Add this page to your Home Screen to turn them on' : 'Not supported in this browser';
+    btn.innerHTML = ''; return;
+  }
+  if(Notification.permission === 'denied'){ st.textContent = 'Blocked — allow them in your settings'; btn.innerHTML = ''; return; }
+  st.textContent = 'Off';
+  btn.innerHTML = '<button class="btn btn-gold" style="padding:9px 14px;font-size:12px" onclick="enablePush()">Turn on</button>';
+}
+async function toggleEmailAlerts(on){
+  const { error } = await sb.rpc('set_email_alerts', { p_on: !!on });
+  if(error){ $('acc-email').checked = !on; return alert(errText(error)); }
+  if(me) me.email_alerts = !!on;
+}
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
+// ora de închidere se actualizează pe ecran
+setInterval(() => {
+  if($('play-list').style.display !== 'none') renderComps();
+  else if(current) $('pd-sub') && openCompHeader();
+}, 30000);
+function openCompHeader(){
+  const c = current; if(!c) return;
+  const pc = prizeCounts[c.id] || { total:0, won:0 };
+  $('pd-sub').innerHTML = `${statusPill(c.status)}${closesPill(c)}${pc.total - pc.won} of ${pc.total} prizes left · <a href="#" onclick="showPrizesFor(${c.id});return false">see all prizes</a>`;
+}
+
+/* ═══ PORNIRE ══════════════════════════════════════════════════ */
+sb.auth.onAuthStateChange(async (event) => {
+  if(event === 'PASSWORD_RECOVERY'){
+    document.querySelectorAll('#sec-account .card').forEach(c => c.style.display = 'none');
+    $('newpass-card').style.display = 'block';
+    showTab('account');
+    $('newpass-card').style.display = 'block';
+    return;
+  }
+  if(handlingConfirm) return;
+  if(event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED'){
+    // amânat: nu apelăm Supabase direct din callback
+    setTimeout(async () => {
+      if($('newpass-card').style.display === 'block') return;
+      await refreshUser();
+      if(event === 'SIGNED_IN'){
+        if(!me) showTab('account');
+        else if(document.querySelector('#sec-account.active')) showTab(current ? 'play' : 'wallet');
+      }
+      if(current) renderPlayState();
+    }, 0);
+  }
+});
+(async () => {
+  if(FROM_CONFIRM){
+    const { data } = await sb.auth.getSession();          // așteaptă procesarea linkului
+    const email = data.session ? data.session.user.email : '';
+    await sb.auth.signOut({ scope: 'local' });             // nu rămâne logat din link
+    history.replaceState(null, '', location.pathname);
+    handlingConfirm = false;
+    await refreshUser();
+    await loadComps();
+    authMode('in');
+    if(email) $('a-email').value = email;
+    showTab('account');
+    showAlert('auth-alert','success','✅ Your email is confirmed. Sign in to finish setting up your account.');
+    $('a-pass').focus();
+    return;
+  }
+  if(LINK_ERROR){
+    history.replaceState(null, '', location.pathname);
+    await refreshUser();
+    await loadComps();
+    showTab('account');
+    showAlert('auth-alert','error','This link has expired or was already used. Sign in — or, if you never finished signing up, create your account again.');
+    return;
+  }
+  await refreshUser();
+  await loadComps();
+  if(DEEP_COMP && comps.some(c => c.id === DEEP_COMP)) openComp(DEEP_COMP);
+  const wantTab = new URLSearchParams(location.search).get('tab');
+  if(session && !me) showTab('account');
+  else if(wantTab === 'wallet' || wantTab === 'account') showTab(me ? 'wallet' : 'account');
+  else if(wantTab === 'prizes' || wantTab === 'winners') showTab(wantTab);
+})();
+</script>
+
+<!-- ═══ PULL-TO-REFRESH (doar în aplicația instalată / PWA) ═══════
+     Safari pe iPhone nu are pull-to-refresh în aplicațiile instalate
+     pe ecranul principal, așa că îl facem noi. În browser nu se
+     activează, acolo există deja cel al telefonului. -->
+<style>
+.ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);z-index:300;width:40px;height:40px;margin-left:-20px;border-radius:50%;background:#fff;border:1px solid #e7e0d5;box-shadow:0 8px 24px rgba(0,0,0,.12);display:grid;place-items:center;transform:translateY(-70px);opacity:0;pointer-events:none;transition:transform .2s ease,opacity .2s ease}
+.ptr svg{width:20px;height:20px;stroke:#c9962d;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s ease}
+.ptr.dragging{transition:none}
+.ptr.ready svg{transform:rotate(180deg)}
+.ptr.loading svg{animation:ptrspin .8s linear infinite}
+@keyframes ptrspin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.ptr.loading svg{animation:none}}
+</style>
+<div class="ptr" id="ptr" aria-hidden="true">
+  <svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+</div>
+<script>
+(function(){
+  const standalone = window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  if(!standalone) return;
+
+  const el = document.getElementById('ptr');
+  const SPIN  = '<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/>';
+  const THRESHOLD = 80;
+  let startY = 0, pull = 0, active = false, busy = false;
+
+  // nu pornim dacă degetul e într-o listă derulată sau dacă e deschisă o fereastră
+  function blocked(target){
+    if(busy || document.body.style.overflow === 'hidden') return true;
+    if(typeof spinning !== 'undefined' && spinning) return true;
+    for(let n = target; n && n !== document.body; n = n.parentElement){
+      if(n.scrollTop > 0) return true;
+    }
+    return false;
+  }
+  function show(dist){
+    const y = Math.min(dist, 120) - 70;
+    el.style.transform = `translateY(${y}px) rotate(${dist * 2}deg)`;
+    el.style.opacity = Math.min(dist / THRESHOLD, 1);
+    el.classList.toggle('ready', dist >= THRESHOLD);
+  }
+  function reset(){
+    el.classList.remove('dragging','ready');
+    el.style.transform = 'translateY(-70px)';
+    el.style.opacity = 0;
+  }
+
+  window.addEventListener('touchstart', e => {
+    if(e.touches.length !== 1 || window.scrollY > 0 || blocked(e.target)){ active = false; return; }
+    startY = e.touches[0].clientY; pull = 0; active = true;
+  }, { passive: true });
+
+  window.addEventListener('touchmove', e => {
+    if(!active) return;
+    const dy = e.touches[0].clientY - startY;
+    if(dy <= 0 || window.scrollY > 0){ pull = 0; reset(); return; }
+    pull = dy * 0.5;                       // rezistență, ca la cel nativ
+    el.classList.add('dragging');
+    show(pull);
+    if(e.cancelable) e.preventDefault();   // oprește „bounce”-ul iOS cât tragem
+  }, { passive: false });
+
+  window.addEventListener('touchend', () => {
+    if(!active) return;
+    active = false;
+    el.classList.remove('dragging');
+    if(pull >= THRESHOLD){
+      busy = true;
+      el.classList.remove('ready');
+      el.classList.add('loading');
+      el.querySelector('svg').innerHTML = SPIN;
+      el.style.transform = 'translateY(10px)';
+      el.style.opacity = 1;
+      setTimeout(() => location.reload(), 350);
+    } else {
+      reset();
+    }
+    pull = 0;
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>

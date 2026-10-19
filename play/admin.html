@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Instant Prizes</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--gold:#C9952A;--gold-dim:#a8781c;--black:#f7f4ed;--surface:#faf8f3;--card:#fff;--border:#e7e0d5;--text:#101010;--muted:#706d67;--green:#2D7D46;--red:#c0392b;--blue:#2f5fb3;--orange:#c2610c}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--black);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:0 0 20px}
+.wrap{padding:20px 20px 0}
+.wrap{max-width:860px;margin:0 auto}
+header{padding:20px 0 16px;border-bottom:1px solid var(--border);margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-box{width:40px;height:40px;background:#101010;border-radius:12px;display:grid;place-items:center;font-size:20px}
+.logo-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--gold)}
+.logo-sub{font-size:11px;color:var(--muted)}
+.hdr-links{display:flex;gap:14px;align-items:center;font-size:13px}
+.hdr-links a{color:var(--muted);text-decoration:none}
+.hdr-links a:hover{color:var(--gold)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px;margin-bottom:16px;box-shadow:0 10px 40px rgba(43,32,13,.06)}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;color:var(--text);margin-bottom:14px}
+label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:12px 0 6px}
+input,select,textarea{width:100%;padding:11px 13px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:rgba(245,200,66,.5)}
+textarea{min-height:140px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.note{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.btn{padding:11px 20px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-gold{background:#101010;color:#fff}
+.btn-gold:hover:not(:disabled){background:#2a2a2a}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover:not(:disabled){border-color:rgba(245,200,66,.4);color:var(--gold)}
+.btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%;margin-top:14px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn-row .btn{flex:1}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.alert{padding:11px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none;line-height:1.5}
+.alert.show{display:block}
+.alert-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--green)}
+.alert-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.alert-info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#2f5fb3}
+.alert-warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--orange)}
+#global-alert{position:sticky;top:10px;z-index:150}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:5px;margin-bottom:22px;overflow-x:auto}
+.tab{flex:0 0 auto;padding:10px 15px;background:transparent;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{background:#101010;color:#fff}
+.section{display:none}
+.section.active{display:block}
+.row{display:flex;align-items:center;gap:10px;padding:13px 15px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;flex-wrap:wrap}
+.row.editing{border-color:rgba(245,200,66,.5)}
+.row-main{flex:1;min-width:200px}
+.row-name{font-weight:600;font-size:14px}
+.row-sub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.pill{display:inline-block;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;margin-right:4px}
+.pill-active{background:rgba(34,197,94,.12);color:var(--green)}
+.pill-draft{background:rgba(0,0,0,.06);color:#706d67}
+.pill-paused{background:rgba(245,158,11,.12);color:var(--orange)}
+.pill-closed{background:rgba(239,68,68,.12);color:var(--red)}
+.pill-open{background:rgba(59,130,246,.12);color:#2f5fb3}
+.pill-buyers{background:rgba(245,200,66,.12);color:var(--gold)}
+.pill-won{background:rgba(34,197,94,.12);color:var(--green)}
+.table-wrap{overflow-x:auto;max-height:440px;overflow-y:auto;border:1px solid var(--border);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;color:var(--muted);font-weight:700;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #f0ebe1;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.empty{text-align:center;padding:28px;color:var(--muted);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.stat b{display:block;font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--gold);line-height:1.1}
+.stat span{font-size:12px;color:var(--muted)}
+.sub-head{font-size:13px;font-weight:700;color:var(--text);margin:18px 0 10px;padding-top:16px;border-top:1px solid var(--border)}
+.preview-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.preview-list span{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px 9px;font-size:12px}
+.toggle-line{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.toggle-line input{width:18px;height:18px}
+.ledger{margin-top:10px;width:100%}
+@media(max-width:600px){.grid-2,.grid-3{grid-template-columns:1fr}.wrap{padding:12px 12px 0}.card{padding:16px}}
+.spin-modes{display:flex;flex-direction:column;gap:8px}
+.spin-mode{display:flex;align-items:center;gap:10px;margin:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-weight:500;font-size:14px;cursor:pointer}
+.spin-mode input[type=radio]{width:18px;height:18px;margin:0;accent-color:#101010;flex-shrink:0}
+.spin-mode input[type=number]{width:80px;padding:6px 8px;display:inline-block;margin:0 4px}
+#b-preview{margin-top:10px}
+.cgroup{margin-bottom:14px}
+.cgroup>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:10px 4px;font-weight:700;font-size:14px;color:var(--text)}
+.cgroup>summary::-webkit-details-marker{display:none}
+.cgroup>summary::after{content:'▾';margin-left:8px;color:var(--muted);transition:transform .15s}
+.cgroup:not([open])>summary::after{transform:rotate(-90deg)}
+.cgroup>summary span:first-child{flex:1}
+.gcount{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:1px 10px;font-size:12px;color:var(--muted)}
+.cgroup[data-key="closed"]{border-top:1px solid var(--border);padding-top:6px}
+.lmodal{position:fixed;inset:0;z-index:100;background:rgba(16,16,16,.45);display:none;align-items:center;justify-content:center;padding:16px}
+.lmodal.open{display:flex}
+.lbox{background:#fff;border-radius:20px;padding:22px;width:100%;max-width:480px;max-height:calc(100vh - 32px);overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+.lbox .preview-list span{cursor:pointer}
+.lbox .preview-list span:hover{border-color:var(--gold)}
+
+/* ── Bara comună a adminului (Tombole · Instante) ── */
+.admbar{background:#101010;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 18px;font-family:'DM Sans',sans-serif}
+.admbar a{text-decoration:none}
+.admlogo{font:800 15px 'DM Sans',sans-serif;letter-spacing:.06em;color:#f0d08a;white-space:nowrap}
+.admsec{display:flex;gap:4px;background:#1f1f1f;border:1px solid #2c2c2c;border-radius:999px;padding:4px}
+.admsec a{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;color:#a8a39a;white-space:nowrap}
+.admsec a.on{background:#f0d08a;color:#111}
+.admright{display:flex;gap:14px;align-items:center;font-size:13px}
+.admright a{color:rgba(255,255,255,.55)}
+.admright a:hover{color:#f0d08a}
+@media(max-width:600px){.admbar{justify-content:center}.admlogo{width:100%;text-align:center}}
+</style>
+</head>
+<body>
+<div class="admbar">
+  <a class="admlogo" href="/admin.html">🦁 GIVEAWAYS ADMIN</a>
+  <div class="admsec"><a href="/admin.html">🎟️ Tombole &amp; site</a><a href="/play/admin.html" class="on">🎰 Instante</a></div>
+  <div class="admright">
+    <a href="#" id="logout-link" onclick="doLogout();return false" style="display:none">Ieși din cont</a>
+    <a href="/">← Site</a>
+  </div>
+</div>
+<div class="wrap">
+
+
+  <!-- ═══ LOGIN ═══ -->
+  <div id="login-view" class="card">
+    <div class="card-title">🔐 Admin</div>
+    <div id="login-alert" class="alert"></div>
+    <label for="login-email">Email</label>
+    <input type="email" id="login-email" autocomplete="username">
+    <label for="login-pass">Parolă Supabase</label>
+    <input type="password" id="login-pass" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-gold btn-full" onclick="doLogin()">Intră</button>
+  </div>
+
+  <!-- ═══ PANOU ═══ -->
+  <div id="admin-view" style="display:none">
+    <div id="global-alert" class="alert"></div>
+    <div class="tabs">
+      <button class="tab active" data-tab="comps"   onclick="showTab('comps')">🏆 Competiții</button>
+      <button class="tab"        data-tab="prizes"  onclick="showTab('prizes')">💰 Premii</button>
+      <button class="tab"        data-tab="buyers"  onclick="showTab('buyers')">🎟️ Cumpărători</button>
+      <button class="tab"        data-tab="players" onclick="showTab('players')">👤 Jucători</button>
+      <button class="tab"        data-tab="draws"   onclick="showTab('draws')">📋 Extrageri</button>
+    </div>
+
+    <!-- ─────────── COMPETIȚII ─────────── -->
+    <section class="section active" id="sec-comps">
+      <div class="card">
+        <div class="card-title" id="comp-form-title">Competiție nouă</div>
+        <input type="hidden" id="c-id">
+        <label for="c-name">Nume</label>
+        <input type="text" id="c-name" placeholder="ex: Instant Prizes — £75,000 Cash">
+        <div class="grid-2">
+          <div>
+            <label for="c-access">Cine joacă gratuit</label>
+            <select id="c-access" onchange="syncAccessFields()">
+              <option value="buyers">Doar cumpărătorii (lista din tabul Cumpărători)</option>
+              <option value="open">Oricine își face cont (promoție)</option>
+            </select>
+          </div>
+          <div>
+            <label for="c-status">Stare</label>
+            <select id="c-status">
+              <option value="draft">Ciornă — nu apare pe site</option>
+              <option value="active">Activă — se poate juca</option>
+              <option value="paused">Pe pauză — se vede, nu se joacă</option>
+              <option value="closed">Încheiată</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div>
+            <label for="c-tickets">Total bilete</label>
+            <input type="number" id="c-tickets" value="10000" min="1" max="1000000">
+          </div>
+          <div id="free-spins-wrap">
+            <label for="c-free">Spin-uri gratuite / cont</label>
+            <input type="number" id="c-free" value="1" min="0">
+          </div>
+          <div>
+            <label for="c-cost">Cost spin în credite</label>
+            <input type="number" id="c-cost" value="0" min="0">
+          </div>
+        </div>
+        <div class="note" id="access-note"></div>
+        <div class="grid-2">
+          <div>
+            <label for="c-maxcredit">Maxim spin-uri pe credite / cont</label>
+            <input type="number" id="c-maxcredit" value="0" min="0">
+            <div class="note">0 = fără limită. Contează doar dacă costul e peste 0.</div>
+          </div>
+          <div>
+            <label for="c-link">Link Raffall</label>
+            <input type="text" id="c-link" placeholder="https://raffall.com/...">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gold" id="c-save" onclick="saveComp()">✅ Creează competiția</button>
+          <button class="btn btn-ghost" id="c-cancel" style="display:none" onclick="resetCompForm()">Renunță</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Toate competițiile</div>
+        <div id="comp-list"></div>
+      </div>
+    </section>
+
+    <!-- ─────────── PREMII ─────────── -->
+    <section class="section" id="sec-prizes">
+      <div class="card">
+        <label for="p-comp">Competiția</label>
+        <select id="p-comp" onchange="renderPrizes()"></select>
+        <div class="stats" id="p-stats" style="margin-top:14px"></div>
+
+        <div class="sub-head">⚡ Generator automat</div>
+        <div class="grid-3">
+          <div><label for="g-budget">Buget total</label><input type="number" id="g-budget" min="0" step="0.01" placeholder="ex: 500" oninput="previewGen()"></div>
+          <div><label for="g-count">Număr de premii</label><input type="number" id="g-count" min="1" placeholder="ex: 50" oninput="previewGen()"></div>
+          <div>
+            <label for="g-kind">Tip</label>
+            <select id="g-kind" onchange="previewGen()">
+              <option value="cash">Bani (£)</option>
+              <option value="credits">Credite</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label for="g-dist">Distribuție</label>
+            <select id="g-dist" onchange="syncGenFields();previewGen()">
+              <option value="pyramid">Piramidă — puține premii mari, multe mici</option>
+              <option value="equal">Egale</option>
+            </select>
+          </div>
+          <div id="g-ratio-wrap">
+            <label for="g-ratio">Cel mai mare premiu = de câte ori cel mai mic</label>
+            <input type="number" id="g-ratio" value="20" min="1" oninput="previewGen()">
+          </div>
+        </div>
+        <div class="note" id="g-summary"></div>
+        <div class="preview-list" id="g-preview"></div>
+        <button class="btn btn-gold btn-full" id="g-btn" onclick="runGenerator()" disabled>⚡ Pune premiile pe bilete aleatorii</button>
+
+        <div class="sub-head">➕ Premiu manual</div>
+        <div class="grid-3">
+          <div><label for="m-ticket">Bilet</label><input type="number" id="m-ticket" min="1" placeholder="ex: 547"></div>
+          <div>
+            <label for="m-kind">Tip</label>
+            <select id="m-kind"><option value="cash">Bani (£)</option><option value="credits">Credite</option></select>
+          </div>
+          <div><label for="m-amount">Valoare</label><input type="number" id="m-amount" min="0" step="0.01" placeholder="ex: 25"></div>
+        </div>
+        <label for="m-label">Descriere (opțional)</label>
+        <input type="text" id="m-label" placeholder="ex: AirPods Pro — lasă gol pentru bani/credite">
+        <button class="btn btn-ghost btn-full" onclick="addManualPrize()">➕ Adaugă premiul</button>
+
+        <div class="sub-head">Lista de premii</div>
+        <div id="p-list"></div>
+      </div>
+    </section>
+
+    <!-- ─────────── CUMPĂRĂTORI ─────────── -->
+    <section class="section" id="sec-buyers">
+      <div class="card">
+        <label for="b-comp">Competiția</label>
+        <select id="b-comp" onchange="renderBuyers()"></select>
+        <div class="note" id="b-note"></div>
+
+        <div class="sub-head">🙋 Cereri de verificare</div>
+        <div class="note" style="margin-bottom:10px">Jucători care și-au făcut cont și spun că au cumpărat bilet, dar nu sunt încă în listă. Caută-i pe Raffall și adaugă-i — cererea dispare singură când username-ul intră în listă.</div>
+        <div id="b-requests"></div>
+
+        <div class="sub-head">Lipește lista de pe Raffall</div>
+        <div class="note" style="margin-bottom:8px">Pe Raffall apasă <b>Load More</b> până se încarcă toți participanții, apoi selectează tot și copiază. „x10”, „Load More” și titlurile se curăță singure.</div>
+        <textarea id="b-input" oninput="previewBuyers()" placeholder="Lipește aici lista de participanți de pe Raffall&#10;&#10;Maurits   x10&#10;Luis Cruz   x150&#10;Iain Morton   x1"></textarea>
+
+        <label>Câte spin-uri primește fiecare</label>
+        <div class="spin-modes">
+          <label class="spin-mode"><input type="radio" name="b-mode" value="one" checked onchange="previewBuyers()"> <span><b>1 spin</b> fiecare</span></label>
+          <label class="spin-mode"><input type="radio" name="b-mode" value="custom" onchange="previewBuyers()"> <span><b>Custom:</b> <input type="number" id="b-custom" min="1" value="3" oninput="previewBuyers()" onfocus="document.querySelector('input[name=b-mode][value=custom]').checked=true;previewBuyers()"> spin-uri fiecare</span></label>
+          <label class="spin-mode"><input type="radio" name="b-mode" value="tickets" onchange="previewBuyers()"> <span><b>După bilete:</b> x10 = 10 spin-uri</span></label>
+        </div>
+        <div class="note" id="b-preview"></div>
+
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="saveBuyers('add')">➕ Actualizează lista</button>
+          <button class="btn btn-ghost" onclick="saveBuyers('replace')">♻️ Înlocuiește toată lista</button>
+        </div>
+
+        <div class="sub-head">Lista curentă</div>
+        <div id="b-list"></div>
+      </div>
+    </section>
+
+    <!-- ─────────── JUCĂTORI ─────────── -->
+    <section class="section" id="sec-players">
+      <div class="card">
+        <div class="stats" id="pl-stats"></div>
+        <input type="search" id="pl-search" placeholder="🔍 Caută nume…" oninput="renderPlayers()">
+        <div id="pl-list" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <!-- ─────────── EXTRAGERI ─────────── -->
+    <section class="section" id="sec-draws">
+      <div class="card">
+        <label for="d-comp">Competiția</label>
+        <select id="d-comp" onchange="renderDraws()"></select>
+        <div class="stats" id="d-stats" style="margin-top:14px"></div>
+        <div id="d-list"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ═══ CONFIG ═══════════════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://bgbsfufelueubbnxsdsy.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnYnNmdWZlbHVldWJibnhzZHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzgwNDksImV4cCI6MjEwNjg1NDA0OX0.CU6Ka5jWd6xeh-jdlNaH8_IR3xGWcX3-oLdBsaWiR8s';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const nkey = s => String(s ?? '').trim().replace(/^@+/, '').trim().toLowerCase();
+
+let comps = [], prizes = [], players = [];
+let genPlan = null;
+
+/* ═══ MESAJE ═══════════════════════════════════════════════════ */
+function showAlert(id, type, msg){
+  const el = $(id); if(!el) return;
+  el.className = 'alert alert-' + type + ' show';
+  el.innerHTML = msg;
+  clearTimeout(el._t);
+  if(type === 'success') el._t = setTimeout(() => el.classList.remove('show'), 4000);
+}
+const flash = (type, msg) => showAlert('global-alert', type, msg);
+
+const ERRORS = {
+  not_admin: 'Contul ăsta nu e admin.',
+  username_taken: 'Username-ul e deja folosit de alt cont.',
+  invalid_username: 'Username invalid (2–40 caractere).',
+  no_profile: 'Contul jucătorului nu există.',
+  zero_delta: 'Scrie un număr diferit de 0.'
+};
+function errMsg(e){
+  const m = (e && (e.message || e.details)) || String(e);
+  for(const k in ERRORS) if(m.includes(k)) return ERRORS[k];
+  if(e && e.code === '23505') return 'Există deja un premiu pe biletul ăsta.';
+  if(/check constraint.*credits/i.test(m)) return 'Soldul nu poate scădea sub 0.';
+  if(/JWT|expired/i.test(m)) return 'Sesiunea a expirat. Reîncarcă pagina și intră din nou.';
+  if(/Failed to fetch|NetworkError/i.test(m)) return 'Nu am conexiune cu Supabase.';
+  return 'Eroare: ' + esc(m);
+}
+
+/* ═══ FORMATARE ════════════════════════════════════════════════ */
+const fmtDate = iso => iso ? new Date(iso).toLocaleString('ro-RO', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '—';
+function fmtPrize(p){
+  if(!p) return '';
+  if(p.label) return esc(p.label);
+  return p.kind === 'credits' ? `⭐ ${Number(p.amount).toLocaleString('en-GB')} credite` : `£${Number(p.amount).toFixed(2).replace(/\.00$/, '')}`;
+}
+const STATUS = { draft:['Ciornă','pill-draft'], active:['Activă','pill-active'], paused:['Pe pauză','pill-paused'], closed:['Încheiată','pill-closed'] };
+const statusPill = s => `<span class="pill ${STATUS[s][1]}">${STATUS[s][0]}</span>`;
+const accessPill = a => a === 'open' ? '<span class="pill pill-open">Deschisă</span>' : '<span class="pill pill-buyers">Cumpărători</span>';
+
+/* ═══ LOGIN ════════════════════════════════════════════════════ */
+async function enterIfAdmin(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session) return false;
+  const { data, error } = await sb.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle();
+  if(error || !data){
+    await sb.auth.signOut();
+    showAlert('login-alert','error','Contul ăsta nu are drept de admin.');
+    return false;
+  }
+  $('login-view').style.display = 'none';
+  $('admin-view').style.display = 'block';
+  $('logout-link').style.display = 'inline';
+  await loadAll();
+  showTab(sessionStorage.getItem('ip_admin_tab') || 'comps');
+  return true;
+}
+async function doLogin(){
+  const email = $('login-email').value.trim(), password = $('login-pass').value;
+  if(!email || !password) return showAlert('login-alert','error','Completează emailul și parola.');
+  showAlert('login-alert','info','Se verifică…');
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if(error) return showAlert('login-alert','error', /invalid/i.test(error.message) ? 'Email sau parolă greșită.' : esc(error.message));
+  $('login-pass').value = '';
+  $('login-alert').classList.remove('show');
+  await enterIfAdmin();
+}
+async function doLogout(){ await sb.auth.signOut(); location.reload(); }
+
+/* ═══ TABURI ═══════════════════════════════════════════════════ */
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === 'sec-' + name));
+  sessionStorage.setItem('ip_admin_tab', name);
+  if(name === 'prizes')  renderPrizes();
+  if(name === 'buyers')  renderBuyers();
+  if(name === 'players') loadPlayers();
+  if(name === 'draws')   renderDraws();
+}
+
+/* ═══ ÎNCĂRCARE ════════════════════════════════════════════════ */
+async function loadComps(){
+  const { data, error } = await sb.from('instant_competitions').select('*').order('created_at', { ascending:false });
+  if(error) return flash('error', errMsg(error));
+  comps = data;
+}
+async function loadPrizeSummary(){
+  const { data, error } = await sb.from('instant_prizes').select('id,competition_id,ticket,kind,amount,label,won_by,won_at').order('ticket');
+  if(error) return flash('error', errMsg(error));
+  prizes = data;
+}
+async function loadAll(){
+  await Promise.all([loadComps(), loadPrizeSummary()]);
+  renderComps();
+  fillCompSelects();
+}
+function fillCompSelects(){
+  const opt = c => `<option value="${c.id}">${esc(c.name)} — ${STATUS[c.status][0]}</option>`;
+  const grp = (label, list) => list.length ? `<optgroup label="${label}">${list.map(opt).join('')}</optgroup>` : '';
+  const active = comps.filter(c => c.status === 'active');
+  const waiting = comps.filter(c => c.status === 'paused' || c.status === 'draft');
+  const closed = comps.filter(c => c.status === 'closed');
+  const sets = {
+    // Cumpărători: doar ce se mai poate juca — încheiatele nu apar deloc
+    'b-comp': grp('🟢 Active', active) + grp('⏸ Pe pauză / ciorne', waiting),
+    // Premii și Extrageri: încheiatele rămân, la final, ca istoric
+    'p-comp': grp('🟢 Active', active) + grp('⏸ Pe pauză / ciorne', waiting) + grp('🏁 Încheiate', closed),
+    'd-comp': grp('🟢 Active', active) + grp('⏸ Pe pauză / ciorne', waiting) + grp('🏁 Încheiate', closed)
+  };
+  Object.entries(sets).forEach(([id, html]) => {
+    const el = $(id), prev = el.value;
+    el.innerHTML = html || '<option value="">Nicio competiție activă</option>';
+    if(prev && [...el.options].some(o => o.value === prev)) el.value = prev;
+  });
+}
+const compById = id => comps.find(c => String(c.id) === String(id));
+
+/* ═══ COMPETIȚII ═══════════════════════════════════════════════ */
+function syncAccessFields(){
+  const open = $('c-access').value === 'open';
+  $('free-spins-wrap').style.opacity = open ? '1' : '.4';
+  $('c-free').disabled = !open;
+  $('access-note').textContent = open
+    ? 'Orice cont primește numărul de spin-uri gratuite de mai sus. Cineva cu mai multe emailuri le primește de mai multe ori — pune premii mici la promoții.'
+    : 'Spin-urile gratuite le iau doar username-urile din tabul Cumpărători, câte spin-uri ai trecut acolo pentru fiecare.';
+}
+function resetCompForm(){
+  $('c-id').value = '';
+  $('c-name').value = ''; $('c-access').value = 'buyers'; $('c-status').value = 'draft';
+  $('c-tickets').value = 10000; $('c-free').value = 1; $('c-cost').value = 0; $('c-maxcredit').value = 0; $('c-link').value = '';
+  $('comp-form-title').textContent = 'Competiție nouă';
+  $('c-save').textContent = '✅ Creează competiția';
+  $('c-cancel').style.display = 'none';
+  syncAccessFields();
+  renderComps();
+}
+function editComp(id){
+  const c = compById(id); if(!c) return;
+  $('c-id').value = c.id;
+  $('c-name').value = c.name; $('c-access').value = c.access; $('c-status').value = c.status;
+  $('c-tickets').value = c.total_tickets; $('c-free').value = c.free_spins; $('c-cost').value = c.credit_cost;
+  $('c-maxcredit').value = c.max_credit_spins; $('c-link').value = c.raffall_link || '';
+  $('comp-form-title').textContent = 'Editează: ' + c.name;
+  $('c-save').textContent = '💾 Salvează modificările';
+  $('c-cancel').style.display = 'inline-flex';
+  syncAccessFields();
+  renderComps();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+async function saveComp(){
+  const id = $('c-id').value;
+  const row = {
+    name: $('c-name').value.trim(),
+    access: $('c-access').value,
+    status: $('c-status').value,
+    total_tickets: parseInt($('c-tickets').value) || 0,
+    free_spins: Math.max(parseInt($('c-free').value) || 0, 0),
+    credit_cost: Math.max(parseInt($('c-cost').value) || 0, 0),
+    max_credit_spins: Math.max(parseInt($('c-maxcredit').value) || 0, 0),
+    raffall_link: $('c-link').value.trim() || null
+  };
+  if(!row.name) return flash('error','Scrie numele competiției.');
+  if(row.total_tickets < 1 || row.total_tickets > 1000000) return flash('error','Totalul de bilete trebuie să fie între 1 și 1.000.000.');
+  if(id){
+    const c = compById(id);
+    const maxPrizeTicket = Math.max(0, ...prizes.filter(p => String(p.competition_id) === String(id)).map(p => p.ticket));
+    if(row.total_tickets < maxPrizeTicket) return flash('error', `Există un premiu pe biletul ${maxPrizeTicket}. Totalul nu poate fi mai mic.`);
+    const { error } = await sb.from('instant_competitions').update(row).eq('id', id);
+    if(error) return flash('error', errMsg(error));
+    flash('success','✅ Salvat.');
+  } else {
+    const { error } = await sb.from('instant_competitions').insert(row);
+    if(error) return flash('error', errMsg(error));
+    flash('success', row.status === 'draft' ? '📝 Creată ca ciornă. Adaugă premiile, apoi activeaz-o.' : '✅ Competiție creată.');
+  }
+  await loadAll();
+  resetCompForm();
+}
+/* ═══ DESCHIDE + NOTIFICĂ ══════════════════════════════════════ */
+const INSTANT_URL = 'https://giveawayscommunity.com/play/';
+let launchId = null;
+const ukTime = d => d.toLocaleTimeString('en-GB', { timeZone:'Europe/London', hour:'2-digit', minute:'2-digit' });
+function closeDateFromInput(){
+  const v = $('l-close').value; if(!v) return null;
+  const [h, m] = v.split(':').map(Number);
+  const d = new Date(); d.setHours(h, m, 0, 0);
+  if(d <= new Date()) d.setDate(d.getDate() + 1);      // ora a trecut azi → mâine
+  return d;
+}
+function openLaunch(id){
+  const c = compById(id); if(!c) return;
+  launchId = id;
+  const active = c.status === 'active';
+  $('l-title').textContent = active ? '🔔 Notifică: ' + c.name : '▶ Deschide + notifică: ' + c.name;
+  $('l-sub').textContent = active ? 'Competiția e deja deschisă. Poți schimba ora de închidere și trimite o notificare.' : 'Competiția se deschide imediat ce apeși butonul.';
+  const d = c.closes_at ? new Date(c.closes_at) : new Date(Date.now() + 30 * 60000);
+  if(!c.closes_at) d.setMinutes(Math.ceil(d.getMinutes() / 5) * 5, 0, 0);
+  $('l-close').value = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  $('l-has-close').checked = true;
+  $('l-notify').checked = true;
+  $('l-quick').innerHTML = [15, 30, 60, 120].map(m => `<span onclick="quickClose(${m})">+${m < 60 ? m + ' min' : m / 60 + ' h'}</span>`).join('');
+  $('l-url').textContent = INSTANT_URL + '?c=' + c.id;
+  $('l-go').textContent = active ? '💾 Salvează + trimite' : '▶ Deschide acum';
+  $('l-ntitle').dataset.auto = '1'; $('l-nbody').dataset.auto = '1';
+  syncLaunch(true);
+  $('launch-modal').classList.add('open');
+}
+function quickClose(min){
+  const d = new Date(Date.now() + min * 60000);
+  $('l-close').value = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  syncLaunch();
+}
+function closeLaunch(){ $('launch-modal').classList.remove('open'); launchId = null; }
+function syncLaunch(){
+  const c = compById(launchId); if(!c) return;
+  const hasClose = $('l-has-close').checked, notify = $('l-notify').checked;
+  $('l-close-wrap').style.display = hasClose ? 'block' : 'none';
+  $('l-msg-wrap').style.display = notify ? 'block' : 'none';
+  const d = hasClose ? closeDateFromInput() : null;
+  $('l-close-note').innerHTML = d
+    ? `Se închide la <b>${d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'})}</b> ora României = <b>${ukTime(d)}</b> UK${d.getDate() !== new Date().getDate() ? ' (mâine)' : ''}. Apoi trece singură pe pauză.`
+    : '';
+  // textul notificării se completează singur, până îl modifici tu
+  const shortName = c.name.replace(/\s*\(.*$/, '').trim() || c.name;
+  if($('l-ntitle').dataset.auto) $('l-ntitle').value = `⚡ ${shortName} is OPEN!`.slice(0, 65);
+  if($('l-nbody').dataset.auto) $('l-nbody').value = (d ? `Open now until ${ukTime(d)} UK time only. ` : 'Open now. ')
+    + (/every ticket wins/i.test(c.name) ? 'Every ticket wins — tap to spin!' : 'Tap to spin!');
+}
+document.addEventListener('input', e => { if(e.target.id === 'l-ntitle' || e.target.id === 'l-nbody') delete e.target.dataset.auto; });
+
+async function sendPush({ title, body, url, trigger, only_me }){
+  const { data, error } = await sb.functions.invoke('send-push', { body: { title, body, url, trigger, only_me: !!only_me } });
+  if(error){
+    let msg = error.message || 'Eroare';
+    try{ const j = await error.context.json(); if(j && j.error) msg = j.error; }catch(e){}
+    throw new Error(msg);
+  }
+  return data;
+}
+async function testLaunchPush(){
+  const c = compById(launchId); if(!c) return;
+  try{
+    const r = await sendPush({ title: $('l-ntitle').value.trim() || '🧪 Test', body: $('l-nbody').value.trim(), url: INSTANT_URL + '?c=' + c.id, trigger:'test', only_me: true });
+    flash('success', `🧪 Test trimis pe ${r.sent} dispozitiv(e) ale tale. Competiția NU a fost deschisă.`);
+  }catch(e){ flash('error', esc(e.message)); }
+}
+async function doLaunch(){
+  const c = compById(launchId); if(!c) return;
+  const d = $('l-has-close').checked ? closeDateFromInput() : null;
+  if($('l-has-close').checked && !d) return flash('error','Alege ora de închidere.');
+  const notify = $('l-notify').checked;
+  const title = $('l-ntitle').value.trim(), body = $('l-nbody').value.trim();
+  if(notify && !title) return flash('error','Scrie titlul notificării.');
+  const prizesLeft = prizes.filter(p => p.competition_id === c.id && !p.won_by).length;
+  if(!prizesLeft && !confirm('Competiția nu are premii libere. O deschizi totuși?')) return;
+  $('l-go').disabled = true;
+  const { error } = await sb.from('instant_competitions').update({ status:'active', closes_at: d ? d.toISOString() : null }).eq('id', c.id);
+  if(error){ $('l-go').disabled = false; return flash('error', errMsg(error)); }
+  let msg = d ? `▶ Deschisă până la ${d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'})}.` : '▶ Deschisă.';
+  if(notify){
+    try{
+      const r = await sendPush({ title, body, url: INSTANT_URL + '?c=' + c.id, trigger:'instant_open' });
+      msg += ` 🔔 Notificare trimisă la ${r.sent} abonați.`;
+    }catch(e){
+      $('l-go').disabled = false;
+      closeLaunch(); await loadAll();
+      return flash('error', msg + ' Dar notificarea NU a plecat: ' + esc(e.message));
+    }
+  }
+  $('l-go').disabled = false;
+  closeLaunch();
+  flash('success', msg);
+  await loadAll();
+}
+
+async function setStatus(id, status){
+  const { error } = await sb.from('instant_competitions').update({ status, closes_at: null }).eq('id', id);
+  if(error) return flash('error', errMsg(error));
+  flash('success', status === 'closed'
+    ? '🏁 Încheiată — nu mai apare pe site. O găsești jos, la „Încheiate”.'
+    : `Stare schimbată: ${STATUS[status][0]}.`);
+  await loadAll();
+}
+async function deleteComp(id){
+  const c = compById(id); if(!c) return;
+  const { count } = await sb.from('instant_draws').select('id', { count:'exact', head:true }).eq('competition_id', id);
+  const msg = count
+    ? `„${c.name}” are deja ${count} extrageri. Dacă o ștergi, dispar și extragerile și premiile ei.\n\nMai bine o treci pe „Încheiată”. Ștergi totuși?`
+    : `Ștergi definitiv „${c.name}” și premiile ei?`;
+  if(!confirm(msg)) return;
+  const { error } = await sb.from('instant_competitions').delete().eq('id', id);
+  if(error) return flash('error', errMsg(error));
+  if($('c-id').value === String(id)) resetCompForm();
+  flash('success','🗑️ Ștearsă.');
+  await loadAll();
+}
+let closedOpen = false;
+function compRow(c){
+  const ps = prizes.filter(p => p.competition_id === c.id);
+  const won = ps.filter(p => p.won_by).length;
+  const parts = [
+    `${c.total_tickets.toLocaleString('en-GB')} bilete`,
+    `${ps.length} premii (${won} câștigate)`,
+    c.access === 'open' ? `${c.free_spins} spin gratuit/cont` : 'spin-uri după listă',
+    c.credit_cost > 0 ? `${c.credit_cost} credite/spin` + (c.max_credit_spins ? `, max ${c.max_credit_spins}` : '') : 'fără credite'
+  ];
+  const actions = [];
+  if(c.status !== 'closed') actions.push(`<button class="btn btn-gold btn-sm" onclick="openLaunch(${c.id})">🔔 ${c.status === 'active' ? 'Notifică' : 'Deschide + notifică'}</button>`);
+  if(c.status !== 'active') actions.push(`<button class="btn btn-ghost btn-sm" onclick="setStatus(${c.id},'active')">▶ ${c.status === 'closed' ? 'Redeschide' : 'Activează'}</button>`);
+  if(c.status === 'active') actions.push(`<button class="btn btn-ghost btn-sm" onclick="setStatus(${c.id},'paused')">⏸ Pauză</button>`);
+  if(c.status !== 'closed' && c.status !== 'draft') actions.push(`<button class="btn btn-ghost btn-sm" onclick="setStatus(${c.id},'closed')">🏁 Încheie</button>`);
+  actions.push(`<button class="btn btn-ghost btn-sm" title="Editează" onclick="editComp(${c.id})">✏️</button>`);
+  actions.push(`<button class="btn btn-danger btn-sm" title="Șterge" onclick="deleteComp(${c.id})">🗑️</button>`);
+  return `<div class="row${$('c-id').value === String(c.id) ? ' editing' : ''}">
+    <div class="row-main">
+      <div class="row-name">${esc(c.name)}</div>
+      ${c.raffle_id && c.status !== 'closed' ? '<div class="row-sub">🔗 Legată de tombola de pe site — butonul de pe card apare când o activezi.</div>' : ''}
+      <div class="row-sub">${statusPill(c.status)}${accessPill(c.access)} ${parts.join(' · ')}</div>
+      ${c.status === 'active' && c.closes_at ? `<div class="row-sub" style="color:var(--orange);font-weight:700">⏱ Se închide automat la ${new Date(c.closes_at).toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'})} (ora României) și trece pe pauză</div>` : ''}
+    </div>
+    <div class="row-actions">${actions.join('')}</div>
+  </div>`;
+}
+function renderComps(){
+  const wrap = $('comp-list');
+  if(!comps.length){ wrap.innerHTML = '<div class="empty">Nicio competiție încă. Creează prima mai sus.</div>'; return; }
+  const by = st => comps.filter(c => c.status === st);
+  const group = (key, title, list, open, note) => list.length ? `
+    <details class="cgroup" data-key="${key}"${open ? ' open' : ''}>
+      <summary><span>${title}</span><span class="gcount">${list.length}</span></summary>
+      ${note ? `<div class="note" style="margin:0 0 10px">${note}</div>` : ''}
+      ${list.map(compRow).join('')}
+    </details>` : '';
+  wrap.innerHTML =
+      group('active', '🟢 Active', by('active'), true)
+    + group('paused', '⏸ Pe pauză', by('paused'), true, 'Se văd pe site, dar nu se poate juca.')
+    + group('draft',  '📝 Ciorne',  by('draft'),  true, 'Nu apar pe site. Adaugă premiile, apoi activează.')
+    + group('closed', '🏁 Încheiate', by('closed'), closedOpen, 'Nu mai apar pe site. Premiile și extragerile rămân în taburile Premii și Extrageri.');
+  const cg = wrap.querySelector('details[data-key="closed"]');
+  if(cg) cg.addEventListener('toggle', () => { closedOpen = cg.open; });
+}
+
+/* ═══ PREMII ═══════════════════════════════════════════════════ */
+function syncGenFields(){ $('g-ratio-wrap').style.visibility = $('g-dist').value === 'pyramid' ? 'visible' : 'hidden'; }
+
+/* Împarte bugetul. Piramidă: cel mai mare premiu = R × cel mai mic,
+   cu scădere geometrică între ele. Banii se rotunjesc la 0,50 £ (la
+   0,01 £ dacă bugetul e mic), creditele la întreg. Restul de rotunjire
+   se împarte câte o unitate, începând cu premiile mari. */
+function splitBudget(budget, n, kind, dist, ratio){
+  if(!(budget > 0) || !(n >= 1)) return null;
+  const unit = kind === 'credits' ? 1 : (budget / 0.5 >= n * 2 ? 0.5 : 0.01);
+  if(budget / unit < n) return { error: `Bugetul e prea mic pentru ${n} premii.` };
+  let w;
+  if(dist === 'equal' || n === 1 || ratio <= 1) w = Array(n).fill(1);
+  else w = Array.from({ length:n }, (_, i) => Math.pow(ratio, (n - 1 - i) / (n - 1)));
+  const sum = w.reduce((a,b) => a + b, 0);
+  const units = Math.round(budget / unit);
+  let amounts = w.map(x => Math.max(1, Math.floor(units * x / sum)));
+  let diff = units - amounts.reduce((a,b) => a + b, 0);
+  for(let i = 0; diff > 0; i = (i + 1) % n, diff--) amounts[i]++;
+  for(let i = n - 1; diff < 0 && i >= 0; i--) while(diff < 0 && amounts[i] > 1){ amounts[i]--; diff++; }
+  if(diff !== 0) return { error: 'Nu pot împărți bugetul așa. Micșorează raportul sau numărul de premii.' };
+  return { amounts: amounts.map(a => kind === 'credits' ? a : Math.round(a * unit * 100) / 100).sort((a,b) => b - a) };
+}
+function freeTickets(comp){
+  const taken = new Set(prizes.filter(p => p.competition_id === comp.id).map(p => p.ticket));
+  return { taken, count: comp.total_tickets - taken.size };
+}
+function previewGen(){
+  genPlan = null;
+  $('g-btn').disabled = true;
+  $('g-preview').innerHTML = '';
+  const comp = compById($('p-comp').value);
+  if(!comp){ $('g-summary').textContent = ''; return; }
+  const budget = parseFloat($('g-budget').value), n = parseInt($('g-count').value);
+  const kind = $('g-kind').value, dist = $('g-dist').value, ratio = parseFloat($('g-ratio').value) || 1;
+  if(!(budget > 0) || !(n >= 1)){ $('g-summary').textContent = 'Completează bugetul și numărul de premii ca să vezi previzualizarea.'; return; }
+  const free = freeTickets(comp).count;
+  if(n > free){ $('g-summary').innerHTML = `<span style="color:var(--red)">Sunt doar ${free} bilete libere în competiția asta.</span>`; return; }
+  const res = splitBudget(budget, n, kind, dist, ratio);
+  if(!res || res.error){ $('g-summary').innerHTML = `<span style="color:var(--red)">${esc(res ? res.error : '')}</span>`; return; }
+  genPlan = { comp, kind, amounts: res.amounts };
+  const fmt = a => kind === 'credits' ? `⭐ ${a.toLocaleString('en-GB')}` : `£${a.toFixed(2).replace(/\.00$/, '')}`;
+  const groups = {};
+  res.amounts.forEach(a => groups[a] = (groups[a] || 0) + 1);
+  const total = res.amounts.reduce((a,b) => a + b, 0);
+  $('g-summary').innerHTML = `Total: <b>${fmt(kind === 'credits' ? total : Math.round(total * 100) / 100)}</b> în ${n} premii, pe bilete aleatorii din ${free.toLocaleString('en-GB')} libere.`;
+  $('g-preview').innerHTML = Object.entries(groups).sort((a,b) => b[0] - a[0]).map(([a, c]) => `<span>${c} × ${fmt(Number(a))}</span>`).join('');
+  $('g-btn').disabled = false;
+}
+async function runGenerator(){
+  if(!genPlan) return;
+  const { comp, kind, amounts } = genPlan;
+  if(!confirm(`Adaug ${amounts.length} premii în „${comp.name}”?`)) return;
+  // bilete libere, alese aleatoriu (fără premiu deja pus)
+  const { taken } = freeTickets(comp);
+  const { data: drawn } = await sb.from('instant_draws').select('ticket').eq('competition_id', comp.id);
+  (drawn || []).forEach(d => taken.add(d.ticket));
+  const pool = [];
+  for(let t = 1; t <= comp.total_tickets; t++) if(!taken.has(t)) pool.push(t);
+  if(pool.length < amounts.length) return flash('error', `Sunt doar ${pool.length} bilete libere (fără premiu și neextrase).`);
+  for(let i = 0; i < amounts.length; i++){
+    const j = i + Math.floor(Math.random() * (pool.length - i));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const rows = amounts.map((a, i) => ({ competition_id: comp.id, ticket: pool[i], kind, amount: a }));
+  $('g-btn').disabled = true;
+  flash('info', `Se adaugă ${rows.length} premii…`);
+  const { error } = await sb.from('instant_prizes').insert(rows);
+  if(error){ $('g-btn').disabled = false; return flash('error', errMsg(error)); }
+  flash('success', `⚡ ${rows.length} premii adăugate.`);
+  $('g-budget').value = ''; $('g-count').value = '';
+  await loadPrizeSummary();
+  renderPrizes(); renderComps();
+}
+async function addManualPrize(){
+  const comp = compById($('p-comp').value);
+  if(!comp) return flash('error','Alege competiția.');
+  const ticket = parseInt($('m-ticket').value), kind = $('m-kind').value, amount = parseFloat($('m-amount').value);
+  if(!(ticket >= 1 && ticket <= comp.total_tickets)) return flash('error', `Biletul trebuie să fie între 1 și ${comp.total_tickets}.`);
+  if(!(amount > 0)) return flash('error','Scrie valoarea premiului.');
+  if(kind === 'credits' && amount !== Math.floor(amount)) return flash('error','Creditele trebuie să fie număr întreg.');
+  const { count } = await sb.from('instant_draws').select('id', { count:'exact', head:true }).eq('competition_id', comp.id).eq('ticket', ticket);
+  if(count) return flash('error', `Biletul ${ticket} a fost deja extras. Alege altul.`);
+  const { error } = await sb.from('instant_prizes').insert({ competition_id: comp.id, ticket, kind, amount, label: $('m-label').value.trim() || null });
+  if(error) return flash('error', errMsg(error));
+  flash('success', `➕ Premiu pus pe biletul ${ticket}.`);
+  ['m-ticket','m-amount','m-label'].forEach(id => $(id).value = '');
+  await loadPrizeSummary();
+  renderPrizes(); renderComps();
+}
+async function deletePrize(id){
+  if(!confirm('Ștergi premiul?')) return;
+  const { error } = await sb.from('instant_prizes').delete().eq('id', id).is('won_by', null);
+  if(error) return flash('error', errMsg(error));
+  await loadPrizeSummary();
+  renderPrizes(); renderComps();
+}
+async function deleteAllUnwon(){
+  const comp = compById($('p-comp').value); if(!comp) return;
+  const n = prizes.filter(p => p.competition_id === comp.id && !p.won_by).length;
+  if(!n) return;
+  if(!confirm(`Ștergi toate cele ${n} premii necâștigate din „${comp.name}”?\nCele câștigate rămân.`)) return;
+  const { error } = await sb.from('instant_prizes').delete().eq('competition_id', comp.id).is('won_by', null);
+  if(error) return flash('error', errMsg(error));
+  flash('success', `🗑️ ${n} premii șterse.`);
+  await loadPrizeSummary();
+  renderPrizes(); renderComps();
+}
+async function renderPrizes(){
+  syncGenFields();
+  if(!players.length) await loadPlayers(true);
+  const comp = compById($('p-comp').value);
+  if(!comp){ $('p-list').innerHTML = '<div class="empty">Creează întâi o competiție.</div>'; $('p-stats').innerHTML = ''; previewGen(); return; }
+  const ps = prizes.filter(p => p.competition_id === comp.id);
+  const won = ps.filter(p => p.won_by);
+  const sumCash = k => ps.filter(p => p.kind === 'cash' && (k === 'all' || !!p.won_by === k)).reduce((a,p) => a + Number(p.amount), 0);
+  const sumCred = k => ps.filter(p => p.kind === 'credits' && (k === 'all' || !!p.won_by === k)).reduce((a,p) => a + Number(p.amount), 0);
+  $('p-stats').innerHTML = `
+    <div class="stat"><b>${ps.length}</b><span>premii total</span></div>
+    <div class="stat"><b>${won.length}</b><span>câștigate</span></div>
+    <div class="stat"><b>£${sumCash('all').toFixed(0)}</b><span>bani (£${sumCash(true).toFixed(0)} câștigați)</span></div>
+    <div class="stat"><b>${sumCred('all').toLocaleString('en-GB')}</b><span>credite (${sumCred(true).toLocaleString('en-GB')} câștigate)</span></div>`;
+  previewGen();
+  if(!ps.length){ $('p-list').innerHTML = '<div class="empty">Niciun premiu încă.</div>'; return; }
+  const winners = Object.fromEntries(players.map(p => [p.id, p.username]));
+  $('p-list').innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>Bilet</th><th>Premiu</th><th>Stare</th><th></th></tr></thead><tbody>` +
+    ps.map(p => `<tr>
+      <td>#${String(p.ticket).padStart(5,'0')}</td>
+      <td>${fmtPrize(p)}</td>
+      <td>${p.won_by ? `<span class="pill pill-won">câștigat</span> ${esc(winners[p.won_by] || '')} · ${fmtDate(p.won_at)}` : '<span style="color:var(--muted)">liber</span>'}</td>
+      <td>${p.won_by ? '' : `<button class="btn btn-danger btn-sm" onclick="deletePrize(${p.id})">🗑️</button>`}</td>
+    </tr>`).join('') + '</tbody></table></div>' +
+    (ps.some(p => !p.won_by) ? `<button class="btn btn-danger btn-full" onclick="deleteAllUnwon()">🗑️ Șterge toate premiile necâștigate</button>` : '');
+}
+
+/* ═══ CUMPĂRĂTORI ══════════════════════════════════════════════ */
+/* Curăță lista copiată de pe Raffall:
+   „Maurits  x10” → Maurits cu 10 bilete. „x10” pe rând separat se lipește
+   de numele de deasupra. Titlurile paginii („Entrants”, „Load More”…) se ignoră. */
+const RAFFALL_JUNK = /^(entrants|load more|\(includes paid and free tickets\)|\d[\d,]*\s+tickets? (have|has) been issued\.?)$/i;
+function parseBuyers(text){
+  const seen = {}, tickets = {}, order = [];
+  let last = null;
+  text.replace(/\r/g, '').split('\n').forEach(line => {
+    let raw = line.replace(/[ \t]+/g, ' ').trim();
+    if(!raw || RAFFALL_JUNK.test(raw)) return;
+    const only = raw.match(/^x\s*(\d+)$/i);                 // „x10” singur pe rând
+    if(only){ if(last) tickets[last] = (tickets[last] || 0) + parseInt(only[1]); return; }
+    let t = 0;
+    const m = raw.match(/^(.*\S)\s+x\s*(\d+)$/i);             // „Nume x10”
+    if(m){ raw = m[1].trim(); t = parseInt(m[2]); }
+    const name = nkey(raw); if(!name) return;
+    if(!(name in seen)){ seen[name] = 0; order.push(name); }
+    seen[name]++;
+    if(t) tickets[name] = (tickets[name] || 0) + t;
+    last = name;
+  });
+  return order.map(n => ({ username: n, tickets: tickets[n] || seen[n] }));
+}
+function buyerMode(){ return document.querySelector('input[name=b-mode]:checked').value; }
+function spinsFor(b){
+  const mode = buyerMode();
+  if(mode === 'custom') return Math.max(parseInt($('b-custom').value) || 1, 1);
+  if(mode === 'tickets') return Math.max(b.tickets, 1);
+  return 1;
+}
+function readBuyers(){ return parseBuyers($('b-input').value); }
+function previewBuyers(){
+  const list = readBuyers();
+  const box = $('b-preview');
+  if(!list.length){ box.innerHTML = ''; return; }
+  const total = list.reduce((a,b) => a + spinsFor(b), 0);
+  const show = list.slice(0, 8).map(b => `<span>${esc(b.username)} · ${spinsFor(b)}</span>`).join('');
+  box.innerHTML = `Am găsit <b>${list.length}</b> participanți · <b>${total}</b> spin-uri în total.<div class="preview-list">${show}${list.length > 8 ? `<span>+ încă ${list.length - 8}</span>` : ''}</div>`;
+}
+async function saveBuyers(mode){
+  const comp = compById($('b-comp').value);
+  if(!comp) return flash('error','Alege competiția.');
+  const list = readBuyers();
+  if(!list.length) return flash('error','Lipește lista de participanți.');
+  let rows, added = 0, raised = 0;
+  if(mode === 'replace'){
+    if(!confirm(`Înlocuiești toată lista din „${comp.name}” cu ${list.length} participanți?`)) return;
+    const { error } = await sb.from('instant_eligibility').delete().eq('competition_id', comp.id);
+    if(error) return flash('error', errMsg(error));
+    rows = list.map(b => ({ competition_id: comp.id, username: b.username, spins: spinsFor(b) }));
+    added = rows.length;
+  } else {
+    // Actualizare: adaugă oamenii noi și crește spin-urile dacă au cumpărat mai mult.
+    // Nu adună peste ce era — poți lipi zilnic toată lista fără să dublezi spin-uri.
+    const { data: cur, error } = await sb.from('instant_eligibility').select('username,spins').eq('competition_id', comp.id);
+    if(error) return flash('error', errMsg(error));
+    const existing = Object.fromEntries((cur || []).map(r => [r.username, r.spins]));
+    rows = [];
+    list.forEach(b => {
+      const want = spinsFor(b), had = existing[b.username];
+      if(had === undefined){ added++; rows.push({ competition_id: comp.id, username: b.username, spins: want }); }
+      else if(want > had){ raised++; rows.push({ competition_id: comp.id, username: b.username, spins: want }); }
+    });
+    if(!rows.length){ flash('info','Nimic nou — toți participanții erau deja în listă.'); $('b-input').value = ''; previewBuyers(); return renderBuyers(); }
+  }
+  const { error } = await sb.from('instant_eligibility').upsert(rows, { onConflict: 'competition_id,username' });
+  if(error) return flash('error', errMsg(error));
+  flash('success', mode === 'replace'
+    ? `🎟️ Listă nouă: ${added} participanți.`
+    : `🎟️ ${added} participanți noi${raised ? `, ${raised} cu spin-uri în plus` : ''}.`);
+  $('b-input').value = '';
+  previewBuyers();
+  renderBuyers();
+}
+async function removeBuyer(username){
+  const comp = compById($('b-comp').value); if(!comp) return;
+  if(!confirm(`Scoți ${username} din listă?`)) return;
+  const { error } = await sb.from('instant_eligibility').delete().eq('competition_id', comp.id).eq('username', username);
+  if(error) return flash('error', errMsg(error));
+  renderBuyers();
+}
+async function renderRequests(comp){
+  const box = $('b-requests');
+  if(comp.access !== 'buyers'){ box.innerHTML = '<div class="note">Competiție deschisă — nu e nevoie de cereri.</div>'; return; }
+  const { data, error } = await sb.from('instant_requests').select('*').eq('competition_id', comp.id).order('created_at');
+  if(error){ box.innerHTML = `<div class="note">${errMsg(error)}</div>`; return; }
+  if(!data.length){ box.innerHTML = '<div class="empty" style="padding:14px">Nicio cerere în așteptare.</div>'; return; }
+  box.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Nume Raffall</th><th>Cerut</th><th></th></tr></thead><tbody>` +
+    data.map(r => `<tr>
+      <td><b>${esc(r.username)}</b></td><td>${fmtDate(r.created_at)}</td>
+      <td style="text-align:right">
+        <button class="btn btn-gold btn-sm" onclick="approveRequest('${esc(r.username)}')">✓ E pe Raffall — adaugă</button>
+        <button class="btn btn-ghost btn-sm" onclick="dismissRequest('${r.user_id}')">✕ Nu l-am găsit</button>
+      </td></tr>`).join('') + '</tbody></table></div>' +
+    `<div class="note" style="margin-top:8px">„Adaugă” îi dă 1 spin. Dacă a cumpărat mai multe bilete, scrie-l în câmpul de mai jos cu <code>username | spin-uri</code>.</div>`;
+}
+async function approveRequest(username){
+  const comp = compById($('b-comp').value); if(!comp) return;
+  const key = nkey(username);
+  const { data: cur } = await sb.from('instant_eligibility').select('spins').eq('competition_id', comp.id).eq('username', key).maybeSingle();
+  const { error } = await sb.from('instant_eligibility').upsert({ competition_id: comp.id, username: key, spins: (cur ? cur.spins : 0) + 1 }, { onConflict: 'competition_id,username' });
+  if(error) return flash('error', errMsg(error));
+  flash('success', `🎟️ ${esc(username)} adăugat cu 1 spin.`);
+  renderBuyers();
+}
+async function dismissRequest(userId){
+  const comp = compById($('b-comp').value); if(!comp) return;
+  if(!confirm('Ștergi cererea? Jucătorul o poate trimite din nou.')) return;
+  const { error } = await sb.from('instant_requests').delete().eq('competition_id', comp.id).eq('user_id', userId);
+  if(error) return flash('error', errMsg(error));
+  renderBuyers();
+}
+
+async function renderBuyers(){
+  const comp = compById($('b-comp').value);
+  if(!comp){ $('b-list').innerHTML = '<div class="empty">Creează întâi o competiție.</div>'; $('b-note').textContent = ''; $('b-requests').innerHTML = ''; return; }
+  renderRequests(comp);
+  $('b-note').innerHTML = comp.access === 'open'
+    ? '<span style="color:var(--orange)">Competiția asta e deschisă: oricine joacă gratuit, lista nu contează.</span>'
+    : 'Doar username-urile de aici primesc spin-uri gratuite în competiția asta.';
+  const [{ data: list, error }, { data: draws }] = await Promise.all([
+    sb.from('instant_eligibility').select('username,spins').eq('competition_id', comp.id).order('username'),
+    sb.from('instant_draws').select('username,paid_with').eq('competition_id', comp.id).eq('paid_with','free')
+  ]);
+  if(error) return flash('error', errMsg(error));
+  if(!list.length){ $('b-list').innerHTML = '<div class="empty">Lista e goală.</div>'; return; }
+  if(!players.length) await loadPlayers(true);
+  const hasAccount = new Set(players.map(p => nkey(p.username)));
+  const used = {};
+  (draws || []).forEach(d => { const k = nkey(d.username); used[k] = (used[k] || 0) + 1; });
+  const total = list.reduce((a,r) => a + r.spins, 0);
+  $('b-list').innerHTML = `<div class="note" style="margin-bottom:10px">${list.length} username-uri · ${total} spin-uri · ${list.filter(r => hasAccount.has(r.username)).length} au deja cont</div>
+    <div class="table-wrap"><table><thead><tr><th>Nume Raffall</th><th>Spin-uri</th><th>Folosite</th><th>Cont</th><th></th></tr></thead><tbody>` +
+    list.map(r => `<tr>
+      <td>${esc(r.username)}</td><td>${r.spins}</td><td>${used[r.username] || 0}</td>
+      <td>${hasAccount.has(r.username) ? '✅' : '<span style="color:var(--muted)">încă nu</span>'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="removeBuyer('${esc(r.username)}')">✕</button></td>
+    </tr>`).join('') + '</tbody></table></div>';
+}
+
+/* ═══ JUCĂTORI ═════════════════════════════════════════════════ */
+async function loadPlayers(silent){
+  const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending:false });
+  if(error) return flash('error', errMsg(error));
+  players = data;
+  if(!silent) renderPlayers();
+}
+function renderPlayers(){
+  const q = nkey($('pl-search').value);
+  const list = players.filter(p => !q || nkey(p.username).includes(q));
+  const totalCred = players.reduce((a,p) => a + p.credits, 0);
+  $('pl-stats').innerHTML = `
+    <div class="stat"><b>${players.length}</b><span>conturi</span></div>
+    <div class="stat"><b>${players.filter(p => p.verified).length}</b><span>verificate</span></div>
+    <div class="stat"><b>${totalCred.toLocaleString('en-GB')}</b><span>credite în conturi (£${(totalCred / 100).toFixed(2)})</span></div>
+    <div class="stat"><b>${players.filter(p => p.email_alerts).length}</b><span>📧 acceptă emailuri</span></div>`;
+  if(!list.length){ $('pl-list').innerHTML = `<div class="empty">${players.length ? 'Niciun rezultat.' : 'Niciun cont încă.'}</div>`; return; }
+  $('pl-list').innerHTML = list.map(p => `<div class="row" id="pl-${p.id}">
+    <div class="row-main">
+      <div class="row-name">${esc(p.username)} ${p.verified ? '<span class="pill pill-active">✓ verificat</span>' : ''}</div>
+      <div class="row-sub">⭐ ${p.credits.toLocaleString('en-GB')} credite · cont din ${fmtDate(p.created_at)}</div>
+      <div id="ledger-${p.id}"></div>
+    </div>
+    <div class="row-actions">
+      <button class="btn btn-ghost btn-sm" onclick="toggleVerified('${p.id}')">${p.verified ? 'Scoate verificarea' : '✓ Verifică'}</button>
+      <button class="btn btn-ghost btn-sm" onclick="adjustCredits('${p.id}')">± Credite</button>
+      <button class="btn btn-ghost btn-sm" onclick="renameUser('${p.id}')">✏️ Nume</button>
+      <button class="btn btn-ghost btn-sm" onclick="showLedger('${p.id}')">📜 Istoric</button>
+      <button class="btn btn-danger btn-sm" title="Șterge contul" onclick="deletePlayer('${p.id}')">🗑️</button>
+    </div>
+  </div>`).join('');
+}
+const playerById = id => players.find(p => p.id === id);
+async function toggleVerified(id){
+  const p = playerById(id); if(!p) return;
+  const { error } = await sb.rpc('admin_update_profile', { p_user: id, p_username: p.username, p_verified: !p.verified });
+  if(error) return flash('error', errMsg(error));
+  flash('success', p.verified ? 'Verificare scoasă.' : `✓ ${esc(p.username)} e verificat.`);
+  await loadPlayers();
+}
+async function renameUser(id){
+  const p = playerById(id); if(!p) return;
+  const name = prompt(`Nume Raffall nou pentru ${p.username}:\n(folosește doar dacă a greșit username-ul sau într-o dispută)`, p.username);
+  if(name === null || name.trim() === p.username) return;
+  const { error } = await sb.rpc('admin_update_profile', { p_user: id, p_username: name, p_verified: p.verified });
+  if(error) return flash('error', errMsg(error));
+  flash('success','✏️ Username schimbat.');
+  await loadPlayers();
+}
+async function deletePlayer(id){
+  const p = playerById(id); if(!p) return;
+  const [d, w, a] = await Promise.all([
+    sb.from('instant_draws').select('id', { count:'exact', head:true }).eq('user_id', id),
+    sb.from('instant_prizes').select('id', { count:'exact', head:true }).eq('won_by', id),
+    sb.from('admins').select('user_id').eq('user_id', id).maybeSingle()
+  ]);
+  const isAdmin = !!(a && a.data);
+  const lines = [`Ștergi contul „${p.username}”?`, ''];
+  if(isAdmin) lines.push('⚠️ E contul tău de ADMIN: se șterge doar profilul de jucător. Loginul rămâne, poți intra în admin în continuare.', '');
+  lines.push(`• ${p.credits.toLocaleString('en-GB')} credite`, `• ${d.count || 0} spin-uri`);
+  if(w.count) lines.push(`• ${w.count} premii câștigate — redevin LIBERE și se pot câștiga din nou`);
+  lines.push('', 'Nu se poate anula.');
+  if(!confirm(lines.join('\n'))) return;
+  if(w.count && !confirm(`Sigur? Contul are ${w.count} premii câștigate. Dacă e un jucător real, a câștigat corect — mai bine nu-l ștergi.`)) return;
+  const { data, error } = await sb.rpc('admin_delete_player', { p_user: id });
+  if(error) return flash('error', /admin_delete_player/.test(error.message) ? 'Rulează întâi în Supabase fișierul supabase-sterge-jucator.sql.' : errMsg(error));
+  flash('success', data === 'profile_only'
+    ? `🗑️ Profilul de jucător „${esc(p.username)}” a fost șters. Contul de admin rămâne.`
+    : `🗑️ Contul „${esc(p.username)}” a fost șters.`);
+  await Promise.all([loadPlayers(), loadPrizeSummary()]);
+  renderComps();
+}
+async function adjustCredits(id){
+  const p = playerById(id); if(!p) return;
+  const v = prompt(`Credite pentru ${p.username} (sold: ${p.credits}).\nScrie +500 ca să adaugi sau -200 ca să scazi:`);
+  if(v === null) return;
+  const delta = parseInt(v.replace(/\s/g, ''));
+  if(!delta) return flash('error','Scrie un număr, ex: +500 sau -200.');
+  const reason = prompt('Motiv (apare în istoric):', delta > 0 ? 'bonus' : 'corecție');
+  if(reason === null) return;
+  const { data, error } = await sb.rpc('admin_adjust_credits', { p_user: id, p_delta: delta, p_reason: reason });
+  if(error) return flash('error', errMsg(error));
+  flash('success', `⭐ Sold nou pentru ${esc(p.username)}: ${Number(data).toLocaleString('en-GB')} credite.`);
+  await loadPlayers();
+}
+async function showLedger(id){
+  const box = $('ledger-' + id);
+  if(box.innerHTML){ box.innerHTML = ''; return; }
+  const { data, error } = await sb.from('credit_ledger').select('*').eq('user_id', id).order('created_at', { ascending:false }).limit(50);
+  if(error) return flash('error', errMsg(error));
+  if(!data.length){ box.innerHTML = '<div class="note">Nicio mișcare de credite.</div>'; return; }
+  const why = r => r === 'prize' ? 'premiu câștigat' : r === 'spin' ? 'spin plătit' : esc(r);
+  box.innerHTML = `<div class="table-wrap ledger"><table><thead><tr><th>Când</th><th>Mișcare</th><th>Sold după</th><th>Motiv</th></tr></thead><tbody>` +
+    data.map(r => `<tr><td>${fmtDate(r.created_at)}</td><td style="color:${r.delta > 0 ? 'var(--green)' : 'var(--red)'}">${r.delta > 0 ? '+' : ''}${r.delta}</td><td>${r.balance_after}</td><td>${why(r.reason)}</td></tr>`).join('') +
+    '</tbody></table></div>';
+}
+
+/* ═══ EXTRAGERI ════════════════════════════════════════════════ */
+async function renderDraws(){
+  const comp = compById($('d-comp').value);
+  if(!comp){ $('d-list').innerHTML = '<div class="empty">Creează întâi o competiție.</div>'; $('d-stats').innerHTML = ''; return; }
+  const { data, error } = await sb.from('instant_draws')
+    .select('*, instant_prizes(kind,amount,label)')
+    .eq('competition_id', comp.id).order('created_at', { ascending:false }).limit(1000);
+  if(error) return flash('error', errMsg(error));
+  const wins = data.filter(d => d.prize_id);
+  const people = new Set(data.map(d => d.user_id)).size;
+  const spent = data.reduce((a,d) => a + d.credits_spent, 0);
+  $('d-stats').innerHTML = `
+    <div class="stat"><b>${data.length}</b><span>spin-uri</span></div>
+    <div class="stat"><b>${people}</b><span>jucători</span></div>
+    <div class="stat"><b>${wins.length}</b><span>câștiguri</span></div>
+    <div class="stat"><b>${spent.toLocaleString('en-GB')}</b><span>credite cheltuite</span></div>`;
+  if(!data.length){ $('d-list').innerHTML = '<div class="empty">Nicio extragere încă.</div>'; return; }
+  $('d-list').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Când</th><th>Jucător</th><th>Bilet</th><th>Plătit cu</th><th>Rezultat</th></tr></thead><tbody>` +
+    data.map(d => `<tr>
+      <td>${fmtDate(d.created_at)}</td>
+      <td>${esc(d.username)}</td>
+      <td>#${String(d.ticket).padStart(5,'0')}</td>
+      <td>${d.paid_with === 'credits' ? `⭐ ${d.credits_spent}` : 'gratuit'}</td>
+      <td>${d.prize_id && d.instant_prizes ? `<span class="pill pill-won">🏆 ${fmtPrize(d.instant_prizes)}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+    </tr>`).join('') + '</tbody></table></div>';
+}
+
+/* ═══ PORNIRE ══════════════════════════════════════════════════ */
+syncAccessFields();
+enterIfAdmin();
+</script>
+<div class="lmodal" id="launch-modal" onclick="if(event.target===this)closeLaunch()">
+  <div class="lbox">
+    <div class="card-title" id="l-title">Deschide + notifică</div>
+    <div class="note" id="l-sub"></div>
+    <label class="toggle-line"><input type="checkbox" id="l-has-close" checked onchange="syncLaunch()"> Se închide automat la o oră</label>
+    <div id="l-close-wrap">
+      <label for="l-close">Ora de închidere (ora României)</label>
+      <input type="time" id="l-close" oninput="syncLaunch()">
+      <div class="preview-list" id="l-quick"></div>
+      <div class="note" id="l-close-note"></div>
+    </div>
+    <label class="toggle-line"><input type="checkbox" id="l-notify" checked onchange="syncLaunch()"> 🔔 Trimite notificare la toți abonații</label>
+    <div id="l-msg-wrap">
+      <label for="l-ntitle">Titlu notificare</label>
+      <input type="text" id="l-ntitle" maxlength="65">
+      <label for="l-nbody">Mesaj</label>
+      <textarea id="l-nbody" rows="2" maxlength="140" style="min-height:60px;font-family:inherit"></textarea>
+      <div class="note">Se deschide direct competiția: <span id="l-url"></span></div>
+    </div>
+    <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="testLaunchPush()">🧪 Trimite notificarea doar mie (test)</button>
+    <div class="btn-row">
+      <button class="btn btn-gold" id="l-go" onclick="doLaunch()">▶ Deschide acum</button>
+      <button class="btn btn-ghost" onclick="closeLaunch()">Renunță</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
