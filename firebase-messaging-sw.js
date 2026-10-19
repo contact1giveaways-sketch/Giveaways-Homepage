@@ -1,5 +1,7 @@
 // ============================================================
 //  Giveaways Community — Firebase Messaging Service Worker
+//  Notificările vin ca „data” (titlu, text, link) și le afișăm aici.
+//  Merge și cu formatul vechi („notification”), pentru siguranță.
 // ============================================================
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
@@ -13,49 +15,35 @@ firebase.initializeApp({
   appId: "1:335882371621:web:2ab7ceb418b1524b1e75cc"
 });
 
+const DEFAULT_URL = 'https://giveawayscommunity.com';
 const messaging = firebase.messaging();
 
-// Background message handler
 messaging.onBackgroundMessage(payload => {
-  const { title, body, icon } = payload.notification || {};
+  const d = payload.data || {};
+  const n = payload.notification || {};
+  // Formatul vechi („notification”) e afișat deja de Firebase — nu-l dublăm
+  if (n.title && !d.title) return;
 
-  // Get click URL from data payload or notification
-  const clickUrl = (payload.data && payload.data.url)
-    || (payload.notification && payload.notification.click_action)
-    || 'https://giveawayscommunity.com';
-
-  self.registration.showNotification(title || 'Giveaways Community', {
-    body: body || '',
-    icon: icon || '/icon-192.png',
+  self.registration.showNotification(d.title || 'Giveaways Community', {
+    body: d.body || '',
+    icon: '/icon-192.png',
     badge: '/icon-192.png',
     vibrate: [200, 100, 200],
-    data: { url: clickUrl },
-    actions: [
-      { action: 'open', title: '🎟️ Open' },
-      { action: 'close', title: 'Dismiss' }
-    ]
+    tag: 'gw-' + (d.title || '').slice(0, 30),
+    data: { url: d.url || DEFAULT_URL }
   });
 });
 
-// Notification click handler — opens the URL from the notification
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  if (e.action === 'close') return;
-
-  // Get the URL to open — priority: notification data > default homepage
   const urlToOpen = (e.notification.data && e.notification.data.url)
-    ? e.notification.data.url
-    : 'https://giveawayscommunity.com';
-
+    || (e.notification.data && e.notification.data.FCM_MSG && e.notification.data.FCM_MSG.data && e.notification.data.FCM_MSG.data.url)
+    || DEFAULT_URL;
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      // If app is already open on that URL, focus it
       for (const client of list) {
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
-        }
+        if (client.url === urlToOpen && 'focus' in client) return client.focus();
       }
-      // Otherwise open new window with the correct URL
       return clients.openWindow(urlToOpen);
     })
   );
