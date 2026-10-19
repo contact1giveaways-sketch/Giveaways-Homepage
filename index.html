@@ -1098,13 +1098,18 @@ async function getFCMToken(){
 }
 async function saveFCMToken(token){
   if(!token) return;
-  if(localStorage.getItem('gw_fcm_token') === token) return;
-  localStorage.setItem('gw_fcm_token', token);
+  // salvăm în Supabase; re-salvăm o dată pe săptămână ca să rămână „viu”
   try{
-    await fetch(API_URL + '?' + new URLSearchParams({
-      action: 'saveFCMToken',
-      body: JSON.stringify({ action:'saveFCMToken', token })
-    }));
+    const last = JSON.parse(localStorage.getItem('gw_push_sb') || 'null');
+    if(last && last.t === token && Date.now() - last.at < 7 * 864e5) return;
+  }catch(e){}
+  try{
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/save_push_token', {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_token: token, p_source: 'site' })
+    });
+    if(r.ok) localStorage.setItem('gw_push_sb', JSON.stringify({ t: token, at: Date.now() }));
   }catch(e){ console.warn('saveFCMToken:', e); }
 }
 function toast(msg, isErr){
