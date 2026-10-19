@@ -202,17 +202,30 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
 }
 .inst-toggle{display:flex;align-items:center;gap:10px;font-weight:700;cursor:pointer}
 .inst-toggle input{width:18px;height:18px;margin:0;accent-color:#101010}
+
+/* ── Bara comună a adminului (Tombole · Instante) ── */
+.admbar{background:#101010;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 18px;font-family:'DM Sans',sans-serif}
+.admbar a{text-decoration:none}
+.admlogo{font:800 15px 'DM Sans',sans-serif;letter-spacing:.06em;color:#f0d08a;white-space:nowrap}
+.admsec{display:flex;gap:4px;background:#1f1f1f;border:1px solid #2c2c2c;border-radius:999px;padding:4px}
+.admsec a{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;color:#a8a39a;white-space:nowrap}
+.admsec a.on{background:#f0d08a;color:#111}
+.admright{display:flex;gap:14px;align-items:center;font-size:13px}
+.admright a{color:rgba(255,255,255,.55)}
+.admright a:hover{color:#f0d08a}
+@media(max-width:600px){.admbar{justify-content:center}.admlogo{width:100%;text-align:center}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
-<nav>
-  <div class="nav-logo">🦁 Giveaways Admin</div>
-  <div style="display:flex;gap:14px;align-items:center">
-    <a href="#" id="logout-link" onclick="doLogout();return false" style="font-size:13px;color:rgba(255,255,255,0.5);display:none">🔓 Ieși din cont</a>
-    <a href="https://giveawayscommunity.com" class="nav-back">← Site</a>
+<div class="admbar">
+  <a class="admlogo" href="/admin.html">🦁 GIVEAWAYS ADMIN</a>
+  <div class="admsec"><a href="/admin.html" class="on">🎟️ Tombole &amp; site</a><a href="/play/admin.html">🎰 Instante</a></div>
+  <div class="admright">
+    <a href="#" id="logout-link" onclick="doLogout();return false" style="display:none">Ieși din cont</a>
+    <a href="/">← Site</a>
   </div>
-</nav>
+</div>
 
 <div class="container">
   <div class="admin-box">
@@ -477,7 +490,7 @@ nav{background:var(--black);padding:14px 20px;display:flex;align-items:center;ju
         </div>
         <button class="notif-send-btn" id="notif-send-btn" onclick="sendPushNotification()">🔔 SEND TO ALL SUBSCRIBERS</button>
         <button class="ghost-btn" style="width:100%;margin-top:8px" onclick="sendPushTest()">🧪 Trimite doar mie (test)</button>
-        <div class="field-note">„Doar mie” ajunge pe telefoanele unde ești logat cu contul de admin pe instant.giveawayscommunity.com și ai apăsat „Turn on notifications”.</div>
+        <div class="field-note">„Doar mie” ajunge pe telefoanele unde ești logat cu contul de admin pe giveawayscommunity.com/play și ai apăsat „Turn on notifications”.</div>
         <div class="notif-result" id="notif-result">
           <div class="notif-result-num" id="notif-result-num">0</div>
           <div class="notif-result-lbl" id="notif-result-lbl">notifications sent</div>
@@ -883,7 +896,7 @@ async function updateRaffle(draftState){
   if(error) return showAlert('create-alert','error', sbErr(error));
   const r0 = homeData.raffles.find(x => String(x.id) === String(id));
   const instNow = $('u-has-instants').checked && (draftState === false || (draftState === undefined && r0 && !r0.draft)) && !(r0 && r0.hasInstants);
-  showAlert('create-alert','success', (instNow ? '⚡ Competiția de instante e creată (ciornă) în instant.giveawayscommunity.com/admin.html — adaugă premiile și activeaz-o.' + ' ' : '') + (
+  showAlert('create-alert','success', (instNow ? '⚡ Competiția de instante e creată (ciornă) în secțiunea 🎰 Instante — adaugă premiile și activeaz-o.' + ' ' : '') + (
     draftState === false ? '🚀 Publicată! Apare acum pe site.' :
     draftState === true  ? '📝 Mutată în ciorne — nu mai apare pe site.' : '✅ Salvat!'));
   await reloadAll();
@@ -1085,7 +1098,7 @@ async function addRaffle(draft){
   const withInst = !draft && $('r-has-instants').checked;
   const notifyNew = !draft && $('r-notify').checked;
   const newName = name;
-  showAlert('create-alert','success', draft ? '📝 Salvată ca ciornă — nu apare pe site.' : '🚀 Publicată pe site!' + (withInst ? '' + ' ⚡ Competiția de instante e creată (ciornă) în instant.giveawayscommunity.com/admin.html — adaugă premiile și activeaz-o.' : ''));
+  showAlert('create-alert','success', draft ? '📝 Salvată ca ciornă — nu apare pe site.' : '🚀 Publicată pe site!' + (withInst ? '' + ' ⚡ Competiția de instante e creată (ciornă) în secțiunea 🎰 Instante — adaugă premiile și activeaz-o.' : ''));
   resetAddForm();
   await reloadAll();
   showTab('raffles');
