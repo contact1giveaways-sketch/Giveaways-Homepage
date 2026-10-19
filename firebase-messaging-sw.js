@@ -1,7 +1,6 @@
 // ============================================================
 //  Giveaways Community — Firebase Messaging Service Worker
 //  Notificările vin ca „data” (titlu, text, link) și le afișăm aici.
-//  Merge și cu formatul vechi („notification”), pentru siguranță.
 // ============================================================
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
@@ -15,8 +14,12 @@ firebase.initializeApp({
   appId: "1:335882371621:web:2ab7ceb418b1524b1e75cc"
 });
 
-const DEFAULT_URL = 'https://giveawayscommunity.com';
+const DEFAULT_URL = 'https://giveawayscommunity.com/';
 const messaging = firebase.messaging();
+
+// noua versiune intră imediat în funcțiune
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
 messaging.onBackgroundMessage(payload => {
   const d = payload.data || {};
@@ -24,7 +27,9 @@ messaging.onBackgroundMessage(payload => {
   // Formatul vechi („notification”) e afișat deja de Firebase — nu-l dublăm
   if (n.title && !d.title) return;
 
-  self.registration.showNotification(d.title || 'Giveaways Community', {
+  // „return” e important: Chrome așteaptă afișarea. Fără el apare
+  // „This site has been updated in the background”.
+  return self.registration.showNotification(d.title || 'Giveaways Community', {
     body: d.body || '',
     icon: '/icon-192.png',
     badge: '/icon-192.png',
@@ -34,17 +39,27 @@ messaging.onBackgroundMessage(payload => {
   });
 });
 
+// iPhone/iPad: aplicația instalată nu poate deschide direct alt site
+// (ex. Raffall) din notificare — te ducea pe pagina noastră.
+// Deschidem /go.html, care te trimite mai departe.
+const IS_APPLE = /iPhone|iPad|iPod|Macintosh/.test(self.navigator.userAgent);
+
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const urlToOpen = (e.notification.data && e.notification.data.url)
+  let url = (e.notification.data && e.notification.data.url)
     || (e.notification.data && e.notification.data.FCM_MSG && e.notification.data.FCM_MSG.data && e.notification.data.FCM_MSG.data.url)
     || DEFAULT_URL;
+
+  let external = false;
+  try { external = new URL(url, self.location.origin).origin !== self.location.origin; } catch (_) {}
+  if (external && IS_APPLE) url = '/go.html?to=' + encodeURIComponent(url);
+
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const client of list) {
-        if (client.url === urlToOpen && 'focus' in client) return client.focus();
+        if (client.url === url && 'focus' in client) return client.focus();
       }
-      return clients.openWindow(urlToOpen);
+      return clients.openWindow(url);
     })
   );
 });
