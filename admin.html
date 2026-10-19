@@ -891,9 +891,15 @@ async function updateRaffle(draftState){
   if(r){ $('editor-title').textContent = r.name; renderPublishBox(r); }
 
   // 🔔 coduri promo NOI → notificare (doar pe tombole publicate)
-  if(r && !r.draft && $('u-promo-notify').checked){
-    const fresh = (r.promos || []).filter(p => p.code && Number(p.uses) > 0 && !oldCodes.has(String(p.code).trim().toUpperCase()));
-    if(fresh.length){
+  if(r && $('u-promo-notify').checked){
+    const added = (r.promos || []).filter(p => p.code && !oldCodes.has(String(p.code).trim().toUpperCase()));
+    const fresh = added.filter(p => Number(p.uses) > 0);
+    if(added.length && r.draft){
+      showAlert('create-alert','info', `✅ Salvat. Notificarea pentru ${added.map(p => p.code).join(', ')} NU a plecat: tombola e ciornă. Pleacă după ce o publici și salvezi codul.`);
+    } else if(added.length && !fresh.length){
+      showAlert('create-alert','error', `✅ Salvat, dar notificarea NU a plecat: ${added.map(p => p.code).join(', ')} nu are utilizări. Scrie-l așa: ${added[0].code} | 5`);
+    }
+    if(fresh.length && !r.draft){
       const codes = fresh.map(p => p.code).join(', ');
       const p0 = fresh[0];
       await autoPush({
