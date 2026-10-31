@@ -181,6 +181,21 @@ tr.taken td{color:#a49f96}
 .stat b{display:block;font:800 22px/1 'Manrope';letter-spacing:-.03em}
 .stat span{display:block;font-size:10px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.1em}
 
+/* ROATA (DAILY WHEEL) */
+.wheel-wrap{position:relative;width:min(340px,100%);aspect-ratio:1;margin:6px auto 20px}
+.wheel-wrap canvas{width:100%;height:100%;display:block;border-radius:50%;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.wheel-pointer{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:30px solid #f0d08a;filter:drop-shadow(0 3px 4px rgba(0,0,0,.45));z-index:2}
+.wheel-banner{display:none;align-items:center;gap:14px;width:100%;padding:16px 18px;margin-bottom:16px;border:0;border-radius:24px;background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c;cursor:pointer;text-align:left;font-family:inherit;box-shadow:0 14px 40px rgba(201,150,45,.22)}
+.wheel-banner .wb-icon{font-size:30px}
+.wheel-banner .wb-main{flex:1;min-width:0}
+.wheel-banner b{font:800 17px 'Manrope'}
+.wheel-banner small{display:block;font-size:13px;margin-top:3px}
+.wheel-banner small b{font:800 13px 'DM Sans'}
+.wheel-banner .wb-go{font:800 13px 'DM Sans';background:#101010;color:#fff;border-radius:999px;padding:9px 14px;white-space:nowrap}
+.how-list{margin:0 0 12px 20px;line-height:1.7;font-size:14px;color:var(--ink)}
+.how-list a{color:#8d6b26;font-weight:700}
+#wh-how p{font-size:14px;color:var(--muted);line-height:1.6;margin-top:8px}
+
 footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
 .footerin{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .footerin a{text-decoration:none}
@@ -210,6 +225,7 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
   .mtab span{font-size:18px;line-height:20px}
   .mtab.active{color:#fff;background:#1f1f1f}
   body{padding-bottom:96px}
+  .mobilebar.six{grid-template-columns:repeat(6,1fr)}
 }
 @media(prefers-reduced-motion:reduce){.slot-digit.spinning,.result,.confetti-piece{animation:none}}
 </style>
@@ -237,6 +253,7 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
 
   <div class="tabs">
     <button class="tab active" data-tab="play"    onclick="showTab('play')">Play</button>
+    <button class="tab"        data-tab="wheel"   onclick="showTab('wheel')" style="display:none">🎡 Wheel</button>
     <button class="tab"        data-tab="wallet"  onclick="showTab('wallet')">Wallet</button>
     <button class="tab"        data-tab="prizes"  onclick="showTab('prizes')">Prizes</button>
     <button class="tab"        data-tab="winners" onclick="showTab('winners')">Winners</button>
@@ -245,6 +262,7 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
   <!-- ═══ PLAY ═══ -->
   <section class="section active" id="sec-play">
     <div id="play-list">
+      <button class="wheel-banner" id="wheel-banner" onclick="showTab('wheel')"></button>
       <div class="card notifcard" id="notif-card" style="display:none"></div>
       <div class="card">
         <div class="card-title">Competitions</div>
@@ -269,6 +287,32 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
         <div id="pd-actions"></div>
         <div class="note" id="pd-note"></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ═══ ROATA ═══ -->
+  <section class="section" id="sec-wheel">
+    <div class="playcard">
+      <div class="card-title">Daily Wheel</div>
+      <div class="card-sub" id="wh-sub"></div>
+      <div id="wheel-alert" class="alert"></div>
+      <div class="status-line" id="wh-status"></div>
+      <div class="wheel-wrap"><div class="wheel-pointer"></div><canvas id="wheel-canvas"></canvas></div>
+      <div id="wh-result"></div>
+      <div id="wh-actions"></div>
+      <div class="note" id="wh-note"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-title" style="font-size:22px">How it works</div>
+      <div id="wh-how"></div>
+    </div>
+    <div class="card" id="wh-history-card" style="display:none">
+      <div class="card-title" style="font-size:22px">Your spins</div>
+      <div id="wh-history"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:22px">Latest wheel wins</div>
+      <div class="winnerwall" id="wh-wins"><div class="empty">Loading…</div></div>
     </div>
   </section>
 
@@ -376,6 +420,7 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
 <div class="mobilebar">
   <a class="mtab" href="/"><span>⌂</span>Home</a>
   <button class="mtab active" data-tab="play"    onclick="showTab('play')"><span>🎰</span>Play</button>
+  <button class="mtab"        data-tab="wheel"   onclick="showTab('wheel')" style="display:none"><span>🎡</span>Wheel</button>
   <button class="mtab"        data-tab="wallet"  onclick="showTab('wallet')"><span>⭐</span>Wallet</button>
   <button class="mtab"        data-tab="prizes"  onclick="showTab('prizes')"><span>💰</span>Prizes</button>
   <button class="mtab"        data-tab="winners" onclick="showTab('winners')"><span>🏆</span>Winners</button>
@@ -429,6 +474,9 @@ const ERR = {
   username_taken:       'That name is already linked to another account. If it is yours, contact us on Telegram @suportGiveaways and we will sort it out.',
   invalid_username:     'Your name must be 2–40 characters.',
   profile_exists:       'Your Raffall name is already set.',
+  wheel_not_active:     'The wheel is resting right now. Check back soon!',
+  no_spins:             "You don't have any spins left on the wheel right now.",
+  wheel_empty:          'The wheel is being restocked. Please try again later.',
   has_prizes:           "You've won prizes with this account, so it can't be deleted here. Message us on Telegram @suportGiveaways and we'll help."
 };
 function errText(e){
@@ -468,6 +516,7 @@ function showTab(name){
   if(name === 'wallet')  renderWallet();
   if(name === 'prizes')  renderPrizes();
   if(name === 'winners') renderWinners();
+  if(name === 'wheel')   renderWheelTab();
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
@@ -536,6 +585,8 @@ async function saveUsername(){
   if(error) return showAlert('un-alert','error', errText(error));
   if($('un-email').checked) await sb.rpc('set_email_alerts', { p_on: true });
   await refreshUser();
+  await loadWheel();
+  if(wheelInfo && wheelInfo.active && wheelInfo.spins_left > 0 && !current) return showTab('wheel');
   showTab('play');
   if(current) openComp(current.id);
 }
@@ -825,7 +876,7 @@ async function renderWallet(){
   const { data, error } = await sb.from('credit_ledger').select('*').eq('user_id', me.id).order('created_at', { ascending:false }).limit(50);
   if(error) return $('w-ledger').innerHTML = `<div class="empty">${errText(error)}</div>`;
   if(!data.length) return $('w-ledger').innerHTML = '<div class="empty">No credit activity yet. Win credits in instant draws.</div>';
-  const why = r => r === 'prize' ? 'Prize won' : r === 'spin' ? 'Spin' : r.startsWith('admin: ') ? esc(r.slice(7).replace(/^./, x => x.toUpperCase())) : esc(r);
+  const why = r => r === 'prize' ? 'Prize won' : r === 'spin' ? 'Spin' : r === 'wheel' ? 'Wheel prize' : r.startsWith('admin: ') ? esc(r.slice(7).replace(/^./, x => x.toUpperCase())) : esc(r);
   $('w-ledger').innerHTML = `<div class="table-wrap"><table><thead><tr><th>When</th><th>What</th><th>Credits</th><th>Balance</th></tr></thead><tbody>` +
     data.map(r => `<tr><td>${ago(r.created_at)}</td><td>${why(r.reason)}</td><td style="color:${r.delta > 0 ? 'var(--green)' : 'var(--red)'}">${r.delta > 0 ? '+' : ''}${nf(r.delta)}</td><td>${nf(r.balance_after)}</td></tr>`).join('') +
     '</tbody></table></div>';
@@ -986,6 +1037,194 @@ function openCompHeader(){
   $('pd-sub').innerHTML = `${statusPill(c.status)}${closesPill(c)}${pc.total - pc.won} of ${pc.total} prizes left · <a href="#" onclick="showPrizesFor(${c.id});return false">see all prizes</a>`;
 }
 
+/* ═══ DESENUL ROȚII (același în admin și la jucători) ═════════ */
+function wheelTextColor(hex){
+  const n = parseInt(String(hex || '#000000').slice(1), 16);
+  const r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#17130c' : '#ffffff';
+}
+function drawWheel(canvas, segs){
+  if(!canvas || !canvas.clientWidth) return;   // ascuns: desenăm când se vede
+  const dpr = window.devicePixelRatio || 1;
+  const css = canvas.clientWidth;
+  if(canvas.width !== Math.round(css * dpr)){ canvas.width = Math.round(css * dpr); canvas.height = Math.round(css * dpr); }
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, c = W / 2, R = c - 6 * dpr;
+  ctx.clearRect(0, 0, W, W);
+  // inelul exterior
+  ctx.beginPath(); ctx.arc(c, c, R + 4 * dpr, 0, Math.PI * 2); ctx.fillStyle = '#c9962d'; ctx.fill();
+  if(!segs.length){
+    ctx.beginPath(); ctx.arc(c, c, R, 0, Math.PI * 2); ctx.fillStyle = '#f3ead8'; ctx.fill();
+    return;
+  }
+  const step = Math.PI * 2 / segs.length;
+  segs.forEach((s, i) => {
+    // felia 0 începe sus (la acul roții), în sensul acelor de ceasornic
+    const a0 = -Math.PI / 2 + i * step, a1 = a0 + step;
+    ctx.beginPath(); ctx.moveTo(c, c); ctx.arc(c, c, R, a0, a1); ctx.closePath();
+    ctx.fillStyle = s.color || '#c9962d'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5 * dpr; ctx.stroke();
+    // textul, de-a lungul razei
+    ctx.save();
+    ctx.translate(c, c); ctx.rotate(a0 + step / 2);
+    ctx.fillStyle = wheelTextColor(s.color);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    let size = Math.min(R * 0.11, (R * step) * 0.42);
+    ctx.font = `800 ${size}px Manrope, 'DM Sans', sans-serif`;
+    const maxW = R * 0.66;
+    while(ctx.measureText(s.label).width > maxW && size > 7 * dpr){ size -= 1; ctx.font = `800 ${size}px Manrope, 'DM Sans', sans-serif`; }
+    ctx.fillText(s.label, R - 12 * dpr, 0);
+    ctx.restore();
+  });
+  // butucul din mijloc
+  ctx.beginPath(); ctx.arc(c, c, R * 0.16, 0, Math.PI * 2); ctx.fillStyle = '#101010'; ctx.fill();
+  ctx.lineWidth = 3 * dpr; ctx.strokeStyle = '#c9962d'; ctx.stroke();
+  ctx.fillStyle = '#f0d08a'; ctx.font = `800 ${R * 0.07}px Manrope, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('LEO', c, c);
+}
+
+/* ═══ ROATA (DAILY WHEEL) ═════════════════════════════════════ */
+let wheelInfo = null, wheelRot = 0, wheelBusy = false, wheelLastResult = '';
+async function loadWheel(){
+  const { data, error } = await sb.rpc('get_wheel_status');
+  wheelInfo = error ? null : data;
+  const on = !!(wheelInfo && wheelInfo.active);
+  document.querySelectorAll('[data-tab="wheel"]').forEach(b => b.style.display = on ? '' : 'none');
+  document.querySelector('.mobilebar').classList.toggle('six', on);
+  renderWheelBanner();
+  return wheelInfo;
+}
+function renderWheelBanner(){
+  const el = $('wheel-banner');
+  if(!wheelInfo || !wheelInfo.active){ el.style.display = 'none'; return; }
+  const n = wheelInfo.spins_left || 0;
+  el.style.display = 'flex';
+  el.innerHTML = `<span class="wb-icon">🎡</span><span class="wb-main"><b>Daily Wheel</b><small>${
+    n ? `You have <b>${n}</b> spin${n === 1 ? '' : 's'} waiting` :
+    !wheelInfo.logged_in ? `Create an account and get ${wheelInfo.welcome_spins ? `<b>${wheelInfo.welcome_spins} free spin${wheelInfo.welcome_spins === 1 ? '' : 's'}</b>` : 'daily spins'}` :
+    `Buy a ticket on Raffall, get ${wheelInfo.buyer_spins} spins`}</small></span><span class="wb-go">${n ? 'Spin' : 'Open'} →</span>`;
+}
+async function renderWheelTab(){
+  if(!wheelBusy) await loadWheel();
+  const w = wheelInfo;
+  const canvas = $('wheel-canvas');
+  const segs = (w && w.segments) || [];
+  drawWheel(canvas, segs);
+  hideAlert('wheel-alert');
+  const how = $('wh-how');
+  if(!w || !w.active){
+    $('wh-sub').textContent = 'The wheel is resting right now. Check back soon!';
+    $('wh-status').innerHTML = ''; $('wh-actions').innerHTML = ''; $('wh-note').innerHTML = '';
+    how.innerHTML = '';
+    $('wh-history-card').style.display = 'none';
+    return renderWheelWins();
+  }
+  const sp = n => `${n} spin${n === 1 ? '' : 's'}`;
+  how.innerHTML = `<ol class="how-list">
+      <li>Buy any ticket on <a href="${RAFFALL}" target="_blank" rel="noopener">Raffall</a>.</li>
+      <li>After our daily list update (${LIST_UPDATE}) you get <b>${sp(w.buyer_spins)}</b> on the wheel. They are valid until midnight UK time.</li>
+      <li>Bought more tickets? You get new spins on the next update — up to once a day.</li>
+    </ol>
+    ${w.welcome_spins ? `<p>🎁 Every new account gets <b>${sp(w.welcome_spins)}</b> free, once.</p>` : ''}
+    <p>Credits go straight to your wallet. For other prizes we'll contact you — or message us on Telegram @suportGiveaways.</p>
+    <p style="font-size:12px">Your Raffall <b>name</b> on your account must match the entrants list exactly, or we can't find your tickets.</p>`;
+
+  const actions = $('wh-actions'), note = $('wh-note'), status = $('wh-status');
+  if(!w.logged_in){
+    $('wh-sub').innerHTML = w.welcome_spins ? `Create a free account and get <b>${sp(w.welcome_spins)}</b> on the house.` : 'Sign in to spin the wheel.';
+    status.innerHTML = '';
+    actions.innerHTML = `<button class="spin-btn" onclick="showTab('account')">Sign in or create account</button>`;
+    note.innerHTML = '';
+  } else if(!w.has_profile){
+    $('wh-sub').textContent = 'One last step before you can spin.';
+    status.innerHTML = '';
+    actions.innerHTML = `<button class="spin-btn" onclick="showTab('account')">Set your Raffall name</button>`;
+    note.innerHTML = '';
+  } else {
+    const n = w.spins_left || 0;
+    $('wh-sub').innerHTML = n ? 'Tap the button and good luck!' : (w.bought_today ? "You've used today's spins. See you tomorrow!" : 'No spins right now.');
+    status.innerHTML = `<span><b>${n}</b>spins left</span><span><b>${(me && nf(me.credits)) || 0}</b>your credits</span>`;
+    actions.innerHTML = n
+      ? `<button class="spin-btn" id="wh-spin" onclick="spinTheWheel()">SPIN THE WHEEL${n > 1 ? ` · ${n} left` : ''}</button>`
+      : `<a class="spin-btn alt" style="text-align:center;text-decoration:none" href="${RAFFALL}" target="_blank" rel="noopener">Buy a ticket on Raffall</a>`;
+    note.innerHTML = n
+      ? 'Spins from tickets expire at midnight UK time.'
+      : `Buy any ticket on Raffall and get ${sp(w.buyer_spins)} after our next update (${LIST_UPDATE}).`;
+  }
+  renderWheelHistory();
+  renderWheelWins();
+}
+function renderWheelHistory(){
+  const h = (wheelInfo && wheelInfo.history) || [];
+  const card = $('wh-history-card');
+  if(!h.length){ card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  const res = x => x.kind === 'none' ? '<span style="color:var(--muted)">No win</span>'
+    : x.kind === 'credits' ? `<b style="color:var(--green)">+${nf(x.credits)} credits</b>`
+    : `<b>${esc(x.label)}</b> <span style="color:var(--muted)">· ${x.status === 'delivered' ? 'paid' : "we'll contact you"}</span>`;
+  $('wh-history').innerHTML = `<div class="table-wrap"><table><thead><tr><th>When</th><th>Result</th></tr></thead><tbody>` +
+    h.map(x => `<tr><td>${ago(x.at)}</td><td>${res(x)}</td></tr>`).join('') + '</tbody></table></div>';
+}
+async function renderWheelWins(){
+  const { data, error } = await sb.rpc('wheel_recent_wins');
+  const box = $('wh-wins');
+  if(error || !data || !data.length){ box.innerHTML = '<div class="empty">No wheel wins yet — be the first!</div>'; return; }
+  box.innerHTML = data.map(x => `<div class="win-item">
+      <div class="av">${esc(String(x.username || '?').slice(0,1).toUpperCase())}</div>
+      <div class="main"><div class="name">${esc(x.username)}</div><div class="sub">Daily Wheel · ${ago(x.at)}</div></div>
+      <div class="prize">${esc(x.label)}</div>
+    </div>`).join('');
+}
+async function spinTheWheel(){
+  if(wheelBusy || spinning || !wheelInfo) return;
+  wheelBusy = true; spinning = true;
+  hideAlert('wheel-alert');
+  $('wh-result').innerHTML = '';
+  const btn = $('wh-spin'); if(btn) btn.disabled = true;
+  const { data, error } = await sb.rpc('spin_wheel');
+  if(error){
+    wheelBusy = false; spinning = false;
+    showAlert('wheel-alert', 'error', errText(error));
+    return renderWheelTab();
+  }
+  const segs = wheelInfo.segments || [];
+  const canvas = $('wheel-canvas');
+  let idx = segs.findIndex(s => s.id === data.segment_id);
+  const n = segs.length;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(idx >= 0 && n){
+    const step = 360 / n;
+    const jitter = (Math.random() - .5) * step * 0.6;
+    const target = ((360 - (idx + .5) * step + jitter) % 360 + 360) % 360;
+    const cur = ((wheelRot % 360) + 360) % 360;
+    let delta = target - cur; if(delta < 0) delta += 360;
+    wheelRot += (reduce ? 360 : 360 * 6) + delta;
+    canvas.style.transition = `transform ${reduce ? 0.8 : 5.2}s cubic-bezier(.12,.67,.12,1)`;
+    canvas.style.transform = `rotate(${wheelRot}deg)`;
+  }
+  setTimeout(() => finishWheel(data), idx >= 0 ? (reduce ? 900 : 5400) : 300);
+}
+function finishWheel(r){
+  wheelBusy = false; spinning = false;
+  if(me){ me.credits = r.balance; renderChip(); }
+  if(r.kind === 'credits'){
+    $('wh-result').innerHTML = `<div class="result win"><small>Daily Wheel</small>
+      <div class="big">🏆 You won ${nf(r.credits)} credits!</div>
+      <p>They're already in your wallet. New balance: <b>${nf(r.balance)}</b>.</p></div>`;
+    confetti();
+  } else if(r.kind === 'manual'){
+    $('wh-result').innerHTML = `<div class="result win"><small>Daily Wheel</small>
+      <div class="big">🏆 You won ${esc(r.label)}!</div>
+      <p>We'll contact you to arrange your prize. You can also reach us on Telegram @suportGiveaways.</p></div>`;
+    confetti();
+  } else {
+    $('wh-result').innerHTML = `<div class="result lose"><small>Daily Wheel</small>
+      <div class="big" style="font-size:28px">No win this time</div>
+      <p>${r.spins_left ? `You still have ${r.spins_left} spin${r.spins_left === 1 ? '' : 's'} — go again!` : 'Buy a ticket on Raffall for more spins.'}</p></div>`;
+  }
+  renderWheelTab();
+}
+
 /* ═══ PORNIRE ══════════════════════════════════════════════════ */
 sb.auth.onAuthStateChange(async (event) => {
   if(event === 'PASSWORD_RECOVERY'){
@@ -1001,6 +1240,8 @@ sb.auth.onAuthStateChange(async (event) => {
     setTimeout(async () => {
       if($('newpass-card').style.display === 'block') return;
       await refreshUser();
+      await loadWheel();
+      if(document.querySelector('#sec-wheel.active')) renderWheelTab();
       if(event === 'SIGNED_IN'){
         if(!me) showTab('account');
         else if(document.querySelector('#sec-account.active')) showTab(current ? 'play' : 'wallet');
@@ -1034,10 +1275,11 @@ sb.auth.onAuthStateChange(async (event) => {
     return;
   }
   await refreshUser();
-  await loadComps();
+  await Promise.all([loadComps(), loadWheel()]);
   if(DEEP_COMP && comps.some(c => c.id === DEEP_COMP)) openComp(DEEP_COMP);
   const wantTab = new URLSearchParams(location.search).get('tab');
   if(session && !me) showTab('account');
+  else if(wantTab === 'wheel') showTab('wheel');
   else if(wantTab === 'wallet' || wantTab === 'account') showTab(me ? 'wallet' : 'account');
   else if(wantTab === 'prizes' || wantTab === 'winners') showTab(wantTab);
 })();
