@@ -151,6 +151,7 @@ tr:last-child td{border-bottom:none}
       <button class="tab"        data-tab="buyers"  onclick="showTab('buyers')">🎟️ Cumpărători</button>
       <button class="tab"        data-tab="players" onclick="showTab('players')">👤 Jucători</button>
       <button class="tab"        data-tab="draws"   onclick="showTab('draws')">📋 Extrageri</button>
+      <button class="tab"        data-tab="wheel"   onclick="showTab('wheel')">🎡 Roata</button>
     </div>
 
     <!-- ─────────── COMPETIȚII ─────────── -->
@@ -320,6 +321,82 @@ tr:last-child td{border-bottom:none}
         <div id="d-list"></div>
       </div>
     </section>
+
+    <!-- ─────────── ROATA ─────────── -->
+    <section class="section" id="sec-wheel">
+      <div class="card">
+        <div class="card-title">🎡 Roata — setări</div>
+        <div class="stats" id="w-stats"></div>
+        <label class="toggle-line"><input type="checkbox" id="w-active"> Roata e <b>activă</b> (jucătorii o văd și pot învârti)</label>
+        <div class="grid-2">
+          <div><label for="w-buyer">Spin-uri pe zi pentru cumpărători cu bilete noi</label><input type="number" id="w-buyer" min="0" max="50" oninput="previewWheelBuyers()"></div>
+          <div><label for="w-welcome">Spin-uri de bun venit (o singură dată pe cont)</label><input type="number" id="w-welcome" min="0" max="50"></div>
+        </div>
+        <div class="note">Spin-urile de cumpărător expiră la miezul nopții (ora UK). Spin-ul de bun venit nu expiră și îl primește fiecare cont, o singură dată, prima dată când intră pe roată. 0 = oprit.</div>
+        <button class="btn btn-gold btn-full" onclick="saveWheelSettings()">💾 Salvează setările</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Feliile roții</div>
+        <div class="note">Șansa unei felii = greutatea ei împărțită la totalul greutăților. Stoc gol = nelimitat. Când stocul ajunge la 0, felia rămâne pe roată, dar nu mai poate ieși. Textul de pe roată îl văd jucătorii, deci în engleză.</div>
+        <div style="display:flex;justify-content:center;margin:16px 0"><canvas id="w-preview" style="width:240px;height:240px"></canvas></div>
+        <div id="w-segs"></div>
+
+        <div class="sub-head" id="ws-form-title">Felie nouă</div>
+        <input type="hidden" id="ws-id">
+        <div class="grid-2">
+          <div><label for="ws-label">Text pe roată (max 22)</label><input type="text" id="ws-label" maxlength="22" placeholder="10 CREDITS"></div>
+          <div><label for="ws-kind">Tip</label>
+            <select id="ws-kind" onchange="syncSegKind()">
+              <option value="credits">Credite (intră automat în portofel)</option>
+              <option value="none">Fără câștig</option>
+              <option value="manual">Premiu manual (bani, gadget, voucher…)</option>
+            </select></div>
+        </div>
+        <div class="grid-3">
+          <div id="ws-credits-wrap"><label for="ws-credits">Câte credite</label><input type="number" id="ws-credits" min="0" value="10"></div>
+          <div><label for="ws-weight">Greutate (șansă)</label><input type="number" id="ws-weight" min="0" value="10"></div>
+          <div><label for="ws-stock">Stoc (gol = nelimitat)</label><input type="number" id="ws-stock" min="0"></div>
+        </div>
+        <div class="grid-3">
+          <div><label for="ws-color">Culoare</label><input type="color" id="ws-color" value="#c9962d" style="height:44px;padding:4px"></div>
+          <div><label for="ws-pos">Poziție pe roată</label><input type="number" id="ws-pos" value="1"></div>
+          <div><label>&nbsp;</label><label class="toggle-line" style="margin-top:0"><input type="checkbox" id="ws-enabled" checked> Apare pe roată</label></div>
+        </div>
+        <div class="note">Premiile manuale apar mai jos, la „De livrat”, când le câștigă cineva. Le dai tu (pe Raffall, prin transfer etc.) și apeși „Livrat”.</div>
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="saveSegment()">💾 Salvează felia</button>
+          <button class="btn btn-ghost" onclick="resetSegForm()">Golește formularul</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Cumpărători → spin-uri</div>
+        <div class="note">Lipești lista de participanți a unei tombole, ca la instante. Cine apare prima dată sau are mai multe bilete decât la lipirea trecută primește spin-urile de azi. Fiecare jucător primește cel mult o dată pe zi, chiar dacă lipești liste din mai multe tombole.</div>
+        <label for="wb-raffle">Tombola de pe Raffall</label>
+        <select id="wb-raffle" onchange="previewWheelBuyers()"></select>
+        <div class="note" id="wb-raffle-note"></div>
+        <label for="wb-input">Lista de participanți</label>
+        <textarea id="wb-input" oninput="previewWheelBuyers()" placeholder="Lipește aici lista de participanți de pe Raffall&#10;&#10;Andrew Robinson   x70&#10;Kinga Biro-Pacsa   x250"></textarea>
+        <label class="toggle-line"><input type="checkbox" id="wb-nogrant" onchange="previewWheelBuyers()"> Doar memorează lista, fără spin-uri</label>
+        <div class="note" id="wb-preview"></div>
+        <button class="btn btn-gold btn-full" onclick="importWheelBuyers()">🎡 Actualizează lista și dă spin-urile</button>
+
+        <div class="sub-head">Spin-uri date manual</div>
+        <div class="grid-2">
+          <div><label for="wg-name">Numele de pe Raffall</label><input type="text" id="wg-name" placeholder="Andrew Robinson"></div>
+          <div><label for="wg-spins">Spin-uri</label><input type="number" id="wg-spins" min="1" max="50" value="1"></div>
+        </div>
+        <button class="btn btn-ghost btn-full" onclick="giveWheelSpins()">➕ Dă spin-uri (valabile până la miezul nopții UK)</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📦 De livrat</div>
+        <div id="w-pending"></div>
+        <div class="sub-head">Ultimele învârtiri</div>
+        <div id="w-spins"></div>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -351,7 +428,9 @@ const ERRORS = {
   username_taken: 'Username-ul e deja folosit de alt cont.',
   invalid_username: 'Username invalid (2–40 caractere).',
   no_profile: 'Contul jucătorului nu există.',
-  zero_delta: 'Scrie un număr diferit de 0.'
+  zero_delta: 'Scrie un număr diferit de 0.',
+  no_raffle: 'Alege tombola.',
+  invalid_spins: 'Spin-urile trebuie să fie între 1 și 50.'
 };
 function errMsg(e){
   const m = (e && (e.message || e.details)) || String(e);
@@ -412,6 +491,7 @@ function showTab(name){
   if(name === 'buyers')  renderBuyers();
   if(name === 'players') loadPlayers();
   if(name === 'draws')   renderDraws();
+  if(name === 'wheel')   { renderWheelAdmin(); resetSegForm(); }
 }
 
 /* ═══ ÎNCĂRCARE ════════════════════════════════════════════════ */
@@ -1044,7 +1124,7 @@ async function showLedger(id){
   const { data, error } = await sb.from('credit_ledger').select('*').eq('user_id', id).order('created_at', { ascending:false }).limit(50);
   if(error) return flash('error', errMsg(error));
   if(!data.length){ box.innerHTML = '<div class="note">Nicio mișcare de credite.</div>'; return; }
-  const why = r => r === 'prize' ? 'premiu câștigat' : r === 'spin' ? 'spin plătit' : esc(r);
+  const why = r => r === 'prize' ? 'premiu câștigat' : r === 'spin' ? 'spin plătit' : r === 'wheel' ? 'premiu roată' : esc(r);
   box.innerHTML = `<div class="table-wrap ledger"><table><thead><tr><th>Când</th><th>Mișcare</th><th>Sold după</th><th>Motiv</th></tr></thead><tbody>` +
     data.map(r => `<tr><td>${fmtDate(r.created_at)}</td><td style="color:${r.delta > 0 ? 'var(--green)' : 'var(--red)'}">${r.delta > 0 ? '+' : ''}${r.delta}</td><td>${r.balance_after}</td><td>${why(r.reason)}</td></tr>`).join('') +
     '</tbody></table></div>';
@@ -1075,6 +1155,277 @@ async function renderDraws(){
       <td>${d.paid_with === 'credits' ? `⭐ ${d.credits_spent}` : 'gratuit'}</td>
       <td>${d.prize_id && d.instant_prizes ? `<span class="pill pill-won">🏆 ${fmtPrize(d.instant_prizes)}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
     </tr>`).join('') + '</tbody></table></div>';
+}
+
+/* ═══ DESENUL ROȚII (același în admin și la jucători) ═════════ */
+function wheelTextColor(hex){
+  const n = parseInt(String(hex || '#000000').slice(1), 16);
+  const r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#17130c' : '#ffffff';
+}
+function drawWheel(canvas, segs){
+  if(!canvas || !canvas.clientWidth) return;   // ascuns: desenăm când se vede
+  const dpr = window.devicePixelRatio || 1;
+  const css = canvas.clientWidth;
+  if(canvas.width !== Math.round(css * dpr)){ canvas.width = Math.round(css * dpr); canvas.height = Math.round(css * dpr); }
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, c = W / 2, R = c - 6 * dpr;
+  ctx.clearRect(0, 0, W, W);
+  // inelul exterior
+  ctx.beginPath(); ctx.arc(c, c, R + 4 * dpr, 0, Math.PI * 2); ctx.fillStyle = '#c9962d'; ctx.fill();
+  if(!segs.length){
+    ctx.beginPath(); ctx.arc(c, c, R, 0, Math.PI * 2); ctx.fillStyle = '#f3ead8'; ctx.fill();
+    return;
+  }
+  const step = Math.PI * 2 / segs.length;
+  segs.forEach((s, i) => {
+    // felia 0 începe sus (la acul roții), în sensul acelor de ceasornic
+    const a0 = -Math.PI / 2 + i * step, a1 = a0 + step;
+    ctx.beginPath(); ctx.moveTo(c, c); ctx.arc(c, c, R, a0, a1); ctx.closePath();
+    ctx.fillStyle = s.color || '#c9962d'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5 * dpr; ctx.stroke();
+    // textul, de-a lungul razei
+    ctx.save();
+    ctx.translate(c, c); ctx.rotate(a0 + step / 2);
+    ctx.fillStyle = wheelTextColor(s.color);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    let size = Math.min(R * 0.11, (R * step) * 0.42);
+    ctx.font = `800 ${size}px Manrope, 'DM Sans', sans-serif`;
+    const maxW = R * 0.66;
+    while(ctx.measureText(s.label).width > maxW && size > 7 * dpr){ size -= 1; ctx.font = `800 ${size}px Manrope, 'DM Sans', sans-serif`; }
+    ctx.fillText(s.label, R - 12 * dpr, 0);
+    ctx.restore();
+  });
+  // butucul din mijloc
+  ctx.beginPath(); ctx.arc(c, c, R * 0.16, 0, Math.PI * 2); ctx.fillStyle = '#101010'; ctx.fill();
+  ctx.lineWidth = 3 * dpr; ctx.strokeStyle = '#c9962d'; ctx.stroke();
+  ctx.fillStyle = '#f0d08a'; ctx.font = `800 ${R * 0.07}px Manrope, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('LEO', c, c);
+}
+
+/* ═══ ROATA ═══════════════════════════════════════════════════ */
+let wheelSegs = [], wheelRaffles = [];
+const KIND_RO = { none:'Fără câștig', credits:'Credite', manual:'Premiu manual' };
+const ukToday = () => new Intl.DateTimeFormat('en-CA', { timeZone:'Europe/London' }).format(new Date());
+
+async function renderWheelAdmin(){
+  const [st, sg, rf, pend, last] = await Promise.all([
+    sb.from('wheel_settings').select('*').eq('id', 1).maybeSingle(),
+    sb.from('wheel_segments').select('*').order('position').order('id'),
+    sb.from('raffles').select('id,name,draft').order('id', { ascending:false }).limit(80),
+    sb.from('wheel_spins').select('*').eq('status', 'pending').order('created_at'),
+    sb.from('wheel_spins').select('*').order('created_at', { ascending:false }).limit(60)
+  ]);
+  if(st.error) return flash('error', /wheel_settings/.test(st.error.message || '') ? 'Rulează întâi fișierul SQL al roții în Supabase.' : errMsg(st.error));
+  const s = st.data || { active:false, buyer_spins:2, welcome_spins:1 };
+  $('w-active').checked = !!s.active;
+  $('w-buyer').value = s.buyer_spins;
+  $('w-welcome').value = s.welcome_spins;
+
+  wheelSegs = sg.data || [];
+  renderWheelSegs();
+
+  wheelRaffles = (rf.data || []).filter(r => !r.draft);
+  const sel = $('wb-raffle'), prev = sel.value;
+  sel.innerHTML = wheelRaffles.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('') || '<option value="">Nicio tombolă publicată</option>';
+  if(prev && wheelRaffles.some(r => String(r.id) === prev)) sel.value = prev;
+  previewWheelBuyers();
+
+  const p = pend.data || [], l = last.data || [];
+  const day = Date.now() - 86400000;
+  const recent = l.filter(x => new Date(x.created_at) > day);
+  $('w-stats').innerHTML = `
+    <div class="stat"><b>${s.active ? 'DA' : 'NU'}</b><span>roata e activă</span></div>
+    <div class="stat"><b>${recent.length}${l.length === 60 && recent.length === 60 ? '+' : ''}</b><span>învârtiri în 24h</span></div>
+    <div class="stat"><b>${recent.filter(x => x.kind === 'credits').reduce((a, x) => a + x.credits, 0).toLocaleString('en-GB')}</b><span>credite câștigate în 24h</span></div>
+    <div class="stat"><b>${p.length}</b><span>premii de livrat</span></div>`;
+
+  $('w-pending').innerHTML = p.length
+    ? `<div class="table-wrap"><table><thead><tr><th>Când</th><th>Jucător</th><th>Premiu</th><th></th></tr></thead><tbody>` +
+      p.map(x => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.username)}</td><td><b>${esc(x.label)}</b></td>
+        <td><button class="btn btn-gold btn-sm" onclick="deliverWheelPrize(${x.id})">✅ Livrat</button></td></tr>`).join('') + '</tbody></table></div>'
+    : '<div class="empty">Nimic de livrat.</div>';
+
+  const res = x => x.kind === 'none' ? '<span style="color:var(--muted)">fără câștig</span>'
+    : x.kind === 'credits' ? `<span class="pill pill-won">⭐ ${x.credits} credite</span>`
+    : `<span class="pill ${x.status === 'delivered' ? 'pill-won' : 'pill-paused'}">${esc(x.label)} · ${x.status === 'delivered' ? 'livrat' : 'de livrat'}</span>`;
+  $('w-spins').innerHTML = l.length
+    ? `<div class="table-wrap"><table><thead><tr><th>Când</th><th>Jucător</th><th>Rezultat</th></tr></thead><tbody>` +
+      l.map(x => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.username)}</td><td>${res(x)}</td></tr>`).join('') + '</tbody></table></div>'
+    : '<div class="empty">Nicio învârtire încă.</div>';
+}
+
+async function saveWheelSettings(){
+  const buyer = parseInt($('w-buyer').value), welcome = parseInt($('w-welcome').value);
+  if(!(buyer >= 0 && buyer <= 50) || !(welcome >= 0 && welcome <= 50)) return flash('error', 'Spin-urile trebuie să fie între 0 și 50.');
+  const active = $('w-active').checked;
+  if(active && !wheelSegs.some(x => x.enabled && x.weight > 0 && (x.stock === null || x.stock > 0)))
+    return flash('error', 'Roata nu are nicio felie care poate ieși. Adaugă felii înainte s-o activezi.');
+  const { error } = await sb.from('wheel_settings').update({ active, buyer_spins: buyer, welcome_spins: welcome, updated_at: new Date().toISOString() }).eq('id', 1);
+  if(error) return flash('error', errMsg(error));
+  flash('success', active ? '🎡 Setări salvate. Roata e activă pentru jucători.' : '🎡 Setări salvate. Roata e oprită (jucătorii nu o văd).');
+  renderWheelAdmin();
+}
+
+/* ─── Felii ─── */
+function renderWheelSegs(){
+  const onWheel = wheelSegs.filter(x => x.enabled);
+  drawWheel($('w-preview'), onWheel);
+  const live = onWheel.filter(x => x.weight > 0 && (x.stock === null || x.stock > 0));
+  const total = live.reduce((a, x) => a + x.weight, 0);
+  const pct = x => (!x.enabled || !total || x.weight <= 0 || (x.stock !== null && x.stock <= 0)) ? '0%'
+    : (x.weight / total * 100).toFixed(x.weight / total < 0.01 ? 2 : 1) + '%';
+  if(!wheelSegs.length){ $('w-segs').innerHTML = '<div class="empty">Nicio felie. Adaugă prima mai jos.</div>'; return; }
+  $('w-segs').innerHTML = `<div class="table-wrap"><table><thead><tr><th>#</th><th>Text</th><th>Tip</th><th>Greutate</th><th>Șansă</th><th>Stoc</th><th></th></tr></thead><tbody>` +
+    wheelSegs.map(x => `<tr style="${x.enabled ? '' : 'opacity:.45'}">
+      <td>${x.position}</td>
+      <td><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${esc(x.color)};border:1px solid var(--border);vertical-align:-1px;margin-right:6px"></span><b>${esc(x.label)}</b></td>
+      <td>${KIND_RO[x.kind]}${x.kind === 'credits' ? ` · ${x.credits}` : ''}</td>
+      <td>${x.weight}</td>
+      <td><b>${pct(x)}</b></td>
+      <td>${x.stock === null ? '∞' : x.stock}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="editSegment(${x.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteSegment(${x.id})">🗑️</button></td>
+    </tr>`).join('') + '</tbody></table></div>' +
+    `<div class="note">Total greutăți active: ${total}. ${onWheel.length} felii pe roată.</div>`;
+}
+function syncSegKind(){
+  $('ws-credits-wrap').style.visibility = $('ws-kind').value === 'credits' ? 'visible' : 'hidden';
+}
+function resetSegForm(){
+  $('ws-id').value = '';
+  $('ws-form-title').textContent = 'Felie nouă';
+  $('ws-label').value = '';
+  $('ws-kind').value = 'credits';
+  $('ws-credits').value = 10;
+  $('ws-weight').value = 10;
+  $('ws-stock').value = '';
+  $('ws-color').value = '#c9962d';
+  $('ws-pos').value = (wheelSegs.reduce((m, x) => Math.max(m, x.position), 0) || 0) + 1;
+  $('ws-enabled').checked = true;
+  syncSegKind();
+}
+function editSegment(id){
+  const x = wheelSegs.find(s => s.id === id); if(!x) return;
+  $('ws-id').value = x.id;
+  $('ws-form-title').textContent = `Editezi felia „${x.label}”`;
+  $('ws-label').value = x.label;
+  $('ws-kind').value = x.kind;
+  $('ws-credits').value = x.credits;
+  $('ws-weight').value = x.weight;
+  $('ws-stock').value = x.stock === null ? '' : x.stock;
+  $('ws-color').value = x.color;
+  $('ws-pos').value = x.position;
+  $('ws-enabled').checked = x.enabled;
+  syncSegKind();
+  $('ws-label').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+async function saveSegment(){
+  const id = parseInt($('ws-id').value) || null;
+  const kind = $('ws-kind').value;
+  const stockRaw = $('ws-stock').value.trim();
+  const row = {
+    label: $('ws-label').value.trim().toUpperCase(),
+    kind,
+    credits: kind === 'credits' ? (parseInt($('ws-credits').value) || 0) : 0,
+    weight: parseInt($('ws-weight').value),
+    stock: stockRaw === '' ? null : parseInt(stockRaw),
+    color: $('ws-color').value,
+    position: parseInt($('ws-pos').value) || 0,
+    enabled: $('ws-enabled').checked
+  };
+  if(!row.label) return flash('error', 'Scrie textul de pe roată.');
+  if(row.label.length > 22) return flash('error', 'Textul are maxim 22 de caractere.');
+  if(kind === 'credits' && row.credits < 1) return flash('error', 'Scrie câte credite se câștigă.');
+  if(!(row.weight >= 0)) return flash('error', 'Greutatea trebuie să fie 0 sau mai mare.');
+  if(row.stock !== null && !(row.stock >= 0)) return flash('error', 'Stocul trebuie să fie gol sau un număr ≥ 0.');
+  const q = id ? sb.from('wheel_segments').update(row).eq('id', id) : sb.from('wheel_segments').insert(row);
+  const { error } = await q;
+  if(error) return flash('error', errMsg(error));
+  flash('success', id ? '✏️ Felie actualizată.' : '➕ Felie adăugată.');
+  await renderWheelAdmin();
+  resetSegForm();
+}
+async function deleteSegment(id){
+  const x = wheelSegs.find(s => s.id === id); if(!x) return;
+  if(!confirm(`Ștergi felia „${x.label}”? Istoricul învârtirilor rămâne.`)) return;
+  const { error } = await sb.from('wheel_segments').delete().eq('id', id);
+  if(error) return flash('error', errMsg(error));
+  renderWheelAdmin();
+}
+
+/* ─── Cumpărători → spin-uri ─── */
+let wbPreviewSeq = 0;
+async function previewWheelBuyers(){
+  const raffle = $('wb-raffle').value;
+  const seq = ++wbPreviewSeq;
+  if(!raffle){ $('wb-raffle-note').textContent = ''; $('wb-preview').innerHTML = ''; return; }
+  const { data: snap, error } = await sb.from('wheel_snapshot').select('username,tickets,updated_at').eq('raffle_key', raffle);
+  if(seq !== wbPreviewSeq) return;
+  if(error) return flash('error', errMsg(error));
+  const old = Object.fromEntries((snap || []).map(r => [r.username, r.tickets]));
+  const lastAt = (snap || []).reduce((m, r) => r.updated_at > m ? r.updated_at : m, '');
+  $('wb-raffle-note').innerHTML = snap && snap.length
+    ? `Ultima lipire: <b>${fmtDate(lastAt)}</b> · ${snap.length} nume memorate.`
+    : `<b>Prima lipire pentru tombola asta.</b> Dacă tombola rulează deja de câteva zile, bifează „Doar memorează lista”, ca să nu dai spin-uri pentru bilete vechi.`;
+
+  const list = parseBuyers($('wb-input').value);
+  if(!list.length){ $('wb-preview').innerHTML = ''; return; }
+  const fresh = list.filter(b => old[b.username] === undefined);
+  const more = list.filter(b => old[b.username] !== undefined && b.tickets > old[b.username]);
+  const lucky = fresh.concat(more);
+  let already = new Set();
+  if(lucky.length){
+    const { data: g } = await sb.from('wheel_grants').select('username').eq('reason', 'buyer').eq('grant_day', ukToday());
+    if(seq !== wbPreviewSeq) return;
+    already = new Set((g || []).map(x => x.username));
+  }
+  const willGet = lucky.filter(b => !already.has(b.username));
+  const spinsEach = parseInt($('w-buyer').value) || 0;
+  const nogrant = $('wb-nogrant').checked;
+  const chip = b => `<span>${esc(b.username)} · ${old[b.username] === undefined ? 'nou' : `${old[b.username]} → ${b.tickets}`}</span>`;
+  $('wb-preview').innerHTML =
+    `Am găsit <b>${list.length}</b> participanți: <b>${fresh.length}</b> noi, <b>${more.length}</b> cu bilete în plus, ${list.length - lucky.length} neschimbați.<br>` +
+    (nogrant
+      ? '⏸ Doar se memorează lista. <b>Nimeni nu primește spin-uri.</b>'
+      : `🎡 <b>${willGet.length}</b> jucători primesc câte <b>${spinsEach}</b> spin-uri azi` +
+        (lucky.length - willGet.length ? ` (${lucky.length - willGet.length} au primit deja azi și nu mai primesc).` : '.')) +
+    (willGet.length && !nogrant ? `<div class="preview-list">${willGet.slice(0, 12).map(chip).join('')}${willGet.length > 12 ? `<span>+ încă ${willGet.length - 12}</span>` : ''}</div>` : '');
+}
+async function importWheelBuyers(){
+  const raffle = $('wb-raffle').value;
+  if(!raffle) return flash('error', 'Alege tombola.');
+  const list = parseBuyers($('wb-input').value);
+  if(!list.length) return flash('error', 'Lipește lista de participanți.');
+  const nogrant = $('wb-nogrant').checked;
+  const r = wheelRaffles.find(x => String(x.id) === raffle);
+  if(!confirm(nogrant
+    ? `Memorezi lista pentru „${r ? r.name : raffle}” FĂRĂ să dai spin-uri?`
+    : `Actualizezi lista pentru „${r ? r.name : raffle}” și dai spin-urile de azi?`)) return;
+  const { data, error } = await sb.rpc('admin_wheel_import', { p_raffle: raffle, p_rows: list, p_grant: !nogrant });
+  if(error) return flash('error', errMsg(error));
+  flash('success', nogrant
+    ? `💾 Listă memorată: ${data.new} nume noi, ${data.more} cu bilete în plus. Fără spin-uri.`
+    : `🎡 ${data.given} jucători au primit câte ${data.spins_each} spin-uri` +
+      (data.already ? ` · ${data.already} primiseră deja azi` : '') + ` · ${data.same} neschimbați.`);
+  $('wb-input').value = '';
+  $('wb-nogrant').checked = false;
+  previewWheelBuyers();
+}
+async function giveWheelSpins(){
+  const name = $('wg-name').value.trim(), n = parseInt($('wg-spins').value);
+  if(!name) return flash('error', 'Scrie numele de pe Raffall.');
+  if(!(n >= 1 && n <= 50)) return flash('error', 'Spin-urile trebuie să fie între 1 și 50.');
+  const { error } = await sb.rpc('admin_wheel_give', { p_username: name, p_spins: n });
+  if(error) return flash('error', errMsg(error));
+  flash('success', `➕ ${esc(name)} a primit ${n} spin-uri pe roată (valabile până la miezul nopții UK).`);
+  $('wg-name').value = '';
+}
+async function deliverWheelPrize(id){
+  if(!confirm('Marchezi premiul ca livrat?')) return;
+  const { error } = await sb.rpc('admin_wheel_deliver', { p_spin: id });
+  if(error) return flash('error', errMsg(error));
+  renderWheelAdmin();
 }
 
 /* ═══ PORNIRE ══════════════════════════════════════════════════ */
