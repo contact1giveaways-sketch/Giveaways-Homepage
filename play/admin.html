@@ -1399,7 +1399,8 @@ async function previewWheelBuyers(){
   const old = Object.fromEntries((snap || []).map(r => [r.username, r.tickets]));
   const lastAt = (snap || []).reduce((m, r) => r.updated_at > m ? r.updated_at : m, '');
   $('wb-raffle-note').innerHTML = snap && snap.length
-    ? `Ultima lipire: <b>${fmtDate(lastAt)}</b> · ${snap.length} nume memorate.`
+    ? `Ultima lipire: <b>${fmtDate(lastAt)}</b> · ${snap.length} nume memorate.
+       <button class="btn btn-danger btn-sm" style="margin-left:6px" onclick="resetWheelRaffle()">🗑️ Șterge lista tombolei</button>`
     : `<b>Prima lipire pentru tombola asta.</b> Dacă tombola rulează deja de câteva zile, bifează „Doar memorează lista”, ca să nu dai spin-uri pentru bilete vechi.`;
 
   const list = parseBuyers($('wb-input').value);
@@ -1443,6 +1444,16 @@ async function importWheelBuyers(){
       (data.already ? ` · ${data.already} primiseră deja azi` : '') + ` · ${data.same} neschimbați.`);
   $('wb-input').value = '';
   $('wb-nogrant').checked = false;
+  previewWheelBuyers();
+}
+async function resetWheelRaffle(){
+  const raffle = $('wb-raffle').value; if(!raffle) return;
+  const r = wheelRaffles.find(x => String(x.id) === raffle);
+  if(!confirm(`Ștergi lista memorată pentru „${r ? r.name : raffle}”?\n\n• Numele și biletele memorate dispar (următoarea lipire va fi din nou „prima lipire”).\n• Spin-urile date din lista asta și încă nefolosite dispar.\n• Învârtirile deja făcute rămân în istoric.`)) return;
+  const { data, error } = await sb.rpc('admin_wheel_reset_raffle', { p_raffle: raffle });
+  if(error) return flash('error', /admin_wheel_reset_raffle/.test(error.message || '') ? 'Rulează întâi fișierul supabase-roata-v3.sql în Supabase.' : errMsg(error));
+  flash('success', `🗑️ Listă ștearsă: ${data.names} nume. Spin-uri scoase la ${data.removed + data.trimmed} jucători` +
+    (data.trimmed ? ` (${data.trimmed} apucaseră să învârtă; acelea rămân în istoric)` : '') + '.');
   previewWheelBuyers();
 }
 async function giveWheelSpins(){
