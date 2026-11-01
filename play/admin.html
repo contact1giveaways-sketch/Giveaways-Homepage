@@ -338,7 +338,8 @@ tr:last-child td{border-bottom:none}
 
       <div class="card">
         <div class="card-title">Feliile roții</div>
-        <div class="note">Șansa unei felii = greutatea ei împărțită la totalul greutăților. Stoc gol = nelimitat. Când stocul ajunge la 0, felia rămâne pe roată, dar nu mai poate ieși. Textul de pe roată îl văd jucătorii, deci în engleză.</div>
+        <div class="note"><b>Greutatea</b> = cât de des iese felia. Mai mare = iese mai des. Ex.: NO WIN 90 și 10 CREDITS 10 → NO WIN iese în 90% din cazuri, 10 CREDITS în 10%. Poți folosi orice număr de la 0 (nu iese niciodată) în sus; procentul exact apare în coloana „Șansă”.<br>
+        <b>Stocul</b> = câte premii de felul ăsta ai de dat. Gol = nelimitat. Când stocul ajunge la 0, felia dispare singură de pe roată; pui stoc nou și reapare. Textul de pe roată îl văd jucătorii, deci în engleză.</div>
         <div style="display:flex;justify-content:center;margin:16px 0"><canvas id="w-preview" style="width:240px;height:240px"></canvas></div>
         <div id="w-segs"></div>
 
@@ -394,7 +395,13 @@ tr:last-child td{border-bottom:none}
         <div class="card-title">📦 De livrat</div>
         <div id="w-pending"></div>
         <div class="sub-head">Ultimele învârtiri</div>
+        <div class="note" style="margin-bottom:8px">Fiecare jucător își vede doar istoricul lui. Câștigurile (fără NO WIN) apar public în „Latest wheel wins” pe pagina roții; dacă ștergi o învârtire aici, dispare și de acolo.</div>
         <div id="w-spins"></div>
+        <div class="sub-head">Șterge testele</div>
+        <div class="grid-2">
+          <div><label for="wd-name">Numele jucătorului</label><input type="text" id="wd-name" placeholder="numele tău de test"></div>
+          <div><label>&nbsp;</label><button class="btn btn-danger" style="width:100%" onclick="deleteWheelSpinsOf()">🗑️ Șterge toate învârtirile lui</button></div>
+        </div>
       </div>
     </section>
   </div>
@@ -1158,6 +1165,8 @@ async function renderDraws(){
 }
 
 /* ═══ DESENUL ROȚII (același în admin și la jucători) ═════════ */
+const WHEEL_LOGO = new Image();
+WHEEL_LOGO.src = '/icon-192.png';
 function wheelTextColor(hex){
   const n = parseInt(String(hex || '#000000').slice(1), 16);
   const r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
@@ -1196,11 +1205,19 @@ function drawWheel(canvas, segs){
     ctx.fillText(s.label, R - 12 * dpr, 0);
     ctx.restore();
   });
-  // butucul din mijloc
-  ctx.beginPath(); ctx.arc(c, c, R * 0.16, 0, Math.PI * 2); ctx.fillStyle = '#101010'; ctx.fill();
+  // butucul din mijloc, cu logo-ul Giveaways
+  const hr = R * 0.17;
+  ctx.beginPath(); ctx.arc(c, c, hr, 0, Math.PI * 2); ctx.fillStyle = '#101010'; ctx.fill();
+  if(WHEEL_LOGO.complete && WHEEL_LOGO.naturalWidth){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(c, c, hr, 0, Math.PI * 2); ctx.clip();
+    ctx.drawImage(WHEEL_LOGO, c - hr, c - hr, hr * 2, hr * 2);
+    ctx.restore();
+  } else {
+    WHEEL_LOGO.onload = () => drawWheel(canvas, segs);
+  }
+  ctx.beginPath(); ctx.arc(c, c, hr, 0, Math.PI * 2);
   ctx.lineWidth = 3 * dpr; ctx.strokeStyle = '#c9962d'; ctx.stroke();
-  ctx.fillStyle = '#f0d08a'; ctx.font = `800 ${R * 0.07}px Manrope, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('LEO', c, c);
 }
 
 /* ═══ ROATA ═══════════════════════════════════════════════════ */
@@ -1212,7 +1229,7 @@ async function renderWheelAdmin(){
   const [st, sg, rf, pend, last] = await Promise.all([
     sb.from('wheel_settings').select('*').eq('id', 1).maybeSingle(),
     sb.from('wheel_segments').select('*').order('position').order('id'),
-    sb.from('raffles').select('id,name,draft').order('id', { ascending:false }).limit(80),
+    sb.from('raffles').select('id,name,draft,opens_at,draw_date,display_order').eq('draft', false).order('id', { ascending:false }).limit(150),
     sb.from('wheel_spins').select('*').eq('status', 'pending').order('created_at'),
     sb.from('wheel_spins').select('*').order('created_at', { ascending:false }).limit(60)
   ]);
@@ -1225,9 +1242,23 @@ async function renderWheelAdmin(){
   wheelSegs = sg.data || [];
   renderWheelSegs();
 
-  wheelRaffles = (rf.data || []).filter(r => !r.draft);
+  // Tombolele pe grupuri, ca la instante: active primele, apoi programate, apoi extrase
+  wheelRaffles = rf.data || [];
+  const now = Date.now(), tm = v => v ? new Date(v).getTime() : NaN;
+  const live = [], upcoming = [], drawn = [];
+  wheelRaffles.forEach(r => {
+    if(!isNaN(tm(r.opens_at)) && now < tm(r.opens_at)) upcoming.push(r);
+    else if(!isNaN(tm(r.draw_date)) && now >= tm(r.draw_date)) drawn.push(r);
+    else live.push(r);
+  });
+  live.sort((a,b) => (Number(a.display_order)||999) - (Number(b.display_order)||999) || (tm(a.draw_date)||0) - (tm(b.draw_date)||0));
+  upcoming.sort((a,b) => tm(a.opens_at) - tm(b.opens_at));
+  drawn.sort((a,b) => tm(b.draw_date) - tm(a.draw_date));
+  const ropt = r => `<option value="${r.id}">${esc(r.name)}</option>`;
+  const rgrp = (label, list) => list.length ? `<optgroup label="${label}">${list.map(ropt).join('')}</optgroup>` : '';
   const sel = $('wb-raffle'), prev = sel.value;
-  sel.innerHTML = wheelRaffles.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('') || '<option value="">Nicio tombolă publicată</option>';
+  sel.innerHTML = (rgrp('🟢 Active', live) + rgrp('🔜 Programate', upcoming) + rgrp('🏁 Extrase (ultimele 20)', drawn.slice(0, 20)))
+    || '<option value="">Nicio tombolă publicată</option>';
   if(prev && wheelRaffles.some(r => String(r.id) === prev)) sel.value = prev;
   previewWheelBuyers();
 
@@ -1250,8 +1281,9 @@ async function renderWheelAdmin(){
     : x.kind === 'credits' ? `<span class="pill pill-won">⭐ ${x.credits} credite</span>`
     : `<span class="pill ${x.status === 'delivered' ? 'pill-won' : 'pill-paused'}">${esc(x.label)} · ${x.status === 'delivered' ? 'livrat' : 'de livrat'}</span>`;
   $('w-spins').innerHTML = l.length
-    ? `<div class="table-wrap"><table><thead><tr><th>Când</th><th>Jucător</th><th>Rezultat</th></tr></thead><tbody>` +
-      l.map(x => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.username)}</td><td>${res(x)}</td></tr>`).join('') + '</tbody></table></div>'
+    ? `<div class="table-wrap"><table><thead><tr><th>Când</th><th>Jucător</th><th>Rezultat</th><th></th></tr></thead><tbody>` +
+      l.map(x => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.username)}</td><td>${res(x)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteWheelSpin(${x.id})">🗑️</button></td></tr>`).join('') + '</tbody></table></div>'
     : '<div class="empty">Nicio învârtire încă.</div>';
 }
 
@@ -1269,7 +1301,8 @@ async function saveWheelSettings(){
 
 /* ─── Felii ─── */
 function renderWheelSegs(){
-  const onWheel = wheelSegs.filter(x => x.enabled);
+  const inStock = x => x.stock === null || x.stock > 0;
+  const onWheel = wheelSegs.filter(x => x.enabled && inStock(x));
   drawWheel($('w-preview'), onWheel);
   const live = onWheel.filter(x => x.weight > 0 && (x.stock === null || x.stock > 0));
   const total = live.reduce((a, x) => a + x.weight, 0);
@@ -1277,17 +1310,17 @@ function renderWheelSegs(){
     : (x.weight / total * 100).toFixed(x.weight / total < 0.01 ? 2 : 1) + '%';
   if(!wheelSegs.length){ $('w-segs').innerHTML = '<div class="empty">Nicio felie. Adaugă prima mai jos.</div>'; return; }
   $('w-segs').innerHTML = `<div class="table-wrap"><table><thead><tr><th>#</th><th>Text</th><th>Tip</th><th>Greutate</th><th>Șansă</th><th>Stoc</th><th></th></tr></thead><tbody>` +
-    wheelSegs.map(x => `<tr style="${x.enabled ? '' : 'opacity:.45'}">
+    wheelSegs.map(x => `<tr style="${x.enabled && inStock(x) ? '' : 'opacity:.45'}">
       <td>${x.position}</td>
       <td><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${esc(x.color)};border:1px solid var(--border);vertical-align:-1px;margin-right:6px"></span><b>${esc(x.label)}</b></td>
       <td>${KIND_RO[x.kind]}${x.kind === 'credits' ? ` · ${x.credits}` : ''}</td>
       <td>${x.weight}</td>
       <td><b>${pct(x)}</b></td>
-      <td>${x.stock === null ? '∞' : x.stock}</td>
+      <td>${x.stock === null ? '∞' : x.stock === 0 ? '<span class="pill pill-closed">epuizat</span>' : x.stock}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="editSegment(${x.id})">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="deleteSegment(${x.id})">🗑️</button></td>
     </tr>`).join('') + '</tbody></table></div>' +
-    `<div class="note">Total greutăți active: ${total}. ${onWheel.length} felii pe roată.</div>`;
+    `<div class="note">Total greutăți active: ${total}. ${onWheel.length} felii pe roată. Feliile oprite sau epuizate (stoc 0) nu apar pe roată.</div>`;
 }
 function syncSegKind(){
   $('ws-credits-wrap').style.visibility = $('ws-kind').value === 'credits' ? 'visible' : 'hidden';
@@ -1420,6 +1453,26 @@ async function giveWheelSpins(){
   if(error) return flash('error', errMsg(error));
   flash('success', `➕ ${esc(name)} a primit ${n} spin-uri pe roată (valabile până la miezul nopții UK).`);
   $('wg-name').value = '';
+}
+async function deleteWheelSpin(id){
+  if(!confirm('Ștergi învârtirea asta din istoric?\n\nCreditele câștigate rămân în portofel (le scoți din Jucători → ajustare credite, dacă e un test).')) return;
+  const { error } = await sb.from('wheel_spins').delete().eq('id', id);
+  if(error) return flash('error', errMsg(error));
+  renderWheelAdmin();
+}
+async function deleteWheelSpinsOf(){
+  const name = $('wd-name').value.trim();
+  if(!name) return flash('error', 'Scrie numele jucătorului.');
+  const { data, error } = await sb.from('wheel_spins').select('id,username');
+  if(error) return flash('error', errMsg(error));
+  const ids = data.filter(x => nkey(x.username) === nkey(name)).map(x => x.id);
+  if(!ids.length) return flash('info', `Nu am găsit învârtiri pentru „${esc(name)}”.`);
+  if(!confirm(`Ștergi toate cele ${ids.length} învârtiri ale lui „${name}”?\n\nCreditele câștigate rămân în portofel.`)) return;
+  const del = await sb.from('wheel_spins').delete().in('id', ids);
+  if(del.error) return flash('error', errMsg(del.error));
+  flash('success', `🗑️ Am șters ${ids.length} învârtiri ale lui ${esc(name)}.`);
+  $('wd-name').value = '';
+  renderWheelAdmin();
 }
 async function deliverWheelPrize(id){
   if(!confirm('Marchezi premiul ca livrat?')) return;
