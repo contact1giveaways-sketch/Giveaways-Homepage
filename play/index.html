@@ -1038,6 +1038,8 @@ function openCompHeader(){
 }
 
 /* ═══ DESENUL ROȚII (același în admin și la jucători) ═════════ */
+const WHEEL_LOGO = new Image();
+WHEEL_LOGO.src = '/icon-192.png';
 function wheelTextColor(hex){
   const n = parseInt(String(hex || '#000000').slice(1), 16);
   const r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
@@ -1076,11 +1078,19 @@ function drawWheel(canvas, segs){
     ctx.fillText(s.label, R - 12 * dpr, 0);
     ctx.restore();
   });
-  // butucul din mijloc
-  ctx.beginPath(); ctx.arc(c, c, R * 0.16, 0, Math.PI * 2); ctx.fillStyle = '#101010'; ctx.fill();
+  // butucul din mijloc, cu logo-ul Giveaways
+  const hr = R * 0.17;
+  ctx.beginPath(); ctx.arc(c, c, hr, 0, Math.PI * 2); ctx.fillStyle = '#101010'; ctx.fill();
+  if(WHEEL_LOGO.complete && WHEEL_LOGO.naturalWidth){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(c, c, hr, 0, Math.PI * 2); ctx.clip();
+    ctx.drawImage(WHEEL_LOGO, c - hr, c - hr, hr * 2, hr * 2);
+    ctx.restore();
+  } else {
+    WHEEL_LOGO.onload = () => drawWheel(canvas, segs);
+  }
+  ctx.beginPath(); ctx.arc(c, c, hr, 0, Math.PI * 2);
   ctx.lineWidth = 3 * dpr; ctx.strokeStyle = '#c9962d'; ctx.stroke();
-  ctx.fillStyle = '#f0d08a'; ctx.font = `800 ${R * 0.07}px Manrope, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('LEO', c, c);
 }
 
 /* ═══ ROATA (DAILY WHEEL) ═════════════════════════════════════ */
