@@ -392,6 +392,15 @@ tr:last-child td{border-bottom:none}
       </div>
 
       <div class="card">
+        <div class="card-title">🎟️ Spin-uri active acum</div>
+        <div class="note" style="margin-bottom:10px">Jucătorii care au acum spin-uri nefolosite și neexpirate. „Fără cont” = numele e în lista Raffall, dar nu și-a făcut încă cont cu numele ăsta (sau l-a scris altfel), deci nu poate învârti.</div>
+        <div class="stats" id="wa-stats"></div>
+        <label class="toggle-line"><input type="checkbox" id="wa-welcome" onchange="renderWheelActive()"> Arată și spin-urile de bun venit</label>
+        <input type="search" id="wa-search" placeholder="🔍 Caută nume…" oninput="renderWheelActive()" style="margin-top:10px">
+        <div id="wa-list" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card">
         <div class="card-title">📦 De livrat</div>
         <div id="w-pending"></div>
         <div class="sub-head">Ultimele învârtiri</div>
@@ -1261,6 +1270,7 @@ async function renderWheelAdmin(){
     || '<option value="">Nicio tombolă publicată</option>';
   if(prev && wheelRaffles.some(r => String(r.id) === prev)) sel.value = prev;
   previewWheelBuyers();
+  loadWheelActive();
 
   const p = pend.data || [], l = last.data || [];
   const day = Date.now() - 86400000;
@@ -1285,6 +1295,51 @@ async function renderWheelAdmin(){
       l.map(x => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.username)}</td><td>${res(x)}</td>
         <td><button class="btn btn-danger btn-sm" onclick="deleteWheelSpin(${x.id})">🗑️</button></td></tr>`).join('') + '</tbody></table></div>'
     : '<div class="empty">Nicio învârtire încă.</div>';
+}
+
+/* ─── Spin-uri active ─── */
+let wheelActive = [], wheelAccounts = new Set();
+async function loadWheelActive(){
+  const [g, pr] = await Promise.all([
+    sb.from('wheel_grants').select('*').order('created_at', { ascending:false }).limit(2000),
+    sb.from('profiles').select('username')
+  ]);
+  if(g.error) return flash('error', errMsg(g.error));
+  const now = Date.now();
+  wheelActive = (g.data || []).filter(x => x.used < x.spins && (!x.expires_at || new Date(x.expires_at).getTime() > now));
+  wheelAccounts = new Set((pr.data || []).map(x => nkey(x.username)));
+  renderWheelActive();
+}
+function renderWheelActive(){
+  const REASON = { buyer:'cumpărător', admin:'dat manual', welcome:'bun venit' };
+  const withWelcome = $('wa-welcome').checked, q = nkey($('wa-search').value);
+  // un rând pe jucător, cu toate spin-urile lui adunate
+  const by = {};
+  wheelActive.forEach(x => {
+    if(x.reason === 'welcome' && !withWelcome) return;
+    const k = x.username || '';
+    const r = by[k] || (by[k] = { name: k, left: 0, reasons: new Set(), raffles: new Set(), expires: null });
+    r.left += x.spins - x.used;
+    r.reasons.add(REASON[x.reason] || x.reason);
+    if(x.raffle_key){ const rf = wheelRaffles.find(t => String(t.id) === x.raffle_key); r.raffles.add(rf ? rf.name : '#' + x.raffle_key); }
+    if(x.expires_at && (!r.expires || x.expires_at < r.expires)) r.expires = x.expires_at;
+  });
+  let rows = Object.values(by).filter(r => !q || r.name.includes(q)).sort((a,b) => b.left - a.left || a.name.localeCompare(b.name));
+  const noAcc = rows.filter(r => !wheelAccounts.has(r.name)).length;
+  $('wa-stats').innerHTML = `
+    <div class="stat"><b>${rows.length}</b><span>jucători cu spin-uri</span></div>
+    <div class="stat"><b>${rows.reduce((a,r) => a + r.left, 0)}</b><span>spin-uri nefolosite</span></div>
+    <div class="stat"><b>${noAcc}</b><span>fără cont</span></div>`;
+  if(!rows.length){ $('wa-list').innerHTML = '<div class="empty">Nimeni nu are spin-uri active acum.</div>'; return; }
+  $('wa-list').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Nume Raffall</th><th>Spin-uri</th><th>De la</th><th>Tombola</th><th>Expiră</th><th>Cont</th></tr></thead><tbody>` +
+    rows.map(r => `<tr>
+      <td><b>${esc(r.name)}</b></td>
+      <td>${r.left}</td>
+      <td>${[...r.reasons].join(', ')}</td>
+      <td>${[...r.raffles].map(esc).join(', ') || '—'}</td>
+      <td>${r.expires ? fmtDate(r.expires) : 'nu expiră'}</td>
+      <td>${wheelAccounts.has(r.name) ? '<span class="pill pill-won">are cont</span>' : '<span class="pill pill-paused">fără cont</span>'}</td>
+    </tr>`).join('') + '</tbody></table></div>';
 }
 
 async function saveWheelSettings(){
@@ -1445,6 +1500,7 @@ async function importWheelBuyers(){
   $('wb-input').value = '';
   $('wb-nogrant').checked = false;
   previewWheelBuyers();
+  loadWheelActive();
 }
 async function resetWheelRaffle(){
   const raffle = $('wb-raffle').value; if(!raffle) return;
@@ -1455,6 +1511,7 @@ async function resetWheelRaffle(){
   flash('success', `🗑️ Listă ștearsă: ${data.names} nume. Spin-uri scoase la ${data.removed + data.trimmed} jucători` +
     (data.trimmed ? ` (${data.trimmed} apucaseră să învârtă; acelea rămân în istoric)` : '') + '.');
   previewWheelBuyers();
+  loadWheelActive();
 }
 async function giveWheelSpins(){
   const name = $('wg-name').value.trim(), n = parseInt($('wg-spins').value);
@@ -1464,6 +1521,7 @@ async function giveWheelSpins(){
   if(error) return flash('error', errMsg(error));
   flash('success', `➕ ${esc(name)} a primit ${n} spin-uri pe roată (valabile până la miezul nopții UK).`);
   $('wg-name').value = '';
+  loadWheelActive();
 }
 async function deleteWheelSpin(id){
   if(!confirm('Ștergi învârtirea asta din istoric?\n\nCreditele câștigate rămân în portofel (le scoți din Jucători → ajustare credite, dacă e un test).')) return;
