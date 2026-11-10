@@ -182,7 +182,8 @@ tr:last-child td{border-bottom:none}
         <div class="grid-3">
           <div>
             <label for="c-tickets">Total bilete</label>
-            <input type="number" id="c-tickets" value="10000" min="1" max="1000000">
+            <input type="number" id="c-tickets" value="10000" min="1" max="1000000" oninput="ticketsNote()">
+            <div class="note" id="c-tickets-note">Nu apare public. Îl poți micșora ca să crească șansele.</div>
           </div>
           <div id="free-spins-wrap">
             <label for="c-free">Spin-uri gratuite / cont</label>
@@ -247,6 +248,13 @@ tr:last-child td{border-bottom:none}
             <label for="g-ratio">Cel mai mare premiu = de câte ori cel mai mic</label>
             <input type="number" id="g-ratio" value="20" min="1" oninput="previewGen()">
           </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label for="g-range">Pune premiile doar pe biletele 1 – N</label>
+            <input type="number" id="g-range" min="1" placeholder="gol = pe toate biletele" oninput="previewGen()">
+          </div>
+          <div class="note" style="align-self:end">Ex: competiție cu 300.000 de bilete, premii doar pe 1 – 20.000. Mai târziu poți coborî totalul oricând până la 20.000, ca să crească șansele.</div>
         </div>
         <div class="note" id="g-summary"></div>
         <div class="preview-list" id="g-preview"></div>
@@ -512,9 +520,10 @@ function showTab(name){
 
 /* ═══ ÎNCĂRCARE ════════════════════════════════════════════════ */
 async function loadComps(){
-  const { data, error } = await sb.from('instant_competitions').select('*').order('created_at', { ascending:false });
+  // funcție doar pentru admin: publicul nu mai poate citi totalul de bilete
+  const { data, error } = await sb.rpc('admin_list_competitions');
   if(error) return flash('error', errMsg(error));
-  comps = data;
+  comps = data || [];
 }
 async function loadPrizeSummary(){
   const { data, error } = await sb.from('instant_prizes').select('id,competition_id,ticket,kind,amount,label,won_by,won_at').order('ticket');
@@ -559,7 +568,7 @@ function syncAccessFields(){
 function resetCompForm(){
   $('c-id').value = '';
   $('c-name').value = ''; $('c-access').value = 'buyers'; $('c-status').value = 'draft';
-  $('c-tickets').value = 10000; $('c-free').value = 1; $('c-cost').value = 0; $('c-maxcredit').value = 0; $('c-link').value = '';
+  $('c-tickets').value = 10000; ticketsNote(); $('c-free').value = 1; $('c-cost').value = 0; $('c-maxcredit').value = 0; $('c-link').value = '';
   $('comp-form-title').textContent = 'Competiție nouă';
   $('c-save').textContent = '✅ Creează competiția';
   $('c-cancel').style.display = 'none';
@@ -572,12 +581,36 @@ function editComp(id){
   $('c-name').value = c.name; $('c-access').value = c.access; $('c-status').value = c.status;
   $('c-tickets').value = c.total_tickets; $('c-free').value = c.free_spins; $('c-cost').value = c.credit_cost;
   $('c-maxcredit').value = c.max_credit_spins; $('c-link').value = c.raffall_link || '';
+  ticketsNote();
   $('comp-form-title').textContent = 'Editează: ' + c.name;
   $('c-save').textContent = '💾 Salvează modificările';
   $('c-cancel').style.display = 'inline-flex';
   syncAccessFields();
   renderComps();
   window.scrollTo({ top:0, behavior:'smooth' });
+}
+/* Cel mai mare bilet cu premiu încă necâștigat: sub el nu se poate coborî totalul */
+function minTicketsFor(id){
+  return Math.max(0, ...prizes.filter(p => String(p.competition_id) === String(id) && !p.won_by).map(p => p.ticket));
+}
+function ticketsNote(){
+  const el = $('c-tickets-note'); if(!el) return;
+  const id = $('c-id').value, total = parseInt($('c-tickets').value) || 0;
+  if(!id){ el.innerHTML = 'Nu apare public. Îl poți micșora ca să crească șansele.'; return; }
+  const c = compById(id); if(!c) return;
+  const ps = prizes.filter(p => String(p.competition_id) === String(id));
+  const left = ps.filter(p => !p.won_by).length;
+  const min = minTicketsFor(id);
+  const drawn = Number(c.drawn) || 0;
+  const remaining = Math.max(total - drawn, 0);
+  let html = `Nu apare public. Poți coborî până la <b>${(min || 1).toLocaleString('en-GB')}</b>`
+           + (min ? ' (cel mai mare bilet cu premiu necâștigat).' : '.');
+  if(left && remaining){
+    html += ` Cu ${total.toLocaleString('en-GB')} bilete: <b>1 din ${Math.max(1, Math.round(remaining / left)).toLocaleString('en-GB')}</b> spin-uri câștigă`
+          + ` (${left} premii rămase, ${remaining.toLocaleString('en-GB')} bilete neextrase).`;
+  }
+  if(min && total < min) html += ` <span style="color:var(--red)">Prea mic: există un premiu pe biletul ${min}.</span>`;
+  el.innerHTML = html;
 }
 async function saveComp(){
   const id = $('c-id').value;
@@ -595,8 +628,8 @@ async function saveComp(){
   if(row.total_tickets < 1 || row.total_tickets > 1000000) return flash('error','Totalul de bilete trebuie să fie între 1 și 1.000.000.');
   if(id){
     const c = compById(id);
-    const maxPrizeTicket = Math.max(0, ...prizes.filter(p => String(p.competition_id) === String(id)).map(p => p.ticket));
-    if(row.total_tickets < maxPrizeTicket) return flash('error', `Există un premiu pe biletul ${maxPrizeTicket}. Totalul nu poate fi mai mic.`);
+    const maxPrizeTicket = minTicketsFor(id);
+    if(row.total_tickets < maxPrizeTicket) return flash('error', `Există un premiu necâștigat pe biletul ${maxPrizeTicket}. Totalul nu poate fi mai mic.`);
     const { error } = await sb.from('instant_competitions').update(row).eq('id', id);
     if(error) return flash('error', errMsg(error));
     flash('success','✅ Salvat.');
@@ -795,9 +828,16 @@ function splitBudget(budget, n, kind, dist, ratio){
   if(diff !== 0) return { error: 'Nu pot împărți bugetul așa. Micșorează raportul sau numărul de premii.' };
   return { amounts: amounts.map(a => kind === 'credits' ? a : Math.round(a * unit * 100) / 100).sort((a,b) => b - a) };
 }
-function freeTickets(comp){
+/* Intervalul în care se pun premiile: 1 … N (sau tot totalul, dacă N e gol) */
+function genMax(comp){
+  const n = parseInt($('g-range').value);
+  return n >= 1 ? Math.min(n, comp.total_tickets) : comp.total_tickets;
+}
+function freeTickets(comp, max){
+  max = max || comp.total_tickets;
   const taken = new Set(prizes.filter(p => p.competition_id === comp.id).map(p => p.ticket));
-  return { taken, count: comp.total_tickets - taken.size };
+  let inRange = 0; taken.forEach(t => { if(t <= max) inRange++; });
+  return { taken, count: max - inRange };
 }
 function previewGen(){
   genPlan = null;
@@ -808,29 +848,30 @@ function previewGen(){
   const budget = parseFloat($('g-budget').value), n = parseInt($('g-count').value);
   const kind = $('g-kind').value, dist = $('g-dist').value, ratio = parseFloat($('g-ratio').value) || 1;
   if(!(budget > 0) || !(n >= 1)){ $('g-summary').textContent = 'Completează bugetul și numărul de premii ca să vezi previzualizarea.'; return; }
-  const free = freeTickets(comp).count;
-  if(n > free){ $('g-summary').innerHTML = `<span style="color:var(--red)">Sunt doar ${free} bilete libere în competiția asta.</span>`; return; }
+  const max = genMax(comp);
+  const free = freeTickets(comp, max).count;
+  if(n > free){ $('g-summary').innerHTML = `<span style="color:var(--red)">Sunt doar ${free} bilete libere${max < comp.total_tickets ? ` între 1 și ${max.toLocaleString('en-GB')}` : ' în competiția asta'}.</span>`; return; }
   const res = splitBudget(budget, n, kind, dist, ratio);
   if(!res || res.error){ $('g-summary').innerHTML = `<span style="color:var(--red)">${esc(res ? res.error : '')}</span>`; return; }
-  genPlan = { comp, kind, amounts: res.amounts };
+  genPlan = { comp, kind, amounts: res.amounts, max };
   const fmt = a => kind === 'credits' ? `⭐ ${a.toLocaleString('en-GB')}` : `£${a.toFixed(2).replace(/\.00$/, '')}`;
   const groups = {};
   res.amounts.forEach(a => groups[a] = (groups[a] || 0) + 1);
   const total = res.amounts.reduce((a,b) => a + b, 0);
-  $('g-summary').innerHTML = `Total: <b>${fmt(kind === 'credits' ? total : Math.round(total * 100) / 100)}</b> în ${n} premii, pe bilete aleatorii din ${free.toLocaleString('en-GB')} libere.`;
+  $('g-summary').innerHTML = `Total: <b>${fmt(kind === 'credits' ? total : Math.round(total * 100) / 100)}</b> în ${n} premii, pe bilete aleatorii din ${free.toLocaleString('en-GB')} libere${max < comp.total_tickets ? ` (doar între 1 și ${max.toLocaleString('en-GB')})` : ''}.`;
   $('g-preview').innerHTML = Object.entries(groups).sort((a,b) => b[0] - a[0]).map(([a, c]) => `<span>${c} × ${fmt(Number(a))}</span>`).join('');
   $('g-btn').disabled = false;
 }
 async function runGenerator(){
   if(!genPlan) return;
-  const { comp, kind, amounts } = genPlan;
+  const { comp, kind, amounts, max } = genPlan;
   if(!confirm(`Adaug ${amounts.length} premii în „${comp.name}”?`)) return;
   // bilete libere, alese aleatoriu (fără premiu deja pus)
   const { taken } = freeTickets(comp);
   const { data: drawn } = await sb.from('instant_draws').select('ticket').eq('competition_id', comp.id);
   (drawn || []).forEach(d => taken.add(d.ticket));
   const pool = [];
-  for(let t = 1; t <= comp.total_tickets; t++) if(!taken.has(t)) pool.push(t);
+  for(let t = 1; t <= max; t++) if(!taken.has(t)) pool.push(t);
   if(pool.length < amounts.length) return flash('error', `Sunt doar ${pool.length} bilete libere (fără premiu și neextrase).`);
   for(let i = 0; i < amounts.length; i++){
     const j = i + Math.floor(Math.random() * (pool.length - i));
@@ -842,7 +883,7 @@ async function runGenerator(){
   const { error } = await sb.from('instant_prizes').insert(rows);
   if(error){ $('g-btn').disabled = false; return flash('error', errMsg(error)); }
   flash('success', `⚡ ${rows.length} premii adăugate.`);
-  $('g-budget').value = ''; $('g-count').value = '';
+  $('g-budget').value = ''; $('g-count').value = ''; $('g-range').value = '';
   await loadPrizeSummary();
   renderPrizes(); renderComps();
 }
