@@ -125,15 +125,26 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 .status-line{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:4px 0 20px}
 .status-line span{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 13px;font-size:10px;color:#9f9a90;text-transform:uppercase;letter-spacing:.1em}
 .status-line b{display:block;font:800 22px/1 'Manrope';color:var(--goldtxt);margin-bottom:6px;letter-spacing:-.02em;text-transform:none}
-.slot-machine{background:rgba(240,208,138,.07);border:1px solid rgba(240,208,138,.25);border-radius:24px;padding:20px 16px;margin:0 auto 18px;max-width:380px}
+.slot-machine{position:relative;background:rgba(240,208,138,.07);border:1px solid rgba(240,208,138,.25);border-radius:24px;padding:20px 14px;margin:0 auto 18px;max-width:390px;--rh:64px;--rw:46px;--rf:40px}
 .slot-label{font:700 10px/1 'Manrope';color:#9f9a90;letter-spacing:.18em;text-transform:uppercase;text-align:center;margin-bottom:14px}
-.slot-display{display:flex;gap:6px;justify-content:center;background:#0a0a0a;border-radius:16px;padding:16px 10px;border:1px solid rgba(255,255,255,.08)}
-.slot-digit{font-family:'DM Mono',monospace;font-size:44px;font-weight:500;color:var(--goldtxt);width:52px;text-align:center;line-height:1}
-.slot-digit.spinning{animation:digitSpin .08s linear infinite;color:rgba(240,208,138,.55)}
-.slot-display.many .slot-digit{font-size:34px;width:40px}
-.slot-digit.landed{animation:digitLand .3s cubic-bezier(0.34,1.56,0.64,1)}
-@keyframes digitSpin{0%{transform:translateY(-4px);opacity:.7}50%{transform:translateY(4px);opacity:1}100%{transform:translateY(-4px);opacity:.7}}
-@keyframes digitLand{0%{transform:scale(1.3);color:#fff}60%{transform:scale(0.95)}100%{transform:scale(1)}}
+.slot-display{position:relative;display:flex;gap:6px;justify-content:center;background:#0a0a0a;border-radius:16px;padding:12px 10px;border:1px solid rgba(255,255,255,.08)}
+.slot-payline{position:absolute;left:6px;right:6px;top:50%;height:2px;margin-top:-1px;background:linear-gradient(90deg,transparent,rgba(240,208,138,.85),transparent);pointer-events:none;z-index:2}
+.reel{position:relative;width:var(--rw);height:var(--rh);overflow:hidden;border-radius:9px;background:linear-gradient(#050505,#1a1814 50%,#050505)}
+.reel:after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.75),transparent 30%,transparent 70%,rgba(0,0,0,.75));pointer-events:none}
+.reel-strip{will-change:transform}
+.reel-strip div{height:var(--rh);display:flex;align-items:center;justify-content:center;font:500 var(--rf)/1 'DM Mono',monospace;color:var(--goldtxt)}
+.reel.spinning .reel-strip{animation:reelLoop .32s linear infinite;filter:blur(1.6px)}
+.reel.landing .reel-strip{filter:blur(1px)}
+.reel.hit{box-shadow:0 0 0 2px var(--gold),0 0 18px rgba(240,208,138,.6)}
+@keyframes reelLoop{from{transform:translateY(0)}to{transform:translateY(calc(var(--rh) * -10))}}
+.slot-bulbs{position:absolute;inset:-1px;border-radius:24px;pointer-events:none}
+.slot-bulb{position:absolute;width:6px;height:6px;border-radius:50%;background:#5a4a28;transform:translate(-50%,-50%)}
+.slot-machine.running .slot-bulb{animation:bulbChase .8s linear infinite}
+.slot-machine.win .slot-bulb{animation:bulbFlash .25s steps(2) infinite}
+@keyframes bulbChase{0%,60%,100%{background:#5a4a28;box-shadow:none}20%{background:var(--goldtxt);box-shadow:0 0 8px var(--goldtxt)}}
+@keyframes bulbFlash{0%{background:var(--goldtxt);box-shadow:0 0 10px var(--goldtxt)}100%{background:#5a4a28;box-shadow:none}}
+.sound-btn{position:absolute;top:10px;right:12px;z-index:3;background:none;border:0;color:#9f9a90;font-size:15px;line-height:1;padding:4px;cursor:pointer;border-radius:8px}
+.sound-btn[aria-pressed="true"]{color:var(--goldtxt)}
 .spin-btn{display:block;width:100%;max-width:380px;margin:0 auto 10px;padding:17px;border:0;border-radius:999px;background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c;font:800 15px 'Manrope';letter-spacing:.02em;cursor:pointer;box-shadow:0 12px 34px rgba(201,150,45,.25)}
 .spin-btn.alt{background:transparent;border:1px solid rgba(240,208,138,.45);color:var(--goldtxt);box-shadow:none}
 .spin-btn:disabled{opacity:.4;cursor:not-allowed}
@@ -216,9 +227,8 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
   .card-title{font-size:24px}
   .playcard{border-radius:28px;padding:20px 16px}
   .playcard .card-title{font-size:26px}
-  .slot-digit{font-size:34px;width:42px}
-  .slot-display.many{gap:4px}
-  .slot-display.many .slot-digit{font-size:26px;width:30px}
+  .slot-machine{--rh:56px;--rw:40px;--rf:34px;padding:18px 10px}
+  .slot-display{gap:4px;padding:10px 8px}
   .wallet{padding:24px}
   .mobilebar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;right:12px;z-index:80;background:rgba(15,15,15,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid #2b2b2b;border-radius:18px;padding:8px;box-shadow:0 16px 45px rgba(0,0,0,.22)}
   .mtab{text-decoration:none;background:none;border:0;color:#a8a39a;text-align:center;font:800 9px 'DM Sans';padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:12px;cursor:pointer}
@@ -227,7 +237,8 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
   body{padding-bottom:96px}
   .mobilebar.six{grid-template-columns:repeat(6,1fr)}
 }
-@media(prefers-reduced-motion:reduce){.slot-digit.spinning,.result,.confetti-piece{animation:none}}
+@media(max-width:380px){.slot-machine{--rh:50px;--rw:34px;--rf:29px}}
+@media(prefers-reduced-motion:reduce){.reel.spinning .reel-strip,.slot-machine.running .slot-bulb,.slot-machine.win .slot-bulb,.result,.confetti-piece{animation:none}.reel.spinning .reel-strip{filter:none}}
 </style>
 </head>
 <body>
@@ -277,11 +288,11 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
         <div class="card-sub" id="pd-sub"></div>
         <div id="play-alert" class="alert"></div>
         <div class="status-line" id="pd-status"></div>
-        <div class="slot-machine">
+        <div class="slot-machine" id="slot-machine">
+          <div class="slot-bulbs" id="slot-bulbs"></div>
+          <button class="sound-btn" id="sound-btn" type="button" aria-pressed="false" aria-label="Sound" title="Sound on/off" onclick="toggleSound()">🔇</button>
           <div class="slot-label">Your ticket number</div>
-          <div class="slot-display" id="slot-display">
-            <div class="slot-digit">0</div><div class="slot-digit">0</div><div class="slot-digit">0</div><div class="slot-digit">0</div><div class="slot-digit">0</div>
-          </div>
+          <div class="slot-display" id="slot-display"></div>
         </div>
         <div id="pd-result"></div>
         <div id="pd-actions"></div>
@@ -494,11 +505,10 @@ function prizeText(p){
   if(p.label) return esc(p.label);
   return p.kind === 'credits' ? `${nf(p.amount)} credits` : `£${Number(p.amount).toFixed(2).replace(/\.00$/, '')}`;
 }
-/* Câte cifre are biletul: 5 pentru max 99.999, 6 pentru 300.000 etc. */
-const digitsFor = c => Math.max(5, String(c ? c.total_tickets : 0).length);
-function ticketStr(t, compId){
-  const c = compId ? comps.find(x => x.id === compId) : current;
-  return String(t).padStart(digitsFor(c), '0');
+/* Biletul se afișează mereu cu 6 cifre, ca să nu trădeze câte bilete are competiția */
+const TICKET_DIGITS = 6;
+function ticketStr(t){
+  return String(t).padStart(TICKET_DIGITS, '0');
 }
 const ago = iso => {
   const s = (Date.now() - new Date(iso)) / 1000;
@@ -642,9 +652,11 @@ function renderChip(){
 }
 
 /* ═══ COMPETIȚII ═══════════════════════════════════════════════ */
+/* Doar coloanele publice. Totalul de bilete nu se mai citește public. */
+const COMP_COLS = 'id,name,status,access,raffall_link,closes_at,created_at';
 async function loadComps(){
   const [c, p] = await Promise.all([
-    sb.from('instant_competitions').select('*').in('status', ['active','paused']).order('created_at', { ascending:false }),
+    sb.from('instant_competitions').select(COMP_COLS).in('status', ['active','paused']).order('created_at', { ascending:false }),
     sb.from('instant_prizes').select('competition_id,won_by')
   ]);
   if(c.error){ $('comp-list').innerHTML = `<div class="empty">${errText(c.error)}</div>`; return; }
@@ -684,7 +696,7 @@ function renderComps(){
       <div class="comp-icon">${c.status === 'closed' ? '🏁' : '🎰'}</div>
       <div class="comp-main">
         <div class="comp-name">${esc(c.name)}</div>
-        <div class="comp-sub">${statusPill(c.status)}${closesPill(c)}${left} of ${pc.total} prizes left · ${nf(c.total_tickets)} tickets</div>
+        <div class="comp-sub">${statusPill(c.status)}${closesPill(c)}${left} of ${pc.total} prizes left</div>
         <div class="bar"><i style="width:${pct}%"></i></div>
       </div>
     </button>`;
@@ -696,11 +708,110 @@ function backToList(){
   $('play-list').style.display = 'block';
   loadComps();
 }
+/* ═══ SLOT CU ROLE ═════════════════════════════════════════════
+   Rezultatul vine de pe server (perform_draw). Rolele doar îl arată. */
+let soundOn = false, audioCtx = null;
+try{ soundOn = localStorage.getItem('ip_sound') === '1'; }catch(e){}
+function syncSoundBtn(){
+  const b = $('sound-btn'); if(!b) return;
+  b.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+  b.textContent = soundOn ? '🔊' : '🔇';
+}
+function toggleSound(){
+  soundOn = !soundOn;
+  try{ localStorage.setItem('ip_sound', soundOn ? '1' : '0'); }catch(e){}
+  if(soundOn) ensureAudio();
+  syncSoundBtn();
+}
+function ensureAudio(){
+  if(audioCtx) return audioCtx;
+  try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null; }
+  return audioCtx;
+}
+function beep(freq, dur, type, vol){
+  if(!soundOn || !ensureAudio()) return;
+  try{
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type || 'square'; o.frequency.value = freq; g.gain.value = vol || .04;
+    g.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime + dur);
+    o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + dur);
+  }catch(e){}
+}
+const winTune = () => [523,659,784,1047].forEach((f, i) => setTimeout(() => beep(f, .18, 'triangle', .06), i * 110));
+const buzz = ms => { try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} };
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function buildBulbs(){
+  const box = $('slot-bulbs'); if(!box || box.childElementCount) return;
+  const n = 22;
+  for(let i = 0; i < n; i++){
+    const t = i / n, d = document.createElement('i');
+    let x, y;
+    if(t < .3){ x = t / .3 * 100; y = 0; }
+    else if(t < .5){ x = 100; y = (t - .3) / .2 * 100; }
+    else if(t < .8){ x = 100 - (t - .5) / .3 * 100; y = 100; }
+    else { x = 0; y = 100 - (t - .8) / .2 * 100; }
+    d.className = 'slot-bulb';
+    d.style.left = x + '%'; d.style.top = y + '%';
+    d.style.animationDelay = (-i * 0.8 / n * 3) + 's';
+    box.appendChild(d);
+  }
+}
 function resetSlot(){
-  const n = digitsFor(current);
-  const box = $('slot-display');
-  box.classList.toggle('many', n > 5);
-  box.innerHTML = Array.from({ length:n }, () => '<div class="slot-digit">0</div>').join('');
+  buildBulbs(); syncSoundBtn();
+  const m = $('slot-machine'); m.classList.remove('running', 'win');
+  $('slot-display').innerHTML = '<div class="slot-payline"></div>' +
+    Array.from({ length:TICKET_DIGITS }, () => '<div class="reel"><div class="reel-strip"><div>0</div></div></div>').join('');
+}
+/* Rolele se învârt cât timp așteptăm serverul */
+function startReels(){
+  const m = $('slot-machine'); m.classList.remove('win'); m.classList.add('running');
+  const loop = Array.from({ length:20 }, (_, k) => `<div>${k % 10}</div>`).join('');
+  document.querySelectorAll('#slot-display .reel').forEach(r => {
+    r.classList.remove('hit', 'landing');
+    const strip = r.querySelector('.reel-strip');
+    strip.style.transition = 'none'; strip.style.transform = '';
+    strip.innerHTML = loop;
+    r.querySelector('.reel-strip').style.animationDelay = (-0.05 * i - Math.random() * 0.2).toFixed(2) + 's';
+    if(!reduceMotion()) r.classList.add('spinning');
+  });
+}
+/* Oprește rolele pe rând, de la stânga la dreapta, pe biletul primit */
+function landReels(ticket, done){
+  const target = ticketStr(ticket).split('');
+  const reels = Array.from(document.querySelectorAll('#slot-display .reel'));
+  const quick = reduceMotion();
+  reels.forEach((r, i) => setTimeout(() => {
+    const strip = r.querySelector('.reel-strip');
+    const h = r.clientHeight || 64;
+    const n = quick ? 0 : 8;
+    let html = '';
+    for(let k = 0; k < n; k++) html += `<div>${Math.floor(Math.random() * 10)}</div>`;
+    html += `<div>${target[i]}</div>`;
+    r.classList.remove('spinning');
+    strip.style.transition = 'none'; strip.style.transform = 'translateY(0)';
+    strip.innerHTML = html;
+    void strip.offsetHeight;
+    const dur = quick ? 0 : 520;
+    if(dur){
+      r.classList.add('landing');
+      strip.style.transition = `transform ${dur}ms cubic-bezier(.2,.75,.3,1.08)`;
+    }
+    strip.style.transform = `translateY(${-n * h}px)`;
+    setTimeout(() => {
+      r.classList.remove('landing');
+      strip.style.transition = 'none'; strip.style.transform = 'translateY(0)';
+      strip.innerHTML = `<div>${target[i]}</div>`;
+      beep(180 + i * 40, .05); buzz(15);
+      if(i === reels.length - 1){ $('slot-machine').classList.remove('running'); done(); }
+    }, dur);
+  }, quick ? 0 : 250 + i * 330));
+}
+function slotWinLights(){
+  const m = $('slot-machine'); m.classList.add('win');
+  document.querySelectorAll('#slot-display .reel').forEach(r => r.classList.add('hit'));
+  setTimeout(() => m.classList.remove('win'), 2800);
 }
 
 async function openComp(id){
@@ -794,32 +905,21 @@ async function requestSpins(){
 async function spin(pay){
   if(spinning || !current) return;
   spinning = true;
+  if(soundOn) ensureAudio();
   hideAlert('play-alert');
   $('pd-result').innerHTML = '';
   document.querySelectorAll('#pd-actions button').forEach(b => b.disabled = true);
-  const digits = Array.from(document.querySelectorAll('#slot-display .slot-digit'));
-  digits.forEach(d => { d.className = 'slot-digit spinning'; });
-  const ticker = setInterval(() => digits.forEach(d => { if(d.classList.contains('spinning')) d.textContent = Math.floor(Math.random() * 10); }), 70);
+  startReels();
+  beep(90, .12, 'sawtooth', .05);
 
   const { data, error } = await sb.rpc('perform_draw', { p_comp: current.id, p_pay: pay });
   if(error){
-    clearInterval(ticker);
     resetSlot();
     spinning = false;
     showAlert('play-alert','error', errText(error));
     return renderPlayState();
   }
-  const target = ticketStr(data.ticket).split('');
-  target.forEach((n, i) => setTimeout(() => {
-    const d = digits[i];
-    d.classList.remove('spinning');
-    d.textContent = n;
-    d.classList.add('landed');
-    if(i === target.length - 1){
-      clearInterval(ticker);
-      setTimeout(() => finishSpin(data), 450);
-    }
-  }, 500 + i * 320));
+  landReels(data.ticket, () => setTimeout(() => finishSpin(data), 350));
 }
 function finishSpin(r){
   spinning = false;
@@ -833,6 +933,7 @@ function finishSpin(r){
         ? `The credits are already in your wallet. New balance: <b>${nf(r.credits)}</b>.`
         : `We'll contact you to arrange your payment. You can also reach us on Telegram @suportGiveaways.`}</p>
     </div>`;
+    slotWinLights(); winTune(); buzz([40, 60, 40]);
     confetti();
     if(prizeCounts[current.id]) prizeCounts[current.id].won++;
   } else {
@@ -903,7 +1004,7 @@ async function renderPrizes(){
   if(!list.length) return $('pr-list').innerHTML = '<div class="empty">Prizes coming soon.</div>';
   $('pr-list').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Prize</th><th>Winning ticket</th><th>Status</th></tr></thead><tbody>` +
     list.map(x => `<tr class="${x.won_by ? 'taken' : ''}"><td><b style="color:${x.won_by ? 'inherit' : 'var(--gold)'}">${prizeText(x)}</b></td>
-      <td style="font-family:'DM Mono',monospace">#${ticketStr(x.ticket, id)}</td>
+      <td style="font-family:'DM Mono',monospace">#${ticketStr(x.ticket)}</td>
       <td>${x.won_by ? `Won by ${esc(who[x.id] || '—')}` : 'Still to win'}</td></tr>`).join('') +
     '</tbody></table></div>';
 }
@@ -917,7 +1018,7 @@ async function renderWinners(){
   if(!data.length) return $('win-list').innerHTML = '<div class="empty">No winners yet — could be you!</div>';
   $('win-list').innerHTML = data.map(w => `<div class="win-item">
     <div class="av">${esc((w.username || '?').slice(0,1).toUpperCase())}</div>
-    <div class="main"><div class="name">${esc(w.username)}</div><div class="sub">${esc(w.instant_competitions ? w.instant_competitions.name : '')} · #${String(w.ticket).padStart(5,'0')} · ${ago(w.created_at)}</div></div>
+    <div class="main"><div class="name">${esc(w.username)}</div><div class="sub">${esc(w.instant_competitions ? w.instant_competitions.name : '')} · #${ticketStr(w.ticket)} · ${ago(w.created_at)}</div></div>
     <div class="prize">${prizeText(w.instant_prizes)}</div>
   </div>`).join('');
 }
