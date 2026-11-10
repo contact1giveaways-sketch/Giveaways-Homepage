@@ -311,6 +311,8 @@ tr:last-child td{border-bottom:none}
           <label class="spin-mode"><input type="radio" name="b-mode" value="tickets" onchange="previewBuyers()"> <span><b>După bilete:</b> x10 = 10 spin-uri</span></label>
         </div>
         <div class="note" id="b-preview"></div>
+        <label class="toggle-line"><input type="checkbox" id="b-notify" checked> 🔔 Anunță jucătorii noi sau cu spin-uri în plus (push + email), doar dacă competiția e activă</label>
+        <div class="note"><a href="#" onclick="testNotify('instant');return false">🧪 Trimite-mi doar mie un exemplu</a></div>
 
         <div class="btn-row">
           <button class="btn btn-gold" onclick="saveBuyers('add')">➕ Actualizează lista</button>
@@ -347,11 +349,12 @@ tr:last-child td{border-bottom:none}
         <div class="card-title">🎡 Roata — setări</div>
         <div class="stats" id="w-stats"></div>
         <label class="toggle-line"><input type="checkbox" id="w-active"> Roata e <b>activă</b> (jucătorii o văd și pot învârti)</label>
-        <div class="grid-2">
-          <div><label for="w-buyer">Spin-uri pe zi pentru cumpărători cu bilete noi</label><input type="number" id="w-buyer" min="0" max="50" oninput="previewWheelBuyers()"></div>
+        <div class="grid-3">
+          <div><label for="w-buyer">Spin-uri pentru cumpărători, la fiecare lipire cu bilete noi</label><input type="number" id="w-buyer" min="0" max="50" oninput="previewWheelBuyers()"></div>
+          <div><label for="w-cap">Maxim spin-uri pe zi din cumpărături (0 = fără limită)</label><input type="number" id="w-cap" min="0" max="500" oninput="previewWheelBuyers()"></div>
           <div><label for="w-welcome">Spin-uri de bun venit (o singură dată pe cont)</label><input type="number" id="w-welcome" min="0" max="50"></div>
         </div>
-        <div class="note">Spin-urile de cumpărător expiră la miezul nopții (ora UK). Spin-ul de bun venit nu expiră și îl primește fiecare cont, o singură dată, prima dată când intră pe roată. 0 = oprit.</div>
+        <div class="note">Cine are mai multe bilete decât la lipirea anterioară primește spin-uri de fiecare dată, chiar dacă lipești de mai multe ori pe zi. Spin-urile de cumpărător expiră la miezul nopții (ora UK). Spin-ul de bun venit nu expiră și îl primește fiecare cont, o singură dată, prima dată când intră pe roată. 0 = oprit.</div>
         <button class="btn btn-gold btn-full" onclick="saveWheelSettings()">💾 Salvează setările</button>
       </div>
 
@@ -392,13 +395,15 @@ tr:last-child td{border-bottom:none}
 
       <div class="card">
         <div class="card-title">Cumpărători → spin-uri</div>
-        <div class="note">Lipești lista de participanți a unei tombole, ca la instante. Cine apare prima dată sau are mai multe bilete decât la lipirea trecută primește spin-urile de azi. Fiecare jucător primește cel mult o dată pe zi, chiar dacă lipești liste din mai multe tombole.</div>
+        <div class="note">Lipești lista de participanți a unei tombole, ca la instante. Cine apare prima dată sau are mai multe bilete decât la lipirea trecută primește spin-uri, de fiecare dată când lipești (în limita pe zi, dacă ai pus una). Tombolele terminate le găsești în grupul „🏁 Extrase”.</div>
         <label for="wb-raffle">Tombola de pe Raffall</label>
         <select id="wb-raffle" onchange="previewWheelBuyers()"></select>
         <div class="note" id="wb-raffle-note"></div>
         <label for="wb-input">Lista de participanți</label>
         <textarea id="wb-input" oninput="previewWheelBuyers()" placeholder="Lipește aici lista de participanți de pe Raffall&#10;&#10;Andrew Robinson   x70&#10;Kinga Biro-Pacsa   x250"></textarea>
         <label class="toggle-line"><input type="checkbox" id="wb-nogrant" onchange="previewWheelBuyers()"> Doar memorează lista, fără spin-uri</label>
+        <label class="toggle-line"><input type="checkbox" id="wb-notify" checked> 🔔 Anunță jucătorii care primesc spin-uri (push + email celor cu „email alerts”)</label>
+        <div class="note">Fiecare spin-uri primite se anunță o singură dată. Bifa contează și pentru spin-urile date manual mai jos. <a href="#" onclick="testNotify('wheel');return false">🧪 Trimite-mi doar mie un exemplu</a></div>
         <div class="note" id="wb-preview"></div>
         <button class="btn btn-gold btn-full" onclick="importWheelBuyers()">🎡 Actualizează lista și dă spin-urile</button>
 
@@ -705,6 +710,41 @@ function syncLaunch(){
     + (/every ticket wins/i.test(c.name) ? 'Every ticket wins — tap to spin!' : 'Tap to spin!');
 }
 document.addEventListener('input', e => { if(e.target.id === 'l-ntitle' || e.target.id === 'l-nbody') delete e.target.dataset.auto; });
+
+/* ═══ ANUNȚURI PERSONALE (funcția notify-players) ═══════════════ */
+async function notifyPlayers(body){
+  const { data, error } = await sb.functions.invoke('notify-players', { body });
+  if(error){
+    let msg = error.message || 'Eroare';
+    try{ const j = await error.context.json(); if(j && j.error) msg = j.error; }catch(e){}
+    if(/Failed to send a request|404|not found/i.test(msg)) msg = 'Funcția notify-players nu există încă în Supabase.';
+    throw new Error(msg);
+  }
+  return data;
+}
+function notifyText(r){
+  if(r.skipped === 'not_active') return '🔕 Competiția nu e activă, nu am anunțat pe nimeni.';
+  const noAcc = Math.max((r.names || 0) - (r.users || 0), 0);
+  let t = `🔔 Push: ${r.push_users} jucători (${r.push_sent} din ${r.devices} dispozitive) · Email: ${r.emails}` + (noAcc ? ` · Fără cont: ${noAcc}` : '');
+  if(r.email_skipped) t += ` ⚠️ ${r.email_skipped}`;
+  return t;
+}
+async function notifyAfter(prefix, body){
+  flash('info', prefix + ' 🔔 Se trimit anunțurile…');
+  try{
+    const r = await notifyPlayers(body);
+    flash(r.email_skipped ? 'error' : 'success', prefix + ' ' + notifyText(r));
+  }catch(e){
+    flash('error', prefix + ' ⚠️ Spin-urile s-au dat, dar anunțurile nu au plecat: ' + esc(e.message));
+  }
+}
+async function testNotify(kind){
+  flash('info', '🧪 Trimit exemplul doar ție…');
+  try{
+    const r = await notifyPlayers({ mode:'test', kind });
+    flash(r.email_skipped ? 'error' : 'success', `🧪 Exemplu trimis: push pe ${r.push_sent} din ${r.devices} dispozitive ale tale · email: ${r.emails}` + (r.email_skipped ? ` ⚠️ ${r.email_skipped}` : '') + (r.devices ? '' : ' (telefonul tău nu e abonat la notificări cu contul de admin)'));
+  }catch(e){ flash('error', '🧪 ' + esc(e.message)); }
+}
 
 async function sendPush({ title, body, url, trigger, only_me }){
   const { data, error } = await sb.functions.invoke('send-push', { body: { title, body, url, trigger, only_me: !!only_me } });
@@ -1031,13 +1071,16 @@ async function saveBuyers(mode){
   if(!comp) return flash('error','Alege competiția.');
   const list = readBuyers();
   if(!list.length) return flash('error','Lipește lista de participanți.');
-  let rows, added = 0, raised = 0;
+  let rows, added = 0, raised = 0, changed = [];
   if(mode === 'replace'){
     if(!confirm(`Înlocuiești toată lista din „${comp.name}” cu ${list.length} participanți?`)) return;
+    const { data: before } = await sb.from('instant_eligibility').select('username,spins').eq('competition_id', comp.id);
+    const prev = Object.fromEntries((before || []).map(r => [r.username, r.spins]));
     const { error } = await sb.from('instant_eligibility').delete().eq('competition_id', comp.id);
     if(error) return flash('error', errMsg(error));
     rows = list.map(b => ({ competition_id: comp.id, username: b.username, spins: spinsFor(b) }));
     added = rows.length;
+    changed = rows.filter(r => prev[r.username] === undefined || r.spins > prev[r.username]).map(r => r.username);
   } else {
     // Actualizare: adaugă oamenii noi și crește spin-urile dacă au cumpărat mai mult.
     // Nu adună peste ce era — poți lipi zilnic toată lista fără să dublezi spin-uri.
@@ -1050,13 +1093,19 @@ async function saveBuyers(mode){
       if(had === undefined){ added++; rows.push({ competition_id: comp.id, username: b.username, spins: want }); }
       else if(want > had){ raised++; rows.push({ competition_id: comp.id, username: b.username, spins: want }); }
     });
+    changed = rows.map(r => r.username);
     if(!rows.length){ flash('info','Nimic nou — toți participanții erau deja în listă.'); $('b-input').value = ''; previewBuyers(); return renderBuyers(); }
   }
   const { error } = await sb.from('instant_eligibility').upsert(rows, { onConflict: 'competition_id,username' });
   if(error) return flash('error', errMsg(error));
-  flash('success', mode === 'replace'
+  const msg = mode === 'replace'
     ? `🎟️ Listă nouă: ${added} participanți.`
-    : `🎟️ ${added} participanți noi${raised ? `, ${raised} cu spin-uri în plus` : ''}.`);
+    : `🎟️ ${added} participanți noi${raised ? `, ${raised} cu spin-uri în plus` : ''}.`;
+  flash('success', msg);
+  if(changed.length && $('b-notify').checked){
+    if(comp.status === 'active') notifyAfter(msg, { mode:'instant', competition_id: comp.id, usernames: changed });
+    else flash('success', msg + ' 🔕 Nu am anunțat pe nimeni: competiția nu e activă (folosește „🔔 Deschide + notifică” când o deschizi).');
+  }
   $('b-input').value = '';
   previewBuyers();
   renderBuyers();
@@ -1324,6 +1373,7 @@ async function renderWheelAdmin(){
   const s = st.data || { active:false, buyer_spins:2, welcome_spins:1 };
   $('w-active').checked = !!s.active;
   $('w-buyer').value = s.buyer_spins;
+  $('w-cap').value = s.buyer_daily_cap ?? 0;
   $('w-welcome').value = s.welcome_spins;
 
   wheelSegs = sg.data || [];
@@ -1421,12 +1471,13 @@ function renderWheelActive(){
 }
 
 async function saveWheelSettings(){
-  const buyer = parseInt($('w-buyer').value), welcome = parseInt($('w-welcome').value);
+  const buyer = parseInt($('w-buyer').value), welcome = parseInt($('w-welcome').value), cap = parseInt($('w-cap').value) || 0;
   if(!(buyer >= 0 && buyer <= 50) || !(welcome >= 0 && welcome <= 50)) return flash('error', 'Spin-urile trebuie să fie între 0 și 50.');
+  if(!(cap >= 0 && cap <= 500)) return flash('error', 'Limita pe zi trebuie să fie între 0 și 500.');
   const active = $('w-active').checked;
   if(active && !wheelSegs.some(x => x.enabled && x.weight > 0 && (x.stock === null || x.stock > 0)))
     return flash('error', 'Roata nu are nicio felie care poate ieși. Adaugă felii înainte s-o activezi.');
-  const { error } = await sb.from('wheel_settings').update({ active, buyer_spins: buyer, welcome_spins: welcome, updated_at: new Date().toISOString() }).eq('id', 1);
+  const { error } = await sb.from('wheel_settings').update({ active, buyer_spins: buyer, buyer_daily_cap: cap, welcome_spins: welcome, updated_at: new Date().toISOString() }).eq('id', 1);
   if(error) return flash('error', errMsg(error));
   flash('success', active ? '🎡 Setări salvate. Roata e activă pentru jucători.' : '🎡 Setări salvate. Roata e oprită (jucătorii nu o văd).');
   renderWheelAdmin();
@@ -1541,13 +1592,7 @@ async function previewWheelBuyers(){
   const fresh = list.filter(b => old[b.username] === undefined);
   const more = list.filter(b => old[b.username] !== undefined && b.tickets > old[b.username]);
   const lucky = fresh.concat(more);
-  let already = new Set();
-  if(lucky.length){
-    const { data: g } = await sb.from('wheel_grants').select('username').eq('reason', 'buyer').eq('grant_day', ukToday());
-    if(seq !== wbPreviewSeq) return;
-    already = new Set((g || []).map(x => x.username));
-  }
-  const willGet = lucky.filter(b => !already.has(b.username));
+  const willGet = lucky;
   const spinsEach = parseInt($('w-buyer').value) || 0;
   const nogrant = $('wb-nogrant').checked;
   const chip = b => `<span>${esc(b.username)} · ${old[b.username] === undefined ? 'nou' : `${old[b.username]} → ${b.tickets}`}</span>`;
@@ -1555,8 +1600,8 @@ async function previewWheelBuyers(){
     `Am găsit <b>${list.length}</b> participanți: <b>${fresh.length}</b> noi, <b>${more.length}</b> cu bilete în plus, ${list.length - lucky.length} neschimbați.<br>` +
     (nogrant
       ? '⏸ Doar se memorează lista. <b>Nimeni nu primește spin-uri.</b>'
-      : `🎡 <b>${willGet.length}</b> jucători primesc câte <b>${spinsEach}</b> spin-uri azi` +
-        (lucky.length - willGet.length ? ` (${lucky.length - willGet.length} au primit deja azi și nu mai primesc).` : '.')) +
+      : `🎡 <b>${willGet.length}</b> jucători primesc câte <b>${spinsEach}</b> spin-uri` +
+        ((parseInt($('w-cap').value) || 0) > 0 ? ` (cel mult ${parseInt($('w-cap').value)} pe zi de persoană).` : '.')) +
     (willGet.length && !nogrant ? `<div class="preview-list">${willGet.slice(0, 12).map(chip).join('')}${willGet.length > 12 ? `<span>+ încă ${willGet.length - 12}</span>` : ''}</div>` : '');
 }
 async function importWheelBuyers(){
@@ -1568,13 +1613,15 @@ async function importWheelBuyers(){
   const r = wheelRaffles.find(x => String(x.id) === raffle);
   if(!confirm(nogrant
     ? `Memorezi lista pentru „${r ? r.name : raffle}” FĂRĂ să dai spin-uri?`
-    : `Actualizezi lista pentru „${r ? r.name : raffle}” și dai spin-urile de azi?`)) return;
+    : `Actualizezi lista pentru „${r ? r.name : raffle}” și dai spin-urile?`)) return;
   const { data, error } = await sb.rpc('admin_wheel_import', { p_raffle: raffle, p_rows: list, p_grant: !nogrant });
   if(error) return flash('error', errMsg(error));
-  flash('success', nogrant
+  const msg = nogrant
     ? `💾 Listă memorată: ${data.new} nume noi, ${data.more} cu bilete în plus. Fără spin-uri.`
-    : `🎡 ${data.given} jucători au primit câte ${data.spins_each} spin-uri` +
-      (data.already ? ` · ${data.already} primiseră deja azi` : '') + ` · ${data.same} neschimbați.`);
+    : `🎡 ${data.given} jucători au primit spin-uri (${data.spins_given ?? data.given * data.spins_each} în total)` +
+      (data.capped ? ` · ${data.capped} au atins limita pe zi` : '') + ` · ${data.same} neschimbați.`;
+  flash('success', msg);
+  if(!nogrant && data.given && $('wb-notify').checked) notifyAfter(msg, { mode:'wheel' });
   $('wb-input').value = '';
   $('wb-nogrant').checked = false;
   previewWheelBuyers();
@@ -1597,7 +1644,9 @@ async function giveWheelSpins(){
   if(!(n >= 1 && n <= 50)) return flash('error', 'Spin-urile trebuie să fie între 1 și 50.');
   const { error } = await sb.rpc('admin_wheel_give', { p_username: name, p_spins: n });
   if(error) return flash('error', errMsg(error));
-  flash('success', `➕ ${esc(name)} a primit ${n} spin-uri pe roată (valabile până la miezul nopții UK).`);
+  const msg = `➕ ${esc(name)} a primit ${n} spin-uri pe roată (valabile până la miezul nopții UK).`;
+  flash('success', msg);
+  if($('wb-notify').checked) notifyAfter(msg, { mode:'wheel' });
   $('wg-name').value = '';
   loadWheelActive();
 }
