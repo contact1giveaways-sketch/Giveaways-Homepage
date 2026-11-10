@@ -768,7 +768,7 @@ function resetSlot(){
 function startReels(){
   const m = $('slot-machine'); m.classList.remove('win'); m.classList.add('running');
   const loop = Array.from({ length:20 }, (_, k) => `<div>${k % 10}</div>`).join('');
-  document.querySelectorAll('#slot-display .reel').forEach(r => {
+  document.querySelectorAll('#slot-display .reel').forEach((r, i) => {
     r.classList.remove('hit', 'landing');
     const strip = r.querySelector('.reel-strip');
     strip.style.transition = 'none'; strip.style.transform = '';
@@ -909,8 +909,8 @@ async function spin(pay){
   hideAlert('play-alert');
   $('pd-result').innerHTML = '';
   document.querySelectorAll('#pd-actions button').forEach(b => b.disabled = true);
-  startReels();
-  beep(90, .12, 'sawtooth', .05);
+  // animația nu are voie să blocheze spin-ul: dacă dă eroare, spin-ul merge oricum
+  try{ startReels(); beep(90, .12, 'sawtooth', .05); }catch(e){ console.error(e); }
 
   const { data, error } = await sb.rpc('perform_draw', { p_comp: current.id, p_pay: pay });
   if(error){
@@ -919,7 +919,8 @@ async function spin(pay){
     showAlert('play-alert','error', errText(error));
     return renderPlayState();
   }
-  landReels(data.ticket, () => setTimeout(() => finishSpin(data), 350));
+  try{ landReels(data.ticket, () => setTimeout(() => finishSpin(data), 350)); }
+  catch(e){ console.error(e); $('slot-machine').classList.remove('running'); finishSpin(data); }
 }
 function finishSpin(r){
   spinning = false;
