@@ -260,6 +260,17 @@ tr:last-child td{border-bottom:none}
         <div class="preview-list" id="g-preview"></div>
         <button class="btn btn-gold btn-full" id="g-btn" onclick="runGenerator()" disabled>⚡ Pune premiile pe bilete aleatorii</button>
 
+        <div class="sub-head">↘️ Mută premiile necâștigate în 1 – N</div>
+        <div class="grid-2">
+          <div>
+            <label for="mv-max">Biletul maxim (N)</label>
+            <input type="number" id="mv-max" min="1" placeholder="ex: 20000" oninput="previewMove()">
+          </div>
+          <div class="note" style="align-self:end">Premiile necâștigate de pe bilete mai mari decât N se mută pe bilete aleatorii libere între 1 și N. Cele câștigate rămân neatinse. După asta poți coborî totalul până la N.</div>
+        </div>
+        <div class="note" id="mv-summary"></div>
+        <button class="btn btn-ghost btn-full" id="mv-btn" onclick="movePrizes()" disabled>↘️ Mută premiile</button>
+
         <div class="sub-head">➕ Premiu manual</div>
         <div class="grid-3">
           <div><label for="m-ticket">Bilet</label><input type="number" id="m-ticket" min="1" placeholder="ex: 547"></div>
@@ -454,7 +465,9 @@ const ERRORS = {
   no_profile: 'Contul jucătorului nu există.',
   zero_delta: 'Scrie un număr diferit de 0.',
   no_raffle: 'Alege tombola.',
-  invalid_spins: 'Spin-urile trebuie să fie între 1 și 50.'
+  invalid_spins: 'Spin-urile trebuie să fie între 1 și 50.',
+  bad_max: 'N trebuie să fie între 1 și totalul de bilete.',
+  not_enough_free: 'Nu sunt destule bilete libere între 1 și N. Alege un N mai mare.'
 };
 function errMsg(e){
   const m = (e && (e.message || e.details)) || String(e);
@@ -887,6 +900,29 @@ async function runGenerator(){
   await loadPrizeSummary();
   renderPrizes(); renderComps();
 }
+/* Mută premiile necâștigate de peste N pe bilete libere între 1 și N (în Supabase, totul deodată) */
+function previewMove(){
+  const comp = compById($('p-comp').value), n = parseInt($('mv-max').value);
+  $('mv-btn').disabled = true;
+  if(!comp || !(n >= 1)){ $('mv-summary').textContent = ''; return; }
+  if(n > comp.total_tickets){ $('mv-summary').innerHTML = `<span style="color:var(--red)">N nu poate fi mai mare decât totalul (${comp.total_tickets.toLocaleString('en-GB')}).</span>`; return; }
+  const move = prizes.filter(p => p.competition_id === comp.id && !p.won_by && p.ticket > n).length;
+  if(!move){ $('mv-summary').textContent = `Toate premiile necâștigate sunt deja între 1 și ${n.toLocaleString('en-GB')}. Poți coborî totalul până acolo.`; return; }
+  $('mv-summary').innerHTML = `Se mută <b>${move}</b> premii pe bilete aleatorii între 1 și ${n.toLocaleString('en-GB')}.`;
+  $('mv-btn').disabled = false;
+}
+async function movePrizes(){
+  const comp = compById($('p-comp').value), n = parseInt($('mv-max').value);
+  if(!comp || !(n >= 1)) return;
+  if(!confirm(`Muți premiile necâștigate din „${comp.name}” pe biletele 1 – ${n}? Numerele noi apar în lista publică de premii.`)) return;
+  $('mv-btn').disabled = true;
+  const { data, error } = await sb.rpc('admin_move_prizes', { p_comp: comp.id, p_max: n });
+  if(error){ $('mv-btn').disabled = false; return flash('error', errMsg(error)); }
+  flash('success', `↘️ ${data} premii mutate. Acum poți coborî totalul până la ${n.toLocaleString('en-GB')}.`);
+  $('mv-max').value = ''; $('mv-summary').textContent = '';
+  await loadPrizeSummary();
+  renderPrizes(); renderComps();
+}
 async function addManualPrize(){
   const comp = compById($('p-comp').value);
   if(!comp) return flash('error','Alege competiția.');
@@ -923,6 +959,7 @@ async function deleteAllUnwon(){
 }
 async function renderPrizes(){
   syncGenFields();
+  if($('mv-max')) previewMove();
   if(!players.length) await loadPlayers(true);
   const comp = compById($('p-comp').value);
   if(!comp){ $('p-list').innerHTML = '<div class="empty">Creează întâi o competiție.</div>'; $('p-stats').innerHTML = ''; previewGen(); return; }
