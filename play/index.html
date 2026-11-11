@@ -275,6 +275,7 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
     <div id="play-list">
       <button class="wheel-banner" id="wheel-banner" onclick="showTab('wheel')"></button>
       <div class="card notifcard" id="notif-card" style="display:none"></div>
+      <div class="card" id="unsub-card" style="display:none"></div>
       <div class="card">
         <div class="card-title">Competitions</div>
         <div class="card-sub">Pick a competition to see your spins.</div>
@@ -1394,7 +1395,40 @@ sb.auth.onAuthStateChange(async (event) => {
   else if(wantTab === 'wheel') showTab('wheel');
   else if(wantTab === 'wallet' || wantTab === 'account') showTab(me ? 'wallet' : 'account');
   else if(wantTab === 'prizes' || wantTab === 'winners') showTab(wantTab);
+  showUnsub();
 })();
+
+/* ═══ DEZABONARE DE LA EMAILURI (linkul din email: ?unsub=ID.SEMNĂTURĂ) ═══ */
+function showUnsub(){
+  const raw = new URLSearchParams(location.search).get('unsub');
+  const m = raw && raw.match(/^([0-9a-f-]{36})\.([0-9a-f]{40})$/i);
+  if(!m) return;
+  const box = $('unsub-card');
+  box.style.display = 'block';
+  box.innerHTML = `<div class="card-title" style="font-size:22px">Email alerts</div>
+    <div class="card-sub">Stop getting emails from Giveaways Community? You can turn them back on any time in your account.</div>
+    <div id="unsub-alert" class="alert"></div>
+    <button class="btn btn-gold" id="unsub-btn" style="margin-top:12px">Unsubscribe from emails</button>`;
+  showTab('play');
+  $('unsub-btn').onclick = async () => {
+    $('unsub-btn').disabled = true;
+    try{
+      const r = await fetch(SUPABASE_URL + '/functions/v1/email-unsubscribe', {
+        method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ u: m[1], t: m[2] })
+      });
+      const j = await r.json().catch(() => ({}));
+      if(!r.ok || !j.ok) throw new Error(j.error || 'failed');
+      $('unsub-btn').style.display = 'none';
+      showAlert('unsub-alert','success','Done. You won\'t get any more emails from us.');
+      if(me) me.email_alerts = false;
+    }catch(e){
+      $('unsub-btn').disabled = false;
+      showAlert('unsub-alert','error', e.message === 'invalid_link'
+        ? 'This link is not valid. Turn off email alerts from your account instead.'
+        : 'Something went wrong. Please try again.');
+    }
+  };
+}
 </script>
 
 <!-- ═══ PULL-TO-REFRESH (doar în aplicația instalată / PWA) ═══════
