@@ -205,7 +205,14 @@ tr.taken td{color:#a49f96}
 .wheel-banner .wb-go{font:800 13px 'DM Sans';background:#101010;color:#fff;border-radius:999px;padding:9px 14px;white-space:nowrap}
 .how-list{margin:0 0 12px 20px;line-height:1.7;font-size:14px;color:var(--ink)}
 .how-list a{color:#8d6b26;font-weight:700}
-#wh-how p{font-size:14px;color:var(--muted);line-height:1.6;margin-top:8px}
+#wh-how p,#gw-how p{font-size:14px;color:var(--muted);line-height:1.6;margin-top:8px}
+/* GOLD WHEEL */
+.wheel-switch{display:flex;gap:6px;background:var(--white);border:1px solid var(--line);border-radius:999px;padding:5px;margin:0 0 16px;width:max-content;max-width:100%}
+.wheel-switch button{border:0;background:none;border-radius:999px;padding:10px 16px;font:800 13px 'DM Sans';color:var(--muted);cursor:pointer;white-space:nowrap}
+.wheel-switch button.active{background:var(--ink);color:#fff}
+.wheel-switch button[data-w="gold"].active{background:linear-gradient(145deg,#c9952d,#e7c879);color:#17130c}
+.playcard.gold{background:radial-gradient(circle at 80% 0%,#3a2c12 0,#121110 55%)}
+.wheel-wrap.gold canvas{box-shadow:0 0 0 6px #c9962d,0 0 0 9px #f0d08a,0 18px 50px rgba(0,0,0,.45)}
 
 footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
 .footerin{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
@@ -304,6 +311,11 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
 
   <!-- ═══ ROATA ═══ -->
   <section class="section" id="sec-wheel">
+    <div class="wheel-switch" id="wheel-switch" style="display:none">
+      <button type="button" data-w="daily" class="active" onclick="setWheelMode('daily')">🎡 Daily Wheel</button>
+      <button type="button" data-w="gold" onclick="setWheelMode('gold')">⭐ Gold Wheel</button>
+    </div>
+    <div id="daily-block">
     <div class="playcard">
       <div class="card-title">Daily Wheel</div>
       <div class="card-sub" id="wh-sub"></div>
@@ -325,6 +337,28 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
     <div class="card">
       <div class="card-title" style="font-size:22px">Latest wheel wins</div>
       <div class="winnerwall" id="wh-wins"><div class="empty">Loading…</div></div>
+    </div>
+    </div>
+
+    <div id="gold-block" style="display:none">
+      <div class="playcard gold">
+        <div class="card-title">Gold Wheel</div>
+        <div class="card-sub" id="gw-sub"></div>
+        <div id="gold-alert" class="alert"></div>
+        <div class="status-line" id="gw-status"></div>
+        <div class="wheel-wrap gold"><div class="wheel-pointer"></div><canvas id="gold-canvas"></canvas></div>
+        <div id="gw-result"></div>
+        <div id="gw-actions"></div>
+        <div class="note" id="gw-note"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title" style="font-size:22px">How it works</div>
+        <div id="gw-how"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="font-size:22px">Latest Gold Wheel wins</div>
+        <div class="winnerwall" id="gw-wins"><div class="empty">Loading…</div></div>
+      </div>
     </div>
   </section>
 
@@ -489,6 +523,8 @@ const ERR = {
   wheel_not_active:     'The wheel is resting right now. Check back soon!',
   no_spins:             "You don't have any spins left on the wheel right now.",
   wheel_empty:          'The wheel is being restocked. Please try again later.',
+  gold_not_active:      'The Gold Wheel is resting right now. Check back soon!',
+  gold_limit:           "You've reached today's Gold Wheel limit. Come back tomorrow!",
   has_prizes:           "You've won prizes with this account, so it can't be deleted here. Message us on Telegram @suportGiveaways and we'll help."
 };
 function errText(e){
@@ -979,7 +1015,7 @@ async function renderWallet(){
   const { data, error } = await sb.from('credit_ledger').select('*').eq('user_id', me.id).order('created_at', { ascending:false }).limit(50);
   if(error) return $('w-ledger').innerHTML = `<div class="empty">${errText(error)}</div>`;
   if(!data.length) return $('w-ledger').innerHTML = '<div class="empty">No credit activity yet. Win credits in instant draws.</div>';
-  const why = r => r === 'prize' ? 'Prize won' : r === 'spin' ? 'Spin' : r === 'wheel' ? 'Wheel prize' : r.startsWith('admin: ') ? esc(r.slice(7).replace(/^./, x => x.toUpperCase())) : esc(r);
+  const why = r => r === 'prize' ? 'Prize won' : r === 'spin' ? 'Spin' : r === 'wheel' ? 'Wheel prize' : r === 'gold_spin' ? 'Gold Wheel spin' : r === 'gold_wheel' ? 'Gold Wheel prize' : r.startsWith('admin: ') ? esc(r.slice(7).replace(/^./, x => x.toUpperCase())) : esc(r);
   $('w-ledger').innerHTML = `<div class="table-wrap"><table><thead><tr><th>When</th><th>What</th><th>Credits</th><th>Balance</th></tr></thead><tbody>` +
     data.map(r => `<tr><td>${ago(r.created_at)}</td><td>${why(r.reason)}</td><td style="color:${r.delta > 0 ? 'var(--green)' : 'var(--red)'}">${r.delta > 0 ? '+' : ''}${nf(r.delta)}</td><td>${nf(r.balance_after)}</td></tr>`).join('') +
     '</tbody></table></div>';
@@ -1198,10 +1234,16 @@ function drawWheel(canvas, segs){
 
 /* ═══ ROATA (DAILY WHEEL) ═════════════════════════════════════ */
 let wheelInfo = null, wheelRot = 0, wheelBusy = false, wheelLastResult = '';
+let goldInfo = null, goldRot = 0, wheelMode = 'daily';
 async function loadWheel(){
-  const { data, error } = await sb.rpc('get_wheel_status');
-  wheelInfo = error ? null : data;
-  const on = !!(wheelInfo && wheelInfo.active);
+  const [w, g] = await Promise.all([sb.rpc('get_wheel_status'), sb.rpc('get_gold_status')]);
+  wheelInfo = w.error ? null : w.data;
+  goldInfo = g.error ? null : g.data;
+  const dailyOn = !!(wheelInfo && wheelInfo.active), goldOn = !!(goldInfo && goldInfo.active);
+  const on = dailyOn || goldOn;
+  $('wheel-switch').style.display = dailyOn && goldOn ? 'flex' : 'none';
+  if(!goldOn) wheelMode = 'daily';
+  else if(!dailyOn) wheelMode = 'gold';
   document.querySelectorAll('[data-tab="wheel"]').forEach(b => b.style.display = on ? '' : 'none');
   document.querySelector('.mobilebar').classList.toggle('six', on);
   renderWheelBanner();
@@ -1209,6 +1251,13 @@ async function loadWheel(){
 }
 function renderWheelBanner(){
   const el = $('wheel-banner');
+  if((!wheelInfo || !wheelInfo.active) && goldInfo && goldInfo.active){
+    el.style.display = 'flex';
+    el.onclick = () => { showTab('wheel'); setWheelMode('gold'); };
+    el.innerHTML = `<span class="wb-icon">⭐</span><span class="wb-main"><b>Gold Wheel</b><small>Spin for <b>${nf(goldInfo.cost)} credits</b> and win bigger</small></span><span class="wb-go">Open →</span>`;
+    return;
+  }
+  el.onclick = () => showTab('wheel');
   if(!wheelInfo || !wheelInfo.active){ el.style.display = 'none'; return; }
   const n = wheelInfo.spins_left || 0;
   el.style.display = 'flex';
@@ -1217,8 +1266,18 @@ function renderWheelBanner(){
     !wheelInfo.logged_in ? `Create an account and get ${wheelInfo.welcome_spins ? `<b>${wheelInfo.welcome_spins} free spin${wheelInfo.welcome_spins === 1 ? '' : 's'}</b>` : 'daily spins'}` :
     `Buy a ticket on Raffall, get ${wheelInfo.buyer_spins} spins`}</small></span><span class="wb-go">${n ? 'Spin' : 'Open'} →</span>`;
 }
-async function renderWheelTab(){
-  if(!wheelBusy) await loadWheel();
+function setWheelMode(m){
+  wheelMode = m === 'gold' && goldInfo && goldInfo.active ? 'gold' : 'daily';
+  document.querySelectorAll('#wheel-switch button').forEach(b => b.classList.toggle('active', b.dataset.w === wheelMode));
+  $('daily-block').style.display = wheelMode === 'daily' ? '' : 'none';
+  $('gold-block').style.display = wheelMode === 'gold' ? '' : 'none';
+  if(wheelMode === 'gold') renderGoldTab(); else renderWheelTab(true);
+}
+async function renderWheelTab(skipLoad){
+  if(!wheelBusy && skipLoad !== true) await loadWheel();
+  if(wheelMode === 'gold' && skipLoad !== true) return setWheelMode('gold');
+  $('daily-block').style.display = ''; $('gold-block').style.display = 'none';
+  document.querySelectorAll('#wheel-switch button').forEach(b => b.classList.toggle('active', b.dataset.w === 'daily'));
   const w = wheelInfo;
   const canvas = $('wheel-canvas');
   const segs = (w && w.segments) || [];
@@ -1236,7 +1295,7 @@ async function renderWheelTab(){
   how.innerHTML = `<ol class="how-list">
       <li>Buy any ticket on <a href="${RAFFALL}" target="_blank" rel="noopener">Raffall</a>.</li>
       <li>After our daily list update (${LIST_UPDATE}) you get <b>${sp(w.buyer_spins)}</b> on the wheel. They are valid until midnight UK time.</li>
-      <li>Bought more tickets? You get new spins on the next update — up to once a day.</li>
+      <li>Bought more tickets? You get new spins on the next update, every time.</li>
     </ol>
     ${w.welcome_spins ? `<p>🎁 Every new account gets <b>${sp(w.welcome_spins)}</b> free, once.</p>` : ''}
     <p>Credits go straight to your wallet. For other prizes we'll contact you — or message us on Telegram @suportGiveaways.</p>
@@ -1338,6 +1397,108 @@ function finishWheel(r){
   renderWheelTab();
 }
 
+/* ═══ GOLD WHEEL (doar cu credite) ═════════════════════════════ */
+async function renderGoldTab(){
+  if(!wheelBusy) await loadWheel();
+  const g = goldInfo;
+  drawWheel($('gold-canvas'), (g && g.segments) || []);
+  hideAlert('gold-alert');
+  const actions = $('gw-actions'), note = $('gw-note'), status = $('gw-status'), sub = $('gw-sub');
+  if(!g || !g.active){
+    sub.textContent = 'The Gold Wheel is resting right now. Check back soon!';
+    status.innerHTML = ''; actions.innerHTML = ''; note.innerHTML = ''; $('gw-how').innerHTML = '';
+    return renderGoldWins();
+  }
+  const cost = nf(g.cost), lim = g.daily_limit || 0;
+  $('gw-how').innerHTML = `<ol class="how-list">
+      <li>Each spin costs <b>${cost} credits</b> from your wallet.</li>
+      <li>The prize is picked the moment you spin. Credits you win go straight to your wallet.</li>
+      ${lim ? `<li>You can spin up to <b>${lim} times a day</b>. The count resets at midnight UK time.</li>` : ''}
+    </ol>
+    <p>No credits? Win them on the Daily Wheel or in Play. For other prizes we'll contact you, or message us on Telegram @suportGiveaways.</p>`;
+  if(!g.logged_in){
+    sub.textContent = 'Sign in to spin the Gold Wheel.';
+    status.innerHTML = '';
+    actions.innerHTML = `<button class="spin-btn" onclick="showTab('account')">Sign in or create account</button>`;
+    note.innerHTML = '';
+  } else if(!g.has_profile){
+    sub.textContent = 'One last step before you can spin.';
+    status.innerHTML = '';
+    actions.innerHTML = `<button class="spin-btn" onclick="showTab('account')">Set your Raffall name</button>`;
+    note.innerHTML = '';
+  } else {
+    const credits = g.credits || 0, used = g.spins_today || 0;
+    const limitHit = lim && used >= lim, poor = credits < g.cost;
+    sub.innerHTML = limitHit ? "You've reached today's limit. See you tomorrow!" : poor ? 'Not enough credits for a spin right now.' : 'Bigger prizes. Every spin costs credits.';
+    status.innerHTML = `<span><b>${nf(credits)}</b>your credits</span><span><b>${lim ? `${used} / ${lim}` : used}</b>spins today</span>`;
+    actions.innerHTML = `<button class="spin-btn" id="gw-spin" onclick="spinGold()" ${limitHit || poor ? 'disabled' : ''}>⭐ SPIN FOR ${cost} CREDITS</button>`;
+    note.innerHTML = limitHit ? 'The daily count resets at midnight UK time.'
+      : poor ? `You need ${cost} credits. Win some on the <a href="#" onclick="setWheelMode('daily');return false">Daily Wheel</a> or in <a href="#" onclick="showTab('play');return false">Play</a>.`
+      : '';
+  }
+  renderGoldWins();
+}
+async function renderGoldWins(){
+  const { data, error } = await sb.rpc('gold_recent_wins');
+  const box = $('gw-wins');
+  if(error || !data || !data.length){ box.innerHTML = '<div class="empty">No Gold Wheel wins yet — be the first!</div>'; return; }
+  box.innerHTML = data.map(x => `<div class="win-item">
+      <div class="av">${esc(String(x.username || '?').slice(0,1).toUpperCase())}</div>
+      <div class="main"><div class="name">${esc(x.username)}</div><div class="sub">Gold Wheel · ${ago(x.at)}</div></div>
+      <div class="prize">${esc(x.label)}</div>
+    </div>`).join('');
+}
+async function spinGold(){
+  if(wheelBusy || spinning || !goldInfo) return;
+  wheelBusy = true; spinning = true;
+  hideAlert('gold-alert');
+  $('gw-result').innerHTML = '';
+  const btn = $('gw-spin'); if(btn) btn.disabled = true;
+  const { data, error } = await sb.rpc('spin_gold');
+  if(error){
+    wheelBusy = false; spinning = false;
+    showAlert('gold-alert', 'error', errText(error));
+    return renderGoldTab();
+  }
+  if(me){ me.credits = data.balance; renderChip(); }
+  const segs = goldInfo.segments || [];
+  const canvas = $('gold-canvas');
+  const idx = segs.findIndex(s => s.id === data.segment_id);
+  const n = segs.length;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(idx >= 0 && n){
+    const step = 360 / n;
+    const jitter = (Math.random() - .5) * step * 0.6;
+    const target = ((360 - (idx + .5) * step + jitter) % 360 + 360) % 360;
+    const cur = ((goldRot % 360) + 360) % 360;
+    let delta = target - cur; if(delta < 0) delta += 360;
+    goldRot += (reduce ? 360 : 360 * 6) + delta;
+    canvas.style.transition = `transform ${reduce ? 0.8 : 5.2}s cubic-bezier(.12,.67,.12,1)`;
+    canvas.style.transform = `rotate(${goldRot}deg)`;
+  }
+  setTimeout(() => finishGold(data), idx >= 0 ? (reduce ? 900 : 5400) : 300);
+}
+function finishGold(r){
+  wheelBusy = false; spinning = false;
+  if(me){ me.credits = r.balance; renderChip(); }
+  if(r.kind === 'credits'){
+    $('gw-result').innerHTML = `<div class="result win"><small>Gold Wheel</small>
+      <div class="big">🏆 You won ${nf(r.credits)} credits!</div>
+      <p>They're already in your wallet. New balance: <b>${nf(r.balance)}</b>.</p></div>`;
+    confetti();
+  } else if(r.kind === 'manual'){
+    $('gw-result').innerHTML = `<div class="result win"><small>Gold Wheel</small>
+      <div class="big">🏆 You won ${esc(r.label)}!</div>
+      <p>We'll contact you to arrange your prize. You can also reach us on Telegram @suportGiveaways.</p></div>`;
+    confetti();
+  } else {
+    $('gw-result').innerHTML = `<div class="result lose"><small>Gold Wheel</small>
+      <div class="big" style="font-size:28px">No win this time</div>
+      <p>Balance: <b>${nf(r.balance)}</b> credits.</p></div>`;
+  }
+  renderGoldTab();
+}
+
 /* ═══ PORNIRE ══════════════════════════════════════════════════ */
 sb.auth.onAuthStateChange(async (event) => {
   if(event === 'PASSWORD_RECOVERY'){
@@ -1393,6 +1554,7 @@ sb.auth.onAuthStateChange(async (event) => {
   const wantTab = new URLSearchParams(location.search).get('tab');
   if(session && !me) showTab('account');
   else if(wantTab === 'wheel') showTab('wheel');
+  else if(wantTab === 'gold'){ showTab('wheel'); setWheelMode('gold'); }
   else if(wantTab === 'wallet' || wantTab === 'account') showTab(me ? 'wallet' : 'account');
   else if(wantTab === 'prizes' || wantTab === 'winners') showTab(wantTab);
   showUnsub();
