@@ -1161,8 +1161,8 @@ async function renderRequests(comp){
     data.map(r => `<tr>
       <td><b>${esc(r.username)}</b></td><td>${fmtDate(r.created_at)}</td>
       <td style="text-align:right">
-        <button class="btn btn-gold btn-sm" onclick="approveRequest('${esc(r.username)}')">✓ E pe Raffall — adaugă</button>
-        <button class="btn btn-ghost btn-sm" onclick="dismissRequest('${r.user_id}')">✕ Nu l-am găsit</button>
+        <button class="btn btn-gold btn-sm" data-u="${esc(r.username)}" onclick="approveRequest(this.dataset.u)">✓ E pe Raffall — adaugă</button>
+        <button class="btn btn-ghost btn-sm" data-id="${esc(r.user_id)}" onclick="dismissRequest(this.dataset.id)">✕ Nu l-am găsit</button>
       </td></tr>`).join('') + '</tbody></table></div>' +
     `<div class="note" style="margin-top:8px">„Adaugă” îi dă 1 spin. Dacă a cumpărat mai multe bilete, scrie-l în câmpul de mai jos cu <code>username | spin-uri</code>.</div>`;
 }
@@ -1208,7 +1208,7 @@ async function renderBuyers(){
     list.map(r => `<tr>
       <td>${esc(r.username)}</td><td>${r.spins}</td><td>${used[r.username] || 0}</td>
       <td>${hasAccount.has(r.username) ? '✅' : '<span style="color:var(--muted)">încă nu</span>'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="removeBuyer('${esc(r.username)}')">✕</button></td>
+      <td><button class="btn btn-danger btn-sm" data-u="${esc(r.username)}" onclick="removeBuyer(this.dataset.u)">✕</button></td>
     </tr>`).join('') + '</tbody></table></div>';
 }
 
