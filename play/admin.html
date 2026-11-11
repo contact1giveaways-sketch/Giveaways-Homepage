@@ -76,6 +76,11 @@ th{text-align:left;font-size:11px;color:var(--muted);font-weight:700;padding:9px
 td{padding:9px 12px;border-bottom:1px solid #f0ebe1;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 .empty{text-align:center;padding:28px;color:var(--muted);font-size:14px}
+.seg-switch{display:inline-flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px;margin:0 0 12px}
+.seg-switch button{border:0;background:none;border-radius:999px;padding:8px 14px;font:800 12px 'DM Sans';cursor:pointer;color:var(--muted)}
+.seg-switch button.active{background:var(--ink);color:#fff}
+.rtp-box{border-radius:14px;padding:12px 14px;margin:10px 0;font-size:14px;background:var(--paper);border:1px solid var(--line)}
+.rtp-box.bad{border-color:var(--red);color:var(--red)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
 .stat b{display:block;font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--gold);line-height:1.1}
@@ -359,7 +364,26 @@ tr:last-child td{border-bottom:none}
       </div>
 
       <div class="card">
+        <div class="card-title">⭐ Gold Wheel — setări</div>
+        <div class="note" style="margin-bottom:10px">A doua roată: se învârte <b>doar plătind cu credite</b>. Nu primește spin-uri din listele de cumpărători și nu are spin de bun venit. Feliile le editezi mai jos, alegând „⭐ Gold”.</div>
+        <div class="stats" id="g-stats"></div>
+        <div class="note" style="margin:-6px 0 8px">* calculat din ultimele 60 de învârtiri (ambele roți).</div>
+        <label class="toggle-line"><input type="checkbox" id="g-active"> Gold Wheel e <b>activă</b> (jucătorii o văd și pot învârti)</label>
+        <div class="grid-2">
+          <div><label for="g-cost">Cost per spin (credite)</label><input type="number" id="g-cost" min="1" oninput="renderGoldRtp()"></div>
+          <div><label for="g-limit">Maxim spin-uri pe zi per jucător (0 = fără limită)</label><input type="number" id="g-limit" min="0" max="1000"></div>
+        </div>
+        <div class="rtp-box" id="g-rtp"></div>
+        <button class="btn btn-gold btn-full" onclick="saveGoldSettings()">💾 Salvează setările Gold</button>
+      </div>
+
+      <div class="card">
         <div class="card-title">Feliile roții</div>
+        <div class="seg-switch" id="seg-switch">
+          <button type="button" data-w="daily" class="active" onclick="setSegWheel('daily')">🎡 Daily</button>
+          <button type="button" data-w="gold" onclick="setSegWheel('gold')">⭐ Gold</button>
+        </div>
+        <div class="rtp-box" id="seg-rtp" style="display:none"></div>
         <div class="note"><b>Greutatea</b> = cât de des iese felia. Mai mare = iese mai des. Ex.: NO WIN 90 și 10 CREDITS 10 → NO WIN iese în 90% din cazuri, 10 CREDITS în 10%. Poți folosi orice număr de la 0 (nu iese niciodată) în sus; procentul exact apare în coloana „Șansă”.<br>
         <b>Stocul</b> = câte premii de felul ăsta ai de dat. Gol = nelimitat. Când stocul ajunge la 0, felia dispare singură de pe roată; pui stoc nou și reapare. Textul de pe roată îl văd jucătorii, deci în engleză.</div>
         <div style="display:flex;justify-content:center;margin:16px 0"><canvas id="w-preview" style="width:240px;height:240px"></canvas></div>
@@ -1267,7 +1291,7 @@ async function showLedger(id){
   const { data, error } = await sb.from('credit_ledger').select('*').eq('user_id', id).order('created_at', { ascending:false }).limit(50);
   if(error) return flash('error', errMsg(error));
   if(!data.length){ box.innerHTML = '<div class="note">Nicio mișcare de credite.</div>'; return; }
-  const why = r => r === 'prize' ? 'premiu câștigat' : r === 'spin' ? 'spin plătit' : r === 'wheel' ? 'premiu roată' : esc(r);
+  const why = r => r === 'prize' ? 'premiu câștigat' : r === 'spin' ? 'spin plătit' : r === 'wheel' ? 'premiu roată' : r === 'gold_spin' ? 'spin Gold Wheel' : r === 'gold_wheel' ? 'premiu Gold Wheel' : esc(r);
   box.innerHTML = `<div class="table-wrap ledger"><table><thead><tr><th>Când</th><th>Mișcare</th><th>Sold după</th><th>Motiv</th></tr></thead><tbody>` +
     data.map(r => `<tr><td>${fmtDate(r.created_at)}</td><td style="color:${r.delta > 0 ? 'var(--green)' : 'var(--red)'}">${r.delta > 0 ? '+' : ''}${r.delta}</td><td>${r.balance_after}</td><td>${why(r.reason)}</td></tr>`).join('') +
     '</tbody></table></div>';
@@ -1358,16 +1382,20 @@ function drawWheel(canvas, segs){
 
 /* ═══ ROATA ═══════════════════════════════════════════════════ */
 let wheelSegs = [], wheelRaffles = [];
+let dailySegs = [], goldSegs = [], goldSet = null, segWheel = 'daily';
+const segTable = () => segWheel === 'gold' ? 'gold_segments' : 'wheel_segments';
 const KIND_RO = { none:'Fără câștig', credits:'Credite', manual:'Premiu manual' };
 const ukToday = () => new Intl.DateTimeFormat('en-CA', { timeZone:'Europe/London' }).format(new Date());
 
 async function renderWheelAdmin(){
-  const [st, sg, rf, pend, last] = await Promise.all([
+  const [st, sg, rf, pend, last, gst, gsg] = await Promise.all([
     sb.from('wheel_settings').select('*').eq('id', 1).maybeSingle(),
     sb.from('wheel_segments').select('*').order('position').order('id'),
     sb.from('raffles').select('id,name,draft,opens_at,draw_date,display_order').eq('draft', false).order('id', { ascending:false }).limit(150),
     sb.from('wheel_spins').select('*').eq('status', 'pending').order('created_at'),
-    sb.from('wheel_spins').select('*').order('created_at', { ascending:false }).limit(60)
+    sb.from('wheel_spins').select('*').order('created_at', { ascending:false }).limit(60),
+    sb.from('gold_settings').select('*').eq('id', 1).maybeSingle(),
+    sb.from('gold_segments').select('*').order('position').order('id')
   ]);
   if(st.error) return flash('error', /wheel_settings/.test(st.error.message || '') ? 'Rulează întâi fișierul SQL al roții în Supabase.' : errMsg(st.error));
   const s = st.data || { active:false, buyer_spins:2, welcome_spins:1 };
@@ -1376,8 +1404,12 @@ async function renderWheelAdmin(){
   $('w-cap').value = s.buyer_daily_cap ?? 0;
   $('w-welcome').value = s.welcome_spins;
 
-  wheelSegs = sg.data || [];
+  dailySegs = sg.data || [];
+  goldSegs = gsg.error ? [] : (gsg.data || []);
+  goldSet = gst.error ? null : gst.data;
+  wheelSegs = segWheel === 'gold' ? goldSegs : dailySegs;
   renderWheelSegs();
+  renderGoldSettings(last.data || []);
 
   // Tombolele pe grupuri, ca la instante: active primele, apoi programate, apoi extrase
   wheelRaffles = rf.data || [];
@@ -1402,7 +1434,7 @@ async function renderWheelAdmin(){
 
   const p = pend.data || [], l = last.data || [];
   const day = Date.now() - 86400000;
-  const recent = l.filter(x => new Date(x.created_at) > day);
+  const recent = l.filter(x => new Date(x.created_at) > day && x.wheel !== 'gold');
   $('w-stats').innerHTML = `
     <div class="stat"><b>${s.active ? 'DA' : 'NU'}</b><span>roata e activă</span></div>
     <div class="stat"><b>${recent.length}${l.length === 60 && recent.length === 60 ? '+' : ''}</b><span>învârtiri în 24h</span></div>
@@ -1411,7 +1443,7 @@ async function renderWheelAdmin(){
 
   $('w-pending').innerHTML = p.length
     ? `<div class="table-wrap"><table><thead><tr><th>Când</th><th>Jucător</th><th>Premiu</th><th></th></tr></thead><tbody>` +
-      p.map(x => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.username)}</td><td><b>${esc(x.label)}</b></td>
+      p.map(x => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.username)}</td><td><b>${esc(x.label)}</b>${x.wheel === 'gold' ? ' <span class="pill pill-paused">⭐ Gold</span>' : ''}</td>
         <td><button class="btn btn-gold btn-sm" onclick="deliverWheelPrize(${x.id})">✅ Livrat</button></td></tr>`).join('') + '</tbody></table></div>'
     : '<div class="empty">Nimic de livrat.</div>';
 
@@ -1420,7 +1452,7 @@ async function renderWheelAdmin(){
     : `<span class="pill ${x.status === 'delivered' ? 'pill-won' : 'pill-paused'}">${esc(x.label)} · ${x.status === 'delivered' ? 'livrat' : 'de livrat'}</span>`;
   $('w-spins').innerHTML = l.length
     ? `<div class="table-wrap"><table><thead><tr><th>Când</th><th>Jucător</th><th>Rezultat</th><th></th></tr></thead><tbody>` +
-      l.map(x => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.username)}</td><td>${res(x)}</td>
+      l.map(x => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.username)}</td><td>${res(x)}${x.wheel === 'gold' ? ' <span class="pill pill-paused">⭐ Gold</span>' : ''}</td>
         <td><button class="btn btn-danger btn-sm" onclick="deleteWheelSpin(${x.id})">🗑️</button></td></tr>`).join('') + '</tbody></table></div>'
     : '<div class="empty">Nicio învârtire încă.</div>';
 }
@@ -1475,7 +1507,7 @@ async function saveWheelSettings(){
   if(!(buyer >= 0 && buyer <= 50) || !(welcome >= 0 && welcome <= 50)) return flash('error', 'Spin-urile trebuie să fie între 0 și 50.');
   if(!(cap >= 0 && cap <= 500)) return flash('error', 'Limita pe zi trebuie să fie între 0 și 500.');
   const active = $('w-active').checked;
-  if(active && !wheelSegs.some(x => x.enabled && x.weight > 0 && (x.stock === null || x.stock > 0)))
+  if(active && !dailySegs.some(x => x.enabled && x.weight > 0 && (x.stock === null || x.stock > 0)))
     return flash('error', 'Roata nu are nicio felie care poate ieși. Adaugă felii înainte s-o activezi.');
   const { error } = await sb.from('wheel_settings').update({ active, buyer_spins: buyer, buyer_daily_cap: cap, welcome_spins: welcome, updated_at: new Date().toISOString() }).eq('id', 1);
   if(error) return flash('error', errMsg(error));
@@ -1484,6 +1516,75 @@ async function saveWheelSettings(){
 }
 
 /* ─── Felii ─── */
+/* ─── Gold Wheel ─── */
+function setSegWheel(w){
+  if(w === 'gold' && !goldSet) return flash('error', 'Rulează întâi supabase-gold-wheel.sql în Supabase.');
+  segWheel = w;
+  document.querySelectorAll('#seg-switch button').forEach(b => b.classList.toggle('active', b.dataset.w === w));
+  wheelSegs = w === 'gold' ? goldSegs : dailySegs;
+  renderWheelSegs();
+  resetSegForm();
+}
+/* RTP = din 100 de credite cheltuite, câte se întorc în medie (doar feliile cu credite) */
+function goldRtp(cost){
+  const live = goldSegs.filter(x => x.enabled && x.weight > 0 && (x.stock === null || x.stock > 0));
+  const total = live.reduce((a, x) => a + x.weight, 0);
+  if(!total || !(cost > 0)) return null;
+  const avg = live.reduce((a, x) => a + (x.kind === 'credits' ? x.credits * x.weight : 0), 0) / total;
+  return { avg, rtp: avg / cost * 100, manual: live.some(x => x.kind === 'manual') };
+}
+function rtpHtml(cost){
+  const r = goldRtp(cost);
+  if(!r) return { html: 'Adaugă felii și costul ca să vezi cât dă înapoi roata.', bad: false };
+  const bad = r.rtp > 100;
+  return { bad, html: `<b>RTP: ${r.rtp.toFixed(1)}%</b>. Din 100 de credite cheltuite, roata dă înapoi în medie ${r.rtp.toFixed(0)} (≈ ${r.avg.toFixed(1)} credite pe spin de ${cost}).` +
+    (bad ? ' ⚠️ <b>Peste 100%: jucătorii câștigă mai mult decât plătesc și creditele se înmulțesc.</b> Crește greutatea la NO WIN sau costul.' : ' Recomandat: 70–85%.') +
+    (r.manual ? ' Premiile manuale nu sunt incluse în calcul.' : '') };
+}
+function renderGoldRtp(){
+  const cost = parseInt($('g-cost') && $('g-cost').value) || (goldSet && goldSet.cost) || 0;
+  const a = rtpHtml(cost);
+  if($('g-rtp')){ $('g-rtp').innerHTML = a.html; $('g-rtp').classList.toggle('bad', a.bad); }
+  const box = $('seg-rtp');
+  if(box){
+    box.style.display = segWheel === 'gold' ? '' : 'none';
+    box.innerHTML = a.html; box.classList.toggle('bad', a.bad);
+  }
+}
+function renderGoldSettings(last){
+  if(!goldSet){
+    $('g-stats').innerHTML = '';
+    $('g-rtp').innerHTML = 'Rulează întâi <b>supabase-gold-wheel.sql</b> în Supabase.';
+    return;
+  }
+  $('g-active').checked = !!goldSet.active;
+  $('g-cost').value = goldSet.cost;
+  $('g-limit').value = goldSet.daily_limit;
+  const day = Date.now() - 86400000;
+  const recent = last.filter(x => x.wheel === 'gold' && new Date(x.created_at) > day);
+  const won = recent.filter(x => x.kind === 'credits').reduce((a, x) => a + x.credits, 0);
+  $('g-stats').innerHTML = `
+    <div class="stat"><b>${goldSet.active ? 'DA' : 'NU'}</b><span>Gold e activă</span></div>
+    <div class="stat"><b>${recent.length}</b><span>învârtiri Gold în 24h*</span></div>
+    <div class="stat"><b>${(recent.length * goldSet.cost).toLocaleString('en-GB')}</b><span>credite plătite în 24h*</span></div>
+    <div class="stat"><b>${won.toLocaleString('en-GB')}</b><span>credite câștigate în 24h*</span></div>`;
+  renderGoldRtp();
+}
+async function saveGoldSettings(){
+  if(!goldSet) return flash('error', 'Rulează întâi supabase-gold-wheel.sql în Supabase.');
+  const cost = parseInt($('g-cost').value), limit = parseInt($('g-limit').value) || 0, active = $('g-active').checked;
+  if(!(cost >= 1)) return flash('error', 'Costul trebuie să fie cel puțin 1 credit.');
+  if(!(limit >= 0 && limit <= 1000)) return flash('error', 'Limita pe zi trebuie să fie între 0 și 1000.');
+  if(active && !goldSegs.some(x => x.enabled && x.weight > 0 && (x.stock === null || x.stock > 0)))
+    return flash('error', 'Gold Wheel nu are nicio felie care poate ieși. Adaugă felii înainte s-o activezi.');
+  const r = goldRtp(cost);
+  if(active && r && r.rtp > 100 && !confirm(`RTP-ul e ${r.rtp.toFixed(0)}%: roata dă înapoi mai mult decât încasează. O activezi totuși?`)) return;
+  const { error } = await sb.from('gold_settings').update({ active, cost, daily_limit: limit, updated_at: new Date().toISOString() }).eq('id', 1);
+  if(error) return flash('error', errMsg(error));
+  flash('success', active ? '⭐ Setări salvate. Gold Wheel e activă.' : '⭐ Setări salvate. Gold Wheel e oprită (jucătorii nu o văd).');
+  renderWheelAdmin();
+}
+
 function renderWheelSegs(){
   const inStock = x => x.stock === null || x.stock > 0;
   const onWheel = wheelSegs.filter(x => x.enabled && inStock(x));
@@ -1505,6 +1606,7 @@ function renderWheelSegs(){
           <button class="btn btn-danger btn-sm" onclick="deleteSegment(${x.id})">🗑️</button></td>
     </tr>`).join('') + '</tbody></table></div>' +
     `<div class="note">Total greutăți active: ${total}. ${onWheel.length} felii pe roată. Feliile oprite sau epuizate (stoc 0) nu apar pe roată.</div>`;
+  renderGoldRtp();
 }
 function syncSegKind(){
   $('ws-credits-wrap').style.visibility = $('ws-kind').value === 'credits' ? 'visible' : 'hidden';
@@ -1556,7 +1658,7 @@ async function saveSegment(){
   if(kind === 'credits' && row.credits < 1) return flash('error', 'Scrie câte credite se câștigă.');
   if(!(row.weight >= 0)) return flash('error', 'Greutatea trebuie să fie 0 sau mai mare.');
   if(row.stock !== null && !(row.stock >= 0)) return flash('error', 'Stocul trebuie să fie gol sau un număr ≥ 0.');
-  const q = id ? sb.from('wheel_segments').update(row).eq('id', id) : sb.from('wheel_segments').insert(row);
+  const q = id ? sb.from(segTable()).update(row).eq('id', id) : sb.from(segTable()).insert(row);
   const { error } = await q;
   if(error) return flash('error', errMsg(error));
   flash('success', id ? '✏️ Felie actualizată.' : '➕ Felie adăugată.');
@@ -1566,7 +1668,7 @@ async function saveSegment(){
 async function deleteSegment(id){
   const x = wheelSegs.find(s => s.id === id); if(!x) return;
   if(!confirm(`Ștergi felia „${x.label}”? Istoricul învârtirilor rămâne.`)) return;
-  const { error } = await sb.from('wheel_segments').delete().eq('id', id);
+  const { error } = await sb.from(segTable()).delete().eq('id', id);
   if(error) return flash('error', errMsg(error));
   renderWheelAdmin();
 }
