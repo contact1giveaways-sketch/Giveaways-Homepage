@@ -96,6 +96,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 .pill-time{background:#fff;border:1px solid var(--line);color:#8d6b26}
 .warn-box{background:rgba(240,208,138,.18);border:1px solid rgba(201,150,45,.35);border-radius:16px;padding:15px;font-size:14px;line-height:1.6;margin-top:14px}
 .warn-box b{color:#8d6b26}
+.phone-row{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:8px}
+.phone-row select{padding:14px 10px}
+.phone-box{border-top:1px solid var(--line);padding:12px 0 4px;font-size:14px}
+.phone-box .btn{margin-top:10px}
 .check{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:14px;line-height:1.5;color:var(--ink);font-weight:500}
 .check input{width:20px;height:20px;margin-top:1px;flex-shrink:0;accent-color:var(--ink)}
 
@@ -390,6 +394,12 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
         <div class="card-sub" id="acc-info"></div>
         <div class="toggle-row"><span>🔔 Push notifications<br><small style="color:var(--muted)" id="acc-push-state"></small></span><span id="acc-push-btn"></span></div>
         <label class="toggle-row" style="cursor:pointer"><span>📧 Email me when instant prizes open</span><input type="checkbox" id="acc-email" onchange="toggleEmailAlerts(this.checked)"></label>
+        <div class="phone-box">
+          <span>📱 Phone number <small style="color:var(--muted)">(optional)</small></span>
+          <div id="acc-phone-alert" class="alert"></div>
+          <div class="phone-row" style="margin-top:8px"><select id="acc-cc" aria-label="Country code"></select><input type="tel" id="acc-phone" placeholder="7700 900123" autocomplete="tel-national" inputmode="tel"></div>
+          <button class="btn btn-ghost btn-full" onclick="savePhoneFromAccount()">Save phone number</button>
+        </div>
         <a class="btn btn-ghost btn-full" href="/" style="text-decoration:none">← Back to all raffles</a>
         <button class="btn btn-ghost btn-full" style="margin-top:10px" onclick="signOut()">Sign out</button>
         <button class="link-btn" style="display:block;margin:18px auto 0;color:var(--red)" onclick="deleteMyAccount()">Delete my account</button>
@@ -428,6 +438,9 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
       </div>
       <label class="check"><input type="checkbox" id="un-confirm"> <span>I confirm this is my own name as shown on Raffall.</span></label>
       <label class="check"><input type="checkbox" id="un-email"> <span>Email me when instant prizes open and when there are special promotions. You can turn this off anytime.</span></label>
+      <label for="un-phone">Phone number <span style="font-weight:500">(optional)</span></label>
+      <div class="phone-row"><select id="un-cc" aria-label="Country code"></select><input type="tel" id="un-phone" placeholder="7700 900123" autocomplete="tel-national" inputmode="tel"></div>
+      <div class="note" style="color:var(--muted);font-size:12px;margin-top:6px">Helps us reach you quickly if you win. We never share it.</div>
       <button class="btn btn-gold btn-full" onclick="saveUsername()">Save my Raffall name</button>
     </div>
 
@@ -519,6 +532,7 @@ const ERR = {
   sold_out:             'All tickets in this competition have been drawn.',
   username_taken:       'That name is already linked to another account. If it is yours, contact us on Telegram @suportGiveaways and we will sort it out.',
   invalid_username:     'Your name must be 2–40 characters.',
+  invalid_phone:        "That phone number doesn't look right. Check the country and the number.",
   profile_exists:       'Your Raffall name is already set.',
   wheel_not_active:     'The wheel is resting right now. Check back soon!',
   no_spins:             "You don't have any spins left on the wheel right now.",
@@ -623,14 +637,94 @@ async function saveNewPassword(){
   await refreshUser();
   showTab(me ? 'play' : 'account');
 }
+/* ═══ TELEFON (opțional) + FUS ORAR ════════════════════════════ */
+const COUNTRIES = [
+  ['GB','United Kingdom','44'],['IE','Ireland','353'],['RO','Romania','40'],['IT','Italy','39'],['ES','Spain','34'],
+  ['PT','Portugal','351'],['FR','France','33'],['DE','Germany','49'],['NL','Netherlands','31'],['BE','Belgium','32'],
+  ['AT','Austria','43'],['CH','Switzerland','41'],['PL','Poland','48'],['CZ','Czechia','420'],['HU','Hungary','36'],
+  ['BG','Bulgaria','359'],['GR','Greece','30'],['MD','Moldova','373'],['SE','Sweden','46'],['NO','Norway','47'],
+  ['DK','Denmark','45'],['FI','Finland','358'],['MT','Malta','356'],['CY','Cyprus','357'],['HR','Croatia','385'],
+  ['RS','Serbia','381'],['TR','Turkey','90'],['US','United States','1'],['CA','Canada','1'],['AU','Australia','61'],
+  ['NZ','New Zealand','64'],['ZA','South Africa','27'],['NG','Nigeria','234'],['KE','Kenya','254'],['GH','Ghana','233'],
+  ['AE','UAE','971'],['IN','India','91'],['PK','Pakistan','92'],['PH','Philippines','63'],['MY','Malaysia','60'],
+  ['SG','Singapore','65'],['BR','Brazil','55'],['MX','Mexico','52']
+];
+const TZ_COUNTRY = { 'Europe/London':'GB','Europe/Dublin':'IE','Europe/Bucharest':'RO','Europe/Rome':'IT','Europe/Madrid':'ES',
+  'Europe/Lisbon':'PT','Europe/Paris':'FR','Europe/Berlin':'DE','Europe/Amsterdam':'NL','Europe/Brussels':'BE','Europe/Vienna':'AT',
+  'Europe/Zurich':'CH','Europe/Warsaw':'PL','Europe/Prague':'CZ','Europe/Budapest':'HU','Europe/Sofia':'BG','Europe/Athens':'GR',
+  'Europe/Chisinau':'MD','Europe/Stockholm':'SE','Europe/Oslo':'NO','Europe/Copenhagen':'DK','Europe/Helsinki':'FI','Europe/Malta':'MT',
+  'Asia/Nicosia':'CY','Europe/Zagreb':'HR','Europe/Belgrade':'RS','Europe/Istanbul':'TR','Australia/Sydney':'AU','Australia/Melbourne':'AU',
+  'Pacific/Auckland':'NZ','Africa/Johannesburg':'ZA','Africa/Lagos':'NG','Africa/Nairobi':'KE','Africa/Accra':'GH','Asia/Dubai':'AE',
+  'Asia/Kolkata':'IN','Asia/Karachi':'PK','Asia/Manila':'PH','Asia/Kuala_Lumpur':'MY','Asia/Singapore':'SG','America/Sao_Paulo':'BR',
+  'America/Mexico_City':'MX','America/Toronto':'CA','America/Vancouver':'CA' };
+const myTimezone = () => { try{ return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; }catch(e){ return ''; } };
+function guessCountry(){
+  const tz = myTimezone();
+  if(TZ_COUNTRY[tz]) return TZ_COUNTRY[tz];
+  if(/^America\//.test(tz)) return 'US';
+  if(/^Australia\//.test(tz)) return 'AU';
+  return 'GB';
+}
+function fillCountrySelect(id, pick){
+  const el = $(id); if(!el) return;
+  if(!el.options.length) el.innerHTML = COUNTRIES.map(([c, n, d]) => `<option value="${c}">+${d} ${n}</option>`).join('');
+  el.value = pick || guessCountry();
+}
+/* Numărul în format internațional (+44…). null = gol, false = invalid */
+function buildPhone(ccId, inputId){
+  const raw = $(inputId).value.trim();
+  if(!raw) return null;
+  let digits = raw.replace(/[^0-9+]/g, '');
+  if(digits.startsWith('00')) digits = '+' + digits.slice(2);
+  let full;
+  if(digits.startsWith('+')) full = '+' + digits.slice(1).replace(/\D/g, '');
+  else {
+    const c = COUNTRIES.find(x => x[0] === $(ccId).value) || COUNTRIES[0];
+    let nat = digits.replace(/\D/g, '');
+    if(c[0] !== 'IT') nat = nat.replace(/^0+/, '');   // 07700… → 7700…
+    full = '+' + c[2] + nat;
+  }
+  return /^\+[1-9][0-9]{6,14}$/.test(full) ? full : false;
+}
+/* Țara după prefix (dacă omul a scris direct +40…); la prefixe comune păstrăm alegerea lui */
+function countryFor(phone, picked){
+  const pc = COUNTRIES.find(x => x[0] === picked);
+  if(pc && phone.startsWith('+' + pc[2])) return picked;
+  const m = COUNTRIES.filter(x => phone.startsWith('+' + x[2])).sort((a, b) => b[2].length - a[2].length)[0];
+  return m ? m[0] : picked;
+}
+async function savePhone(ccId, inputId){
+  const phone = buildPhone(ccId, inputId);
+  if(phone === false) return { error:'invalid' };
+  if(phone) $(ccId).value = countryFor(phone, $(ccId).value);
+  const { error } = await sb.rpc('set_my_phone', { p_country: $(ccId).value, p_phone: phone || '' });
+  return { error, phone };
+}
+async function savePhoneFromAccount(){
+  hideAlert('acc-phone-alert');
+  const r = await savePhone('acc-cc', 'acc-phone');
+  if(r.error === 'invalid') return showAlert('acc-phone-alert','error','That phone number doesn\'t look right. Check the country and the number.');
+  if(r.error) return showAlert('acc-phone-alert','error', errText(r.error));
+  if(me){ me.phone = r.phone || null; me.phone_country = r.phone ? $('acc-cc').value : null; }
+  if(r.phone) $('acc-phone').value = r.phone;
+  showAlert('acc-phone-alert','success', r.phone ? 'Phone number saved.' : 'Phone number removed.');
+}
+/* Fusul orar se salvează singur, ca să trimitem notificări la ore potrivite */
+function syncTimezone(){
+  const tz = myTimezone();
+  if(me && tz && me.timezone !== tz) sb.rpc('set_my_timezone', { p_tz: tz }).then(({ error }) => { if(!error) me.timezone = tz; });
+}
+
 async function saveUsername(){
   const raw = $('un-input').value.trim().replace(/^@+/, '').trim();
   if(raw.length < 2) return showAlert('un-alert','error','Enter your name as it appears on Raffall.');
   if(!$('un-confirm').checked) return showAlert('un-alert','error','Please tick the box to confirm it is your own Raffall name.');
+  if(buildPhone('un-cc', 'un-phone') === false) return showAlert('un-alert','error','That phone number doesn\'t look right. Check the country and the number, or leave it empty.');
   if(!confirm(`Your name on Raffall is "${raw}"?\n\nIt must match the entrants list on Raffall exactly — your name, not your username. You can't change it later.`)) return;
   const { error } = await sb.rpc('create_profile', { p_username: raw });
   if(error) return showAlert('un-alert','error', errText(error));
   if($('un-email').checked) await sb.rpc('set_email_alerts', { p_on: true });
+  if($('un-phone').value.trim()) await savePhone('un-cc', 'un-phone');
   await refreshUser();
   await loadWheel();
   if(wheelInfo && wheelInfo.active && wheelInfo.spins_left > 0 && !current) return showTab('wheel');
@@ -676,6 +770,8 @@ async function refreshUser(){
   }
   $('auth-card').style.display = session ? 'none' : 'block';
   $('username-card').style.display = (session && !me) ? 'block' : 'none';
+  if(session && !me) fillCountrySelect('un-cc');
+  if(me) syncTimezone();
   renderChip();
   if(me && pushGranted()) getPushToken().then(savePushToken);
   renderNotifCard();
@@ -1010,6 +1106,8 @@ async function renderWallet(){
   $('w-bal').textContent = nf(me.credits);
   $('w-val').textContent = `credits · worth £${(me.credits / 100).toFixed(2)}`;
   $('acc-email').checked = !!me.email_alerts;
+  fillCountrySelect('acc-cc', me.phone_country);
+  $('acc-phone').value = me.phone || '';
   renderPushState();
   $('acc-info').innerHTML = `Raffall name: <b>${esc(me.username)}</b><br>Email: ${esc(session.user.email)}<br>Wrong name? Message us on Telegram @suportGiveaways.`;
   const { data, error } = await sb.from('credit_ledger').select('*').eq('user_id', me.id).order('created_at', { ascending:false }).limit(50);
