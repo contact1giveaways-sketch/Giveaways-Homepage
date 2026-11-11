@@ -336,6 +336,11 @@ tr:last-child td{border-bottom:none}
         <input type="search" id="pl-search" placeholder="🔍 Caută nume…" oninput="renderPlayers()">
         <div id="pl-list" style="margin-top:12px"></div>
       </div>
+      <div class="card">
+        <div class="card-title">🌍 De unde se joacă</div>
+        <div class="note" style="margin-bottom:10px">Fusul orar se salvează singur din telefonul fiecărui jucător când intră pe /play. Ora de acum îți arată când e potrivit să trimiți notificări (ex. între 9 și 21).</div>
+        <div id="pl-geo"></div>
+      </div>
     </section>
 
     <!-- ─────────── EXTRAGERI ─────────── -->
@@ -1162,7 +1167,9 @@ async function approveRequest(username){
   const { data: cur } = await sb.from('instant_eligibility').select('spins').eq('competition_id', comp.id).eq('username', key).maybeSingle();
   const { error } = await sb.from('instant_eligibility').upsert({ competition_id: comp.id, username: key, spins: (cur ? cur.spins : 0) + 1 }, { onConflict: 'competition_id,username' });
   if(error) return flash('error', errMsg(error));
-  flash('success', `🎟️ ${esc(username)} adăugat cu 1 spin.`);
+  const msg = `🎟️ ${esc(username)} adăugat cu 1 spin.`;
+  flash('success', msg);
+  if($('b-notify') && $('b-notify').checked && comp.status === 'active') notifyAfter(msg, { mode:'instant', competition_id: comp.id, usernames: [key] });
   renderBuyers();
 }
 async function dismissRequest(userId){
@@ -1215,12 +1222,14 @@ function renderPlayers(){
     <div class="stat"><b>${players.length}</b><span>conturi</span></div>
     <div class="stat"><b>${players.filter(p => p.verified).length}</b><span>verificate</span></div>
     <div class="stat"><b>${totalCred.toLocaleString('en-GB')}</b><span>credite în conturi (£${(totalCred / 100).toFixed(2)})</span></div>
-    <div class="stat"><b>${players.filter(p => p.email_alerts).length}</b><span>📧 acceptă emailuri</span></div>`;
+    <div class="stat"><b>${players.filter(p => p.email_alerts).length}</b><span>📧 acceptă emailuri</span></div>
+    <div class="stat"><b>${players.filter(p => p.phone).length}</b><span>📱 au lăsat telefonul</span></div>`;
+  renderGeo();
   if(!list.length){ $('pl-list').innerHTML = `<div class="empty">${players.length ? 'Niciun rezultat.' : 'Niciun cont încă.'}</div>`; return; }
   $('pl-list').innerHTML = list.map(p => `<div class="row" id="pl-${p.id}">
     <div class="row-main">
       <div class="row-name">${esc(p.username)} ${p.verified ? '<span class="pill pill-active">✓ verificat</span>' : ''}</div>
-      <div class="row-sub">⭐ ${p.credits.toLocaleString('en-GB')} credite · cont din ${fmtDate(p.created_at)}</div>
+      <div class="row-sub">⭐ ${p.credits.toLocaleString('en-GB')} credite · cont din ${fmtDate(p.created_at)}${p.timezone ? ` · 🌍 ${esc(p.timezone)}` : ''}${p.phone ? ` · 📱 ${esc(p.phone)}` : ''}</div>
       <div id="ledger-${p.id}"></div>
     </div>
     <div class="row-actions">
@@ -1231,6 +1240,19 @@ function renderPlayers(){
       <button class="btn btn-danger btn-sm" title="Șterge contul" onclick="deletePlayer('${p.id}')">🗑️</button>
     </div>
   </div>`).join('');
+}
+/* Câți jucători pe fus orar și pe țara telefonului, cu ora lor de acum */
+function renderGeo(){
+  const box = $('pl-geo'); if(!box) return;
+  const count = key => { const m = {}; players.forEach(p => { const k = p[key]; if(k) m[k] = (m[k] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
+  const tz = count('timezone'), cc = count('phone_country');
+  const unknown = players.filter(p => !p.timezone).length;
+  const hour = z => { try{ return new Date().toLocaleTimeString('en-GB', { timeZone:z, hour:'2-digit', minute:'2-digit' }); }catch(e){ return '—'; } };
+  if(!tz.length && !cc.length){ box.innerHTML = '<div class="empty">Încă nu avem date. Apar pe măsură ce jucătorii intră pe /play.</div>'; return; }
+  box.innerHTML = (tz.length ? `<div class="table-wrap"><table><thead><tr><th>Fus orar</th><th>Jucători</th><th>Ora la ei acum</th></tr></thead><tbody>` +
+      tz.map(([z, n]) => `<tr><td>${esc(z)}</td><td><b>${n}</b></td><td>${hour(z)}</td></tr>`).join('') + '</tbody></table></div>' : '') +
+    (unknown ? `<div class="note">${unknown} conturi fără fus orar încă (n-au mai intrat de la actualizare).</div>` : '') +
+    (cc.length ? `<div class="sub-head">📱 După prefixul telefonului</div><div class="preview-list">${cc.map(([c, n]) => `<span>${esc(c)} · ${n}</span>`).join('')}</div>` : '');
 }
 const playerById = id => players.find(p => p.id === id);
 async function toggleVerified(id){
