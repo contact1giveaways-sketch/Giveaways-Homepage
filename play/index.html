@@ -75,6 +75,14 @@ input:focus,select:focus{border-color:var(--gold);background:#fff}
 .btn-full{width:100%;margin-top:18px}
 .link-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;text-decoration:underline;margin-top:14px;font-family:inherit}
 button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.excluded{position:fixed;inset:0;z-index:200;background:rgba(247,244,237,.97);overflow-y:auto;padding:max(24px,env(safe-area-inset-top)) 16px 40px}
+.excluded .card{max-width:520px;margin:6vh auto 0}
+.excluded h2{font:800 30px/1.1 'Manrope';letter-spacing:-.03em;margin-bottom:10px}
+.excluded p{font-size:15px;line-height:1.6;color:var(--ink);margin-top:10px}
+.excluded ul{margin:10px 0 0 20px;font-size:14px;line-height:1.8}
+.excluded a{color:#8d6b26;font-weight:700}
+.break-box{border-top:1px solid var(--line);padding:12px 0 4px;font-size:14px}
+.break-box .btn{margin-top:10px}
 .alert{padding:13px 16px;border-radius:16px;font-size:14px;margin-bottom:14px;display:none;line-height:1.55}
 .alert.show{display:block}
 .alert-success{background:#eaf6ef;border:1px solid #c7e6d4;color:#17734f}
@@ -400,6 +408,19 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
           <div class="phone-row" style="margin-top:8px"><select id="acc-cc" aria-label="Country code"></select><input type="tel" id="acc-phone" placeholder="7700 900123" autocomplete="tel-national" inputmode="tel"></div>
           <button class="btn btn-ghost btn-full" onclick="savePhoneFromAccount()">Save phone number</button>
         </div>
+        <div class="break-box">
+          <span>⏸ Take a break <small style="color:var(--muted)">(self-exclusion)</small></span>
+          <div class="note" style="color:var(--muted);font-size:13px;margin-top:4px">Block your account for a while. You won't be able to spin or get spins, and we'll stop all notifications and emails. <b>It can't be undone before the end date.</b> It also blocks new accounts with the same email or phone.</div>
+          <div id="break-alert" class="alert"></div>
+          <select id="break-period" aria-label="Break length" style="margin-top:8px">
+            <option value="1">1 month</option>
+            <option value="2">2 months</option>
+            <option value="3">3 months</option>
+            <option value="0">Indefinitely (at least 6 months)</option>
+          </select>
+          <button class="btn btn-ghost btn-full" onclick="takeBreak()">Start my break</button>
+        </div>
+        <a class="btn btn-ghost btn-full" href="/privacy.html" style="text-decoration:none;margin-bottom:10px">Privacy policy</a>
         <a class="btn btn-ghost btn-full" href="/" style="text-decoration:none">← Back to all raffles</a>
         <button class="btn btn-ghost btn-full" style="margin-top:10px" onclick="signOut()">Sign out</button>
         <button class="link-btn" style="display:block;margin:18px auto 0;color:var(--red)" onclick="deleteMyAccount()">Delete my account</button>
@@ -436,7 +457,7 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
         That's how we recognise your tickets and pay your prizes. If it doesn't match, we can't find your entries.
         You can't change it yourself later.
       </div>
-      <label class="check"><input type="checkbox" id="un-confirm"> <span>I confirm this is my own name as shown on Raffall.</span></label>
+      <label class="check"><input type="checkbox" id="un-confirm"> <span>I confirm this is my own name as shown on Raffall, and that I'm 18 or over. Read our <a href="/privacy.html" target="_blank">Privacy policy</a>.</span></label>
       <label class="check"><input type="checkbox" id="un-email"> <span>Email me when instant prizes open and when there are special promotions. You can turn this off anytime.</span></label>
       <label for="un-phone">Phone number <span style="font-weight:500">(optional)</span></label>
       <div class="phone-row"><select id="un-cc" aria-label="Country code"></select><input type="tel" id="un-phone" placeholder="7700 900123" autocomplete="tel-national" inputmode="tel"></div>
@@ -474,7 +495,24 @@ footer{padding:10px 0 42px;color:#8b867d;font-size:11px}
   </section>
 </main>
 
-<footer><div class="shell footerin"><span>© 2026 Giveaways Community</span><a href="/">giveawayscommunity.com</a></div></footer>
+<footer><div class="shell footerin"><span>© 2026 Giveaways Community · <a href="/privacy.html">Privacy</a> · <a href="#" onclick="showTab(me ? 'wallet' : 'account');return false">Take a break</a></span><a href="/">giveawayscommunity.com</a></div></footer>
+
+<div class="excluded" id="excluded-screen" hidden>
+  <div class="card">
+    <div class="eyebrow">Self-exclusion</div>
+    <h2>You're taking a break</h2>
+    <p id="excluded-until"></p>
+    <p>While your break is on, you can't spin or receive spins, and we won't send you notifications or emails. Prizes you already won will still be paid. Message us on Telegram @suportGiveaways if you're waiting for one.</p>
+    <p><b>Free, confidential help is available 24/7:</b></p>
+    <ul>
+      <li>National Gambling Helpline: <b>0808 8020 133</b> (<a href="https://www.gamcare.org.uk" target="_blank" rel="noopener">GamCare</a>)</li>
+      <li><a href="https://www.begambleaware.org" target="_blank" rel="noopener">BeGambleAware</a></li>
+      <li><a href="https://www.gamstop.co.uk" target="_blank" rel="noopener">GAMSTOP</a>: block yourself from all UK-licensed gambling websites and apps</li>
+    </ul>
+    <button class="btn btn-ghost btn-full" style="margin-top:18px" onclick="signOut()">Sign out</button>
+    <a class="btn btn-ghost btn-full" href="/" style="margin-top:10px;text-decoration:none">← giveawayscommunity.com</a>
+  </div>
+</div>
 
 <div class="mobilebar">
   <a class="mtab" href="/"><span>⌂</span>Home</a>
@@ -533,6 +571,8 @@ const ERR = {
   username_taken:       'That name is already linked to another account. If it is yours, contact us on Telegram @suportGiveaways and we will sort it out.',
   invalid_username:     'Your name must be 2–40 characters.',
   invalid_phone:        "That phone number doesn't look right. Check the country and the number.",
+  self_excluded:        "Your account is on a break (self-exclusion). You can't play until it ends.",
+  invalid_period:       'Choose how long your break should be.',
   profile_exists:       'Your Raffall name is already set.',
   wheel_not_active:     'The wheel is resting right now. Check back soon!',
   no_spins:             "You don't have any spins left on the wheel right now.",
@@ -709,6 +749,34 @@ async function savePhoneFromAccount(){
   if(r.phone) $('acc-phone').value = r.phone;
   showAlert('acc-phone-alert','success', r.phone ? 'Phone number saved.' : 'Phone number removed.');
 }
+/* ═══ AUTOEXCLUDERE ═══════════════════════════════════════════ */
+let exclusion = null;
+async function checkExclusion(){
+  exclusion = null;
+  if(session){
+    const { data, error } = await sb.rpc('get_my_exclusion');
+    if(!error && data && data.excluded) exclusion = data;
+  }
+  const scr = $('excluded-screen');
+  scr.hidden = !exclusion;
+  document.body.style.overflow = exclusion ? 'hidden' : '';
+  if(exclusion){
+    $('excluded-until').innerHTML = exclusion.indefinite
+      ? 'Your account is self-excluded <b>indefinitely</b>. After at least 6 months you can ask us to reopen it.'
+      : `Your account is self-excluded until <b>${new Date(exclusion.until).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric', timeZone:'Europe/London' })}</b>.`;
+  }
+}
+async function takeBreak(){
+  hideAlert('break-alert');
+  const m = parseInt($('break-period').value);
+  const label = m === 0 ? 'indefinitely (at least 6 months)' : m === 1 ? 'for 1 month' : `for ${m} months`;
+  if(!confirm(`Start a break ${label}?\n\nYou won't be able to spin or get spins, and we'll stop all notifications and emails.`)) return;
+  if(!confirm('Are you sure? This can\'t be undone before the end date.')) return;
+  const { error } = await sb.rpc('self_exclude', { p_months: m });
+  if(error) return showAlert('break-alert','error', errText(error));
+  await checkExclusion();
+}
+
 /* Fusul orar se salvează singur, ca să trimitem notificări la ore potrivite */
 function syncTimezone(){
   const tz = myTimezone();
@@ -733,7 +801,8 @@ async function saveUsername(){
 }
 async function signOut(){
   await sb.auth.signOut();
-  me = null; session = null;
+  me = null; session = null; exclusion = null;
+  $('excluded-screen').hidden = true; document.body.style.overflow = '';
   renderChip();
   showTab('play');
   if(current) openComp(current.id);
@@ -771,9 +840,10 @@ async function refreshUser(){
   $('auth-card').style.display = session ? 'none' : 'block';
   $('username-card').style.display = (session && !me) ? 'block' : 'none';
   if(session && !me) fillCountrySelect('un-cc');
-  if(me) syncTimezone();
+  await checkExclusion();
+  if(me && !exclusion) syncTimezone();
   renderChip();
-  if(me && pushGranted()) getPushToken().then(savePushToken);
+  if(me && !exclusion && pushGranted()) getPushToken().then(savePushToken);
   renderNotifCard();
 }
 function renderChip(){

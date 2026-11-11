@@ -337,6 +337,11 @@ tr:last-child td{border-bottom:none}
         <div id="pl-list" style="margin-top:12px"></div>
       </div>
       <div class="card">
+        <div class="card-title">🚫 Autoexcluși</div>
+        <div class="note" style="margin-bottom:10px">Jucătorii care și-au luat o pauză din Wallet → Account. Cât timp e activă, contul (și orice cont nou cu același email sau telefon) nu poate da spin, nu primește spin-uri și nu primește notificări. Pauzele de 1–3 luni expiră singure. Pe cele pe termen nedeterminat le poți ridica doar după minim 6 luni, la cererea jucătorului.</div>
+        <div id="pl-excl"></div>
+      </div>
+      <div class="card">
         <div class="card-title">🌍 De unde se joacă</div>
         <div class="note" style="margin-bottom:10px">Fusul orar se salvează singur din telefonul fiecărui jucător când intră pe /play. Ora de acum îți arată când e potrivit să trimiți notificări (ex. între 9 și 21).</div>
         <div id="pl-geo"></div>
@@ -1208,10 +1213,15 @@ async function renderBuyers(){
 }
 
 /* ═══ JUCĂTORI ═════════════════════════════════════════════════ */
+let exclusions = [];
 async function loadPlayers(silent){
-  const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending:false });
+  const [{ data, error }, ex] = await Promise.all([
+    sb.from('profiles').select('*').order('created_at', { ascending:false }),
+    sb.rpc('admin_list_exclusions')
+  ]);
   if(error) return flash('error', errMsg(error));
   players = data;
+  exclusions = ex.error ? [] : (ex.data || []);
   if(!silent) renderPlayers();
 }
 function renderPlayers(){
@@ -1225,10 +1235,11 @@ function renderPlayers(){
     <div class="stat"><b>${players.filter(p => p.email_alerts).length}</b><span>📧 acceptă emailuri</span></div>
     <div class="stat"><b>${players.filter(p => p.phone).length}</b><span>📱 au lăsat telefonul</span></div>`;
   renderGeo();
+  renderExclusions();
   if(!list.length){ $('pl-list').innerHTML = `<div class="empty">${players.length ? 'Niciun rezultat.' : 'Niciun cont încă.'}</div>`; return; }
   $('pl-list').innerHTML = list.map(p => `<div class="row" id="pl-${p.id}">
     <div class="row-main">
-      <div class="row-name">${esc(p.username)} ${p.verified ? '<span class="pill pill-active">✓ verificat</span>' : ''}</div>
+      <div class="row-name">${esc(p.username)} ${p.verified ? '<span class="pill pill-active">✓ verificat</span>' : ''}${exclusions.some(e => e.active && e.user_id === p.id) ? ' <span class="pill pill-closed">🚫 autoexclus</span>' : ''}</div>
       <div class="row-sub">⭐ ${p.credits.toLocaleString('en-GB')} credite · cont din ${fmtDate(p.created_at)}${p.timezone ? ` · 🌍 ${esc(p.timezone)}` : ''}${p.phone ? ` · 📱 ${esc(p.phone)}` : ''}</div>
       <div id="ledger-${p.id}"></div>
     </div>
@@ -1240,6 +1251,27 @@ function renderPlayers(){
       <button class="btn btn-danger btn-sm" title="Șterge contul" onclick="deletePlayer('${p.id}')">🗑️</button>
     </div>
   </div>`).join('');
+}
+function renderExclusions(){
+  const box = $('pl-excl'); if(!box) return;
+  if(!exclusions.length){ box.innerHTML = '<div class="empty">Nimeni nu s-a autoexclus.</div>'; return; }
+  const sixMonths = 182 * 864e5;
+  box.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Jucător</th><th>Email / telefon</th><th>De când</th><th>Până când</th><th></th></tr></thead><tbody>` +
+    exclusions.map(e => {
+      const canLift = e.active && !e.until && Date.now() - new Date(e.created_at) >= sixMonths;
+      const state = e.lifted_at ? `ridicată ${fmtDate(e.lifted_at)}` : !e.active ? 'expirată' : e.until ? fmtDate(e.until) : '<b>nedeterminat</b>';
+      return `<tr style="${e.active ? '' : 'opacity:.5'}"><td><b>${esc(e.username || '—')}</b></td>
+        <td>${esc(e.email || '—')}${e.phone ? `<br>${esc(e.phone)}` : ''}</td>
+        <td>${fmtDate(e.created_at)}</td><td>${state}</td>
+        <td>${canLift ? `<button class="btn btn-ghost btn-sm" onclick="liftExclusion(${e.id})">Ridică</button>` : ''}</td></tr>`;
+    }).join('') + '</tbody></table></div>';
+}
+async function liftExclusion(id){
+  if(!confirm('Ridici autoexcluderea? Fă asta doar dacă jucătorul ți-a cerut-o în scris, după cel puțin 6 luni.')) return;
+  const { error } = await sb.rpc('admin_lift_exclusion', { p_id: id });
+  if(error) return flash('error', /too_early/.test(error.message) ? 'Nu au trecut încă 6 luni.' : errMsg(error));
+  flash('success', 'Autoexcludere ridicată.');
+  loadPlayers();
 }
 /* Câți jucători pe fus orar și pe țara telefonului, cu ora lor de acum */
 function renderGeo(){
